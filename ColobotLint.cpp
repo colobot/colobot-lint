@@ -1,13 +1,12 @@
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Config/config.h"
+#include "clang/Frontend/MultiplexConsumer.h"
 #include "clang/Tooling/CommonOptionsParser.h"
 
-#include "DiagnosticChecker/DiagnosticChecker.h"
-
-#include "AstMatcherRules/NakedDeleteRule.h"
-#include "AstMatcherRules/NakedNewRule.h"
-
-#include "Utils/OutputPrinter.h"
+#include "Common/Context.h"
+#include "Common/OutputPrinter.h"
+#include "DiagnosticHandler/DiagnosticHandler.h"
+#include "ActionFactories.h"
 
 #include "ColobotLintConfig.h"
 
@@ -25,7 +24,7 @@ namespace
 
 OptionCategory g_colobotLintOptionCategory("colobot-lint options");
 
-static opt<std::string> g_outputFileOpt(
+static cl::opt<std::string> g_outputFileOpt(
     "output-file",
     desc("Where to save the XML output; if not given, write to stderr"),
     value_desc("filename"), cat(g_colobotLintOptionCategory));
@@ -65,18 +64,14 @@ int main(int argc, const char **argv)
     ClangTool tool(optionsParser.getCompilations(),
                    optionsParser.getSourcePathList());
 
-    MatchFinder finder;
-
     OutputPrinter printer(g_outputFileOpt);
+    Context context(printer);
 
-    std::vector<std::unique_ptr<Rule>> rules;
-    rules.push_back(make_unique<NakedDeleteRule>(finder, printer));
-    rules.push_back(make_unique<NakedNewRule>(finder, printer));
+    DiagnosticHandler diagnosticHandler(context);
+    tool.setDiagnosticConsumer(&diagnosticHandler);
 
-    DiagnosticChecker diagnosticChecker(printer);
-    tool.setDiagnosticConsumer(&diagnosticChecker);
-
-    int retCode = tool.run(newFrontendActionFactory(&finder).get());
+    ColobotLintActionFactory factory(context);
+    int retCode = tool.run(&factory);
 
     printer.Save();
 

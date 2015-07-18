@@ -7,10 +7,12 @@
 using namespace clang;
 using namespace clang::ast_matchers;
 
-NakedNewRule::NakedNewRule(MatchFinder& finder,
-                                 OutputPrinter& printer)
-    : Rule(printer),
+NakedNewRule::NakedNewRule(Context& context)
+    : Rule(context),
       m_matcher(newExpr().bind("new"))
+{}
+
+void NakedNewRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
     finder.addMatcher(m_matcher, this);
 }
@@ -27,7 +29,7 @@ void NakedNewRule::run(const MatchFinder::MatchResult& result)
 
     std::string typeStr = newExpr->getAllocatedType().getAsString();
 
-    m_printer.PrintRuleViolation(
+    m_context.printer.PrintRuleViolation(
         "naked new",
         Severity::Warning,
         std::string("Naked new called with type '") + typeStr + "'",

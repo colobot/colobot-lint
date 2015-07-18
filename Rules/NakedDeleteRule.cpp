@@ -7,10 +7,12 @@
 using namespace clang;
 using namespace clang::ast_matchers;
 
-NakedDeleteRule::NakedDeleteRule(MatchFinder& finder,
-                                 OutputPrinter& printer)
-    : Rule(printer),
+NakedDeleteRule::NakedDeleteRule(Context& context)
+    : Rule(context),
       m_matcher(deleteExpr().bind("delete"))
+{}
+
+void NakedDeleteRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
     finder.addMatcher(m_matcher, this);
 }
@@ -27,7 +29,7 @@ void NakedDeleteRule::run(const MatchFinder::MatchResult& result)
 
     std::string typeStr = deleteExpr->getDestroyedType().getAsString();
 
-    m_printer.PrintRuleViolation(
+    m_context.printer.PrintRuleViolation(
         "naked delete",
         Severity::Warning,
         std::string("Naked delete called on type '") + typeStr + "'",

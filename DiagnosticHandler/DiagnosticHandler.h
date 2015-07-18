@@ -1,18 +1,18 @@
 #pragma once
 
-#include "../Utils/OutputPrinter.h"
+#include "../Common/Context.h"
 
 #include "clang/Tooling/Tooling.h"
 
-class DiagnosticChecker : public clang::DiagnosticConsumer
+class DiagnosticHandler : public clang::DiagnosticConsumer
 {
 public:
-    DiagnosticChecker(OutputPrinter& outputPrinter);
+    DiagnosticHandler(Context& context);
 
     void HandleDiagnostic(clang::DiagnosticsEngine::Level level, const clang::Diagnostic& info) override;
 
 private:
     std::string GetDiagnosticString(const clang::Diagnostic& info);
 
-    OutputPrinter& m_outputPrinter;
+    Context& m_context;
 };
