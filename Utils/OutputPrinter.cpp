@@ -1,5 +1,7 @@
 #include "OutputPrinter.h"
 
+#include "ColobotLintConfig.h"
+
 OutputPrinter::OutputPrinter(const std::string& outputFileName)
     : m_outputFileName(outputFileName)
 {
@@ -11,7 +13,7 @@ OutputPrinter::OutputPrinter(const std::string& outputFileName)
     m_document.LinkEndChild(resultsElement);
 
     TiXmlElement* colobotLintElement = new TiXmlElement("cppcheck");
-    colobotLintElement->SetAttribute("version", "colobot-lint");
+    colobotLintElement->SetAttribute("version", "colobot-lint-" VERSION_STR);
     resultsElement->LinkEndChild(colobotLintElement);
 
     m_errorsElement = new TiXmlElement("errors");
@@ -20,7 +22,14 @@ OutputPrinter::OutputPrinter(const std::string& outputFileName)
 
 void OutputPrinter::Save()
 {
-    m_document.SaveFile(m_outputFileName);
+    if (m_outputFileName.empty())
+    {
+        m_document.Print();
+    }
+    else
+    {
+        m_document.SaveFile(m_outputFileName);
+    }
 }
 
 void OutputPrinter::PrintRuleViolation(const std::string& ruleName,

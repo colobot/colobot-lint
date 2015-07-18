@@ -1,0 +1,3 @@
+#pragma once
+
+#define VERSION_STR "@GIT_COMMIT_HASH@"

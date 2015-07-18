@@ -1,16 +1,17 @@
-#include "clang/Tooling/CommonOptionsParser.h"
-#include "clang/Tooling/Tooling.h"
-#include "clang/ASTMatchers/ASTMatchFinder.h"
-
 #include "llvm/Support/CommandLine.h"
+#include "llvm/Config/config.h"
+#include "clang/Tooling/CommonOptionsParser.h"
 
 #include "DiagnosticChecker/DiagnosticChecker.h"
 
-#include "Rules/NakedDeleteRule.h"
+#include "AstMatcherRules/NakedDeleteRule.h"
 
 #include "Utils/OutputPrinter.h"
 
+#include "ColobotLintConfig.h"
+
 #include <memory>
+#include <iostream>
 
 using namespace llvm;
 using namespace llvm::cl;
@@ -18,18 +19,54 @@ using namespace clang;
 using namespace clang::tooling;
 using namespace clang::ast_matchers;
 
+namespace
+{
+
+OptionCategory g_colobotLintOptionCategory("colobot-lint options");
+
+static opt<std::string> g_outputFileOpt(
+    "output-file",
+    desc("Where to save the XML output; if not given, write to stderr"),
+    value_desc("filename"), cat(g_colobotLintOptionCategory));
+
+extrahelp g_moreHelp(
+    "Colobot-lint runs just like any other tool based on Clang's libtooling.\n"
+    "\n"
+    "It requires that compilation database is generated for the project, that is to say CMake\n"
+    "has been executed with -DCMAKE_EXPORT_COMPILE_COMMANDS=1).\n"
+    "It then uses information from this file to run Clang's code parser with the exact same compile\n"
+    "options as during normal build, giving it the same \"view\" of code as the compiler.\n"
+    "\n"
+    "When Clang code parser generates AST from input source, we can run various rules on them,\n"
+    "checking the code for coding style violations.\n"
+    "\n"
+    "Additionally, normal build diagnostics (i.e. compile warnings and errors) are reported\n"
+    "alongside our custom rules.\n"
+    "\n"
+    "Output is saved to XML file in a cppcheck compatible format in order to be usable with Jenkins\n"
+    "cppcheck plugin.\n"
+);
+
+void printColobotLintVersion()
+{
+    std::cout << "colobot-lint version " << VERSION_STR <<  " built with LLVM " << LLVM_VERSION_STRING << std::endl;
+    std::cout << "(C) 2015 Piotr Dziwinski <piotrdz@gmail.com>" << std::endl;
+    std::cout << "http://colobot.info http://github.com/colobot/colobot" << std::endl;
+}
+
+} // anonymous namespace
+
 int main(int argc, const char **argv)
 {
-    OptionCategory colobotLintCategory("colobot-lint options");
-    extrahelp commonHelp(CommonOptionsParser::HelpMessage);
-    extrahelp moreHelp("Colobot lint tool...\n");
-    CommonOptionsParser optionsParser(argc, argv, colobotLintCategory);
+    SetVersionPrinter(printColobotLintVersion);
+    CommonOptionsParser optionsParser(argc, argv, g_colobotLintOptionCategory);
 
     ClangTool tool(optionsParser.getCompilations(),
                    optionsParser.getSourcePathList());
 
     MatchFinder finder;
-    OutputPrinter printer("colobot_lint_report.xml");
+
+    OutputPrinter printer(g_outputFileOpt);
 
     std::vector<std::unique_ptr<Rule>> rules;
     rules.push_back(make_unique<NakedDeleteRule>(finder, printer));

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Rules/Severity.h"
+#include "../Common/Severity.h"
 
 #include "clang/Basic/SourceLocation.h"
 #include "clang/AST/ASTContext.h"

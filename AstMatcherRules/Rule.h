@@ -2,7 +2,9 @@
 
 #include "../Utils/OutputPrinter.h"
 
-class Rule
+#include "clang/ASTMatchers/ASTMatchFinder.h"
+
+class Rule : public clang::ast_matchers::MatchFinder::MatchCallback
 {
 public:
     Rule(OutputPrinter& printer)
