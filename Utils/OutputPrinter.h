@@ -25,5 +25,5 @@ private:
 
     std::string m_outputFileName;
     TiXmlDocument m_document;
-    TiXmlElement* m_resultsElement;
+    TiXmlElement* m_errorsElement;
 };
