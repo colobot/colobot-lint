@@ -30,9 +30,10 @@ public:
 
         m_outputPrinter.PrintRuleViolation(
             "naked delete",
+            Severity::Warning,
             std::string("Naked delete called on type ") + typeStr,
             location,
-            result.Context);
+            result.Context->getSourceManager());
     }
 
 private:

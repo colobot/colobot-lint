@@ -4,6 +4,8 @@
 
 #include "llvm/Support/CommandLine.h"
 
+#include "DiagnosticChecker/DiagnosticChecker.h"
+
 #include "Rules/NakedDeleteRule.h"
 
 #include "Utils/OutputPrinter.h"
@@ -27,11 +29,17 @@ int main(int argc, const char **argv)
                    optionsParser.getSourcePathList());
 
     MatchFinder finder;
-
-    OutputPrinter printer("colobot_lint_report.txt");
+    OutputPrinter printer("colobot_lint_report.xml");
 
     std::vector<std::unique_ptr<Rule>> rules;
     rules.push_back(make_unique<NakedDeleteRule>(finder, printer));
 
-    return tool.run(newFrontendActionFactory(&finder).get());
+    DiagnosticChecker diagnosticChecker(printer);
+    tool.setDiagnosticConsumer(&diagnosticChecker);
+
+    int retCode = tool.run(newFrontendActionFactory(&finder).get());
+
+    printer.Save();
+
+    return retCode;
 }
