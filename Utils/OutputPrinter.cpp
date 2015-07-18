@@ -10,8 +10,8 @@ OutputPrinter::OutputPrinter(const std::string& outputFileName)
     resultsElement->SetAttribute("version", "2");
     m_document.LinkEndChild(resultsElement);
 
-    TiXmlElement* colobotLintElement = new TiXmlElement("colobot-lint");
-    colobotLintElement->SetAttribute("version", "0.1");
+    TiXmlElement* colobotLintElement = new TiXmlElement("cppcheck");
+    colobotLintElement->SetAttribute("version", "1.69");
     resultsElement->LinkEndChild(colobotLintElement);
 
     m_errorsElement = new TiXmlElement("errors");
@@ -34,6 +34,7 @@ void OutputPrinter::PrintRuleViolation(const std::string& ruleName,
     errorElement->SetAttribute("id", ruleName);
     errorElement->SetAttribute("severity", GetSeverityString(severity));
     errorElement->SetAttribute("msg", description);
+    errorElement->SetAttribute("verbose", description);
 
     TiXmlElement* locationElement = new TiXmlElement("location");
     locationElement->SetAttribute("file", sourceManager.getFilename(location).str());
