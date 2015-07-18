@@ -5,6 +5,7 @@ add_clang_executable(colobot-lint
   ColobotLint.cpp
   DiagnosticChecker/DiagnosticChecker.cpp
   AstMatcherRules/NakedDeleteRule.cpp
+  AstMatcherRules/NakedNewRule.cpp
   Utils/OutputPrinter.cpp
 )
 target_link_libraries(colobot-lint

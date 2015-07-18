@@ -4,9 +4,7 @@
 #include "clang/ASTMatchers/ASTMatchers.h"
 #include "clang/AST/ExprCXX.h"
 
-using namespace llvm;
 using namespace clang;
-using namespace clang::tooling;
 using namespace clang::ast_matchers;
 
 NakedDeleteRule::NakedDeleteRule(MatchFinder& finder,
@@ -32,7 +30,7 @@ void NakedDeleteRule::run(const MatchFinder::MatchResult& result)
     m_printer.PrintRuleViolation(
         "naked delete",
         Severity::Warning,
-        std::string("Naked delete called on type ") + typeStr,
+        std::string("Naked delete called on type '") + typeStr + "'",
         location,
         result.Context->getSourceManager());
 }

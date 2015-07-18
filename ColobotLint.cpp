@@ -5,6 +5,7 @@
 #include "DiagnosticChecker/DiagnosticChecker.h"
 
 #include "AstMatcherRules/NakedDeleteRule.h"
+#include "AstMatcherRules/NakedNewRule.h"
 
 #include "Utils/OutputPrinter.h"
 
@@ -70,6 +71,7 @@ int main(int argc, const char **argv)
 
     std::vector<std::unique_ptr<Rule>> rules;
     rules.push_back(make_unique<NakedDeleteRule>(finder, printer));
+    rules.push_back(make_unique<NakedNewRule>(finder, printer));
 
     DiagnosticChecker diagnosticChecker(printer);
     tool.setDiagnosticConsumer(&diagnosticChecker);
