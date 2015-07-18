@@ -33,6 +33,8 @@ public:
     std::unique_ptr<clang::ASTConsumer> CreateASTConsumer(clang::CompilerInstance &compiler,
                                                           clang::StringRef file) override;
 
+    bool BeginSourceFileAction(clang::CompilerInstance& ci, llvm::StringRef filename) override;
+
 private:
     Context &m_context;
 };

@@ -29,6 +29,11 @@ static cl::opt<std::string> g_outputFileOpt(
     desc("Where to save the XML output; if not given, write to stderr"),
     value_desc("filename"), cat(g_colobotLintOptionCategory));
 
+static cl::opt<bool> g_verboseOpt(
+    "verbose",
+    desc("Whether to print verbose output"),
+    init(false), cat(g_colobotLintOptionCategory));
+
 extrahelp g_moreHelp(
     "Colobot-lint runs just like any other tool based on Clang's libtooling.\n"
     "\n"
@@ -65,7 +70,7 @@ int main(int argc, const char **argv)
                    optionsParser.getSourcePathList());
 
     OutputPrinter printer(g_outputFileOpt);
-    Context context(printer);
+    Context context(printer, g_verboseOpt);
 
     DiagnosticHandler diagnosticHandler(context);
     tool.setDiagnosticConsumer(&diagnosticHandler);

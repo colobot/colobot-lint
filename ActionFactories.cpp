@@ -23,6 +23,15 @@ ColobotLintFrontendAction::ColobotLintFrontendAction(Context& context)
     : m_context(context)
 {}
 
+bool ColobotLintFrontendAction::BeginSourceFileAction(CompilerInstance& ci, StringRef filename)
+{
+    if (m_context.verbose)
+    {
+        std::cerr << "Processing " << filename.str() << std::endl;
+    }
+    return clang::FrontendAction::BeginSourceFileAction(ci, filename);
+}
+
 std::unique_ptr<ASTConsumer> ColobotLintFrontendAction::CreateASTConsumer(CompilerInstance& compiler,
                                                                           StringRef file)
 {
