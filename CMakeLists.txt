@@ -18,3 +18,5 @@ set(GIT_COMMIT_HASH "<none>" CACHE STRING "Latest git commit hash used as versio
 
 configure_file(ColobotLintConfig.h.in ${CMAKE_CURRENT_BINARY_DIR}/ColobotLintConfig.h)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
+message(STATUS "Git commit hash set to ${GIT_COMMIT_HASH}")
