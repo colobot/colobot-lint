@@ -27,7 +27,7 @@ void OutputPrinter::PrintRuleViolation(const std::string& ruleName,
     errorElement->SetAttribute("line", std::to_string(sourceManager.getSpellingLineNumber(location)));
     errorElement->SetAttribute("id", ruleName);
     errorElement->SetAttribute("severity", GetSeverityString(severity));
-    errorElement->SetAttribute("message", description);
+    errorElement->SetAttribute("msg", description);
 
     m_resultsElement->LinkEndChild(errorElement);
 }
