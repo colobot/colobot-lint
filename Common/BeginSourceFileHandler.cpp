@@ -2,6 +2,8 @@
 
 #include "Context.h"
 
+#include <regex>
+
 BeginSourceFileHandler::BeginSourceFileHandler(Context& context)
     : m_context(context)
 {}
@@ -47,8 +49,15 @@ bool BeginSourceFileHandler::IsFakeHeaderSource(llvm::StringRef filename)
 
 std::string BeginSourceFileHandler::GetActualHeaderFileSuffix(llvm::StringRef filename)
 {
-    auto pos = filename.find(g_fake_header_dir_prefix);
-    auto suffix = filename.substr(pos + strlen(g_fake_header_dir_prefix));
-    auto suffixWithoutCpp = suffix.drop_back(3); // cpp
-    return suffixWithoutCpp.str() + "h";
+    std::regex searchPattern(std::string(g_fake_header_dir_prefix) + "(.*?)\\.cpp$");
+
+    std::smatch match;
+    std::string filenameStr = filename.str();
+    if (!std::regex_search(filenameStr, match, searchPattern))
+    {
+        std::cerr << "Failed to match expected fake source file pattern!" << std::endl;
+        return "<not found>"; // should not match anything
+    }
+
+    return std::string(match[1]) + ".h";
 }
