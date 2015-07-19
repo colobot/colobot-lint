@@ -6,6 +6,7 @@ add_clang_executable(colobot-lint
   ActionFactories.cpp
   DiagnosticHandler/DiagnosticHandler.cpp
   Common/OutputPrinter.cpp
+  Rules/BraceInNewLineRule.cpp
   Rules/NakedDeleteRule.cpp
   Rules/NakedNewRule.cpp
   Rules/TodoRule.cpp

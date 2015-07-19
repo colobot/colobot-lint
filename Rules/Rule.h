@@ -2,9 +2,6 @@
 
 #include "../Common/Context.h"
 
-#include "clang/ASTMatchers/ASTMatchFinder.h"
-#include "clang/Frontend/CompilerInstance.h"
-
 class Rule
 {
 public:
@@ -13,12 +10,6 @@ public:
     {}
 
     virtual ~Rule()
-    {}
-
-    virtual void RegisterASTMatcherCallback(clang::ast_matchers::MatchFinder& finder)
-    {}
-
-    virtual void RegisterPreProcessorCallbacks(clang::CompilerInstance &compiler)
     {}
 
 protected:

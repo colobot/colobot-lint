@@ -8,7 +8,7 @@ using namespace clang;
 using namespace clang::ast_matchers;
 
 NakedNewRule::NakedNewRule(Context& context)
-    : Rule(context),
+    : ASTRule(context),
       m_matcher(newExpr().bind("new"))
 {}
 

@@ -8,7 +8,7 @@ using namespace clang;
 using namespace clang::ast_matchers;
 
 NakedDeleteRule::NakedDeleteRule(Context& context)
-    : Rule(context),
+    : ASTRule(context),
       m_matcher(deleteExpr().bind("delete"))
 {}
 

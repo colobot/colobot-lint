@@ -5,7 +5,7 @@
 using namespace clang;
 
 TodoRule::TodoRule(Context& context)
-    : Rule(context)
+    : ASTRule(context)
     , m_todoPattern("TODO.*$")
 {}
 

@@ -75,8 +75,26 @@ int main(int argc, const char **argv)
     DiagnosticHandler diagnosticHandler(context);
     tool.setDiagnosticConsumer(&diagnosticHandler);
 
-    ColobotLintActionFactory factory(context);
+    if (context.verbose)
+    {
+        std::cerr << "Stage 1. Running AST checks" << std::endl;
+    }
+
+    ColobotLintASTFrontendActionFactory factory(context);
     int retCode = tool.run(&factory);
+    if (retCode == 0)
+    {
+        if (context.verbose)
+        {
+            std::cerr << "Stage 2. Running token checks" << std::endl;
+        }
+
+        IgnoringDiagConsumer ignoringDiagnosticHandler;
+        tool.setDiagnosticConsumer(&ignoringDiagnosticHandler);
+
+        ColobotLintTokenFrontendActionFactory factory(context);
+        retCode = tool.run(&factory);
+    }
 
     printer.Save();
 
