@@ -22,14 +22,12 @@ FrontendAction* ColobotLintASTFrontendActionFactory::create()
 
 ColobotLintASTFrontendAction::ColobotLintASTFrontendAction(Context& context)
     : m_context(context)
+    , m_beginSourceFileHandler(context)
 {}
 
 bool ColobotLintASTFrontendAction::BeginSourceFileAction(CompilerInstance& ci, StringRef filename)
 {
-    if (m_context.verbose)
-    {
-        std::cerr << "Processing " << filename.str() << std::endl;
-    }
+    m_beginSourceFileHandler.BeginSourceFileAction(ci, filename);
     return clang::FrontendAction::BeginSourceFileAction(ci, filename);
 }
 
@@ -82,16 +80,14 @@ FrontendAction* ColobotLintTokenFrontendActionFactory::create()
 
 ColobotLintTokenFrontendAction::ColobotLintTokenFrontendAction(Context& context)
     : m_context(context)
+    , m_beginSourceFileHandler(context)
 {
     m_rules = CreateTokenRules(m_context);
 }
 
 bool ColobotLintTokenFrontendAction::BeginSourceFileAction(CompilerInstance& ci, StringRef filename)
 {
-    if (m_context.verbose)
-    {
-        std::cerr << "Processing " << filename.str() << std::endl;
-    }
+    m_beginSourceFileHandler.BeginSourceFileAction(ci, filename);
     return clang::PreprocessorFrontendAction::BeginSourceFileAction(ci, filename);
 }
 

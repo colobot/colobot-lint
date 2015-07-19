@@ -1,5 +1,7 @@
 #include "NakedNewRule.h"
 
+#include "../Common/SourceLocationHelper.h"
+
 #include "clang/Tooling/Tooling.h"
 #include "clang/ASTMatchers/ASTMatchers.h"
 #include "clang/AST/ExprCXX.h"
@@ -24,7 +26,7 @@ void NakedNewRule::run(const MatchFinder::MatchResult& result)
         return;
 
     SourceLocation location = newExpr->getLocStart();
-    if (! result.Context->getSourceManager().isInMainFile(location))
+    if (! m_context.sourceLocationHelper.IsLocationOfInterest(location, result.Context->getSourceManager()))
         return;
 
     std::string typeStr = newExpr->getAllocatedType().getAsString();

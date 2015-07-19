@@ -1,5 +1,7 @@
 #include "BraceInNewLineRule.h"
 
+#include "../Common/SourceLocationHelper.h"
+
 #include "clang/Lex/Preprocessor.h"
 #include "clang/Lex/Token.h"
 
@@ -14,7 +16,7 @@ BraceInNewLineRule::BraceInNewLineRule(Context& context)
 void BraceInNewLineRule::HandleToken(clang::Preprocessor& pp, const clang::Token& token)
 {
     SourceLocation tokenLocation = token.getLocation();
-    if (! pp.getSourceManager().isInMainFile(tokenLocation))
+    if (! m_context.sourceLocationHelper.IsLocationOfInterest(tokenLocation, pp.getSourceManager()))
         return;
 
     auto currentTokenKind = token.getKind();

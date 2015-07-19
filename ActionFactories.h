@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Common/BeginSourceFileHandler.h"
+
 #include "Rules/ASTRule.h"
 #include "Rules/TokenRule.h"
 
@@ -37,6 +39,7 @@ public:
 
 private:
     Context &m_context;
+    BeginSourceFileHandler m_beginSourceFileHandler;
 };
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -81,5 +84,6 @@ public:
 
 private:
     Context &m_context;
+    BeginSourceFileHandler m_beginSourceFileHandler;
     std::vector<std::unique_ptr<TokenRule>> m_rules;
 };

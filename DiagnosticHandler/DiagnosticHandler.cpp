@@ -10,19 +10,33 @@ void DiagnosticHandler::HandleDiagnostic(DiagnosticsEngine::Level level, const D
 {
     if (level == DiagnosticsEngine::Level::Error)
     {
-        m_context.printer.PrintRuleViolation("compile error",
-                                             Severity::Error,
-                                             GetDiagnosticString(info),
-                                             info.getLocation(),
-                                             info.getSourceManager());
+        if (m_context.areWeInFakeHeaderSourceFile)
+        {
+            m_context.printer.PrintRuleViolation(
+                "header file not self-contained",
+                Severity::Error,
+                "Including single header file should not result in compile error. Error reported was: " + GetDiagnosticString(info),
+                info.getLocation(),
+                info.getSourceManager());
+        }
+        else
+        {
+            m_context.printer.PrintRuleViolation(
+                "compile error",
+                Severity::Error,
+                GetDiagnosticString(info),
+                info.getLocation(),
+                info.getSourceManager());
+        }
     }
     else if (level == DiagnosticsEngine::Level::Warning)
     {
-        m_context.printer.PrintRuleViolation("compile warning",
-                                             Severity::Warning,
-                                             GetDiagnosticString(info),
-                                             info.getLocation(),
-                                             info.getSourceManager());
+        m_context.printer.PrintRuleViolation(
+            "compile warning",
+            Severity::Warning,
+            GetDiagnosticString(info),
+            info.getLocation(),
+            info.getSourceManager());
     }
 }
 

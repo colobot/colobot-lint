@@ -5,6 +5,7 @@
 
 #include "Common/Context.h"
 #include "Common/OutputPrinter.h"
+#include "Common/SourceLocationHelper.h"
 #include "DiagnosticHandler/DiagnosticHandler.h"
 #include "ActionFactories.h"
 
@@ -69,8 +70,12 @@ int main(int argc, const char **argv)
     ClangTool tool(optionsParser.getCompilations(),
                    optionsParser.getSourcePathList());
 
-    OutputPrinter printer(g_outputFileOpt);
-    Context context(printer, g_verboseOpt);
+    SourceLocationHelper sourceLocationHelper;
+    OutputPrinter outputPrinter(g_outputFileOpt);
+    Context context(sourceLocationHelper,
+                    outputPrinter,
+                    g_verboseOpt);
+    sourceLocationHelper.SetContext(&context);
 
     DiagnosticHandler diagnosticHandler(context);
     tool.setDiagnosticConsumer(&diagnosticHandler);
@@ -96,7 +101,7 @@ int main(int argc, const char **argv)
         retCode = tool.run(&factory);
     }
 
-    printer.Save();
+    outputPrinter.Save();
 
     return retCode;
 }

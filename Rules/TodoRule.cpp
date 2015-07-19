@@ -1,6 +1,7 @@
 #include "TodoRule.h"
 
-#include <iostream>
+#include "../Common/SourceLocationHelper.h"
+
 
 using namespace clang;
 
@@ -17,7 +18,8 @@ void TodoRule::RegisterPreProcessorCallbacks(clang::CompilerInstance& compiler)
 bool TodoRule::HandleComment(clang::Preprocessor& pp, clang::SourceRange range)
 {
     SourceLocation location = range.getBegin();
-    if (! pp.getSourceManager().isInMainFile(location))
+
+    if (! m_context.sourceLocationHelper.IsLocationOfInterest(location, pp.getSourceManager()))
         return false;
 
     std::string commentText =

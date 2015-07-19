@@ -41,7 +41,9 @@ set(COLOBOT_LINT_SRCS
     ColobotLint.cpp
     ActionFactories.cpp
     DiagnosticHandler/DiagnosticHandler.cpp
+    Common/BeginSourceFileHandler.cpp
     Common/OutputPrinter.cpp
+    Common/SourceLocationHelper.cpp
     Rules/BraceInNewLineRule.cpp
     Rules/NakedDeleteRule.cpp
     Rules/NakedNewRule.cpp
