@@ -22,6 +22,11 @@ if(NOT "${PROJECT_NAME}" STREQUAL "LLVM")
     if(NOT SKIP_CURSES)
        find_package(Curses REQUIRED)
     endif()
+
+    option(TESTS "Enable tests" OFF)
+    if(TESTS)
+        enable_testing()
+    endif()
 endif()
 
 
@@ -148,3 +153,15 @@ else()
         dl
     )
 endif()
+
+set(TESTS
+    Test/todo_rule_test.py
+)
+
+if("${PROJECT_NAME}" STREQUAL "LLVM")
+    set(COLOBOT_LINT_OUTPUT_BINARY ${LLVM_BINARY_DIR}/bin/colobot-lint)
+else()
+    set(COLOBOT_LINT_OUTPUT_BINARY ${CMAKE_CURRENT_BINARY_DIR}/colobot-lint)
+endif()
+
+add_test(TodoRuleTest ${CMAKE_CURRENT_SOURCE_DIR}/Tests/todo_rule_test.py ${COLOBOT_LINT_OUTPUT_BINARY})

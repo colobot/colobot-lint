@@ -3,3 +3,5 @@
 /.kdev4/
 # Build dir
 /build/
+# Python cache
+__pycache__/

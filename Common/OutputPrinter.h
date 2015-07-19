@@ -16,7 +16,8 @@ public:
                             Severity severity,
                             const std::string& description,
                             const clang::SourceLocation& location,
-                            clang::SourceManager& sourceManager);
+                            clang::SourceManager& sourceManager,
+                            int lineOffset = 0);
 
     void Save();
 

@@ -7,7 +7,7 @@ using namespace clang;
 
 TodoRule::TodoRule(Context& context)
     : ASTRule(context)
-    , m_todoPattern("TODO.*$")
+    , m_todoPattern("(TODO.*?)(\\s*)?(\\*/)?$")
 {}
 
 void TodoRule::RegisterPreProcessorCallbacks(clang::CompilerInstance& compiler)
@@ -27,18 +27,21 @@ bool TodoRule::HandleComment(clang::Preprocessor& pp, clang::SourceRange range)
                              pp.getSourceManager(), pp.getLangOpts());
 
     std::vector<std::string> lines = SplitLines(commentText);
+    int lineOffset = 0;
     for (const auto& commentLine : lines)
     {
         std::smatch match;
         if (std::regex_search(commentLine, match, m_todoPattern))
         {
-            std::string todoText = match[0];
+            std::string todoText = match[1];
             m_context.printer.PrintRuleViolation("TODO comment",
                                                 Severity::Information,
                                                 todoText,
                                                 location,
-                                                pp.getSourceManager());
+                                                pp.getSourceManager(),
+                                                lineOffset);
         }
+        ++lineOffset;
     }
 
     return false;

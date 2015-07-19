@@ -36,7 +36,8 @@ void OutputPrinter::PrintRuleViolation(const std::string& ruleName,
                                        Severity severity,
                                        const std::string& description,
                                        const clang::SourceLocation& location,
-                                       clang::SourceManager& sourceManager)
+                                       clang::SourceManager& sourceManager,
+                                       int lineOffset)
 {
     TiXmlElement* errorElement = new TiXmlElement("error");
 
@@ -47,7 +48,7 @@ void OutputPrinter::PrintRuleViolation(const std::string& ruleName,
 
     TiXmlElement* locationElement = new TiXmlElement("location");
     locationElement->SetAttribute("file", sourceManager.getFilename(location).str());
-    locationElement->SetAttribute("line", std::to_string(sourceManager.getSpellingLineNumber(location)));
+    locationElement->SetAttribute("line", std::to_string(sourceManager.getSpellingLineNumber(location) + lineOffset));
     errorElement->LinkEndChild(locationElement);
 
     m_errorsElement->LinkEndChild(errorElement);
