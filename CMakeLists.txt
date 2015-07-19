@@ -18,7 +18,10 @@ find_package(Git REQUIRED)
 
 if(NOT "${PROJECT_NAME}" STREQUAL "LLVM")
     find_package(ZLIB REQUIRED)
-    find_package(Curses REQUIRED)
+    option(SKIP_CURSES "Whether to skip finding curses" OFF)
+    if(NOT SKIP_CURSES)
+       find_package(Curses REQUIRED)
+    endif()
 endif()
 
 
