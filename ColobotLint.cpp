@@ -54,7 +54,7 @@ extrahelp g_moreHelp(
 
 void printColobotLintVersion()
 {
-    std::cout << "colobot-lint version " << VERSION_STR <<  " built with LLVM " << LLVM_VERSION_STRING << std::endl;
+    std::cout << "colobot-lint version " << COLOBOT_LINT_VERSION_STR <<  " built with LLVM " << LLVM_VERSION_STRING << std::endl;
     std::cout << "(C) 2015 Piotr Dziwinski <piotrdz@gmail.com>" << std::endl;
     std::cout << "http://colobot.info http://github.com/colobot/colobot" << std::endl;
 }

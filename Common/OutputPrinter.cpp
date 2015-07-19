@@ -13,7 +13,7 @@ OutputPrinter::OutputPrinter(const std::string& outputFileName)
     m_document.LinkEndChild(resultsElement);
 
     TiXmlElement* colobotLintElement = new TiXmlElement("cppcheck");
-    colobotLintElement->SetAttribute("version", "colobot-lint-" VERSION_STR);
+    colobotLintElement->SetAttribute("version", "colobot-lint-" COLOBOT_LINT_VERSION_STR);
     resultsElement->LinkEndChild(colobotLintElement);
 
     m_errorsElement = new TiXmlElement("errors");
