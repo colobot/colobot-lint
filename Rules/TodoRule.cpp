@@ -6,8 +6,8 @@
 using namespace clang;
 
 TodoRule::TodoRule(Context& context)
-    : ASTRule(context)
-    , m_todoPattern("(TODO.*?)(\\s*)?(\\*/)?$")
+    : ASTCallbackRule(context),
+      m_todoPattern("(TODO.*?)(\\s*)?(\\*/)?$")
 {}
 
 void TodoRule::RegisterPreProcessorCallbacks(clang::CompilerInstance& compiler)

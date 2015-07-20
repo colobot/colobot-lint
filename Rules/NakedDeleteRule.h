@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ASTRule.h"
+#include "ASTCallbackRule.h"
 
-class NakedDeleteRule : public ASTRule,
+class NakedDeleteRule : public ASTCallbackRule,
                         public clang::ast_matchers::MatchFinder::MatchCallback
 {
 public:

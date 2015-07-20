@@ -5,10 +5,10 @@
 #include "clang/ASTMatchers/ASTMatchFinder.h"
 #include "clang/Frontend/CompilerInstance.h"
 
-class ASTRule : public Rule
+class ASTCallbackRule : public Rule
 {
 public:
-    ASTRule(Context& context)
+    ASTCallbackRule(Context& context)
         : Rule(context)
     {}
 

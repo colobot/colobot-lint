@@ -1,9 +1,8 @@
 #pragma once
 
-#include "Common/BeginSourceFileHandler.h"
+#include "Handlers/BeginSourceFileHandler.h"
 
-#include "Rules/ASTRule.h"
-#include "Rules/TokenRule.h"
+#include "Rules/ASTCallbackRule.h"
 
 #include "clang/Frontend/MultiplexConsumer.h"
 #include "clang/ASTMatchers/ASTMatchFinder.h"
@@ -50,40 +49,9 @@ class ColobotLintASTConsumer : public clang::MultiplexConsumer
 public:
     ColobotLintASTConsumer(std::vector<std::unique_ptr<ASTConsumer>>&& consumers,
                            std::unique_ptr<clang::ast_matchers::MatchFinder>&& finder,
-                           std::vector<std::unique_ptr<ASTRule>>&& rules);
+                           std::vector<std::unique_ptr<ASTCallbackRule>>&& rules);
 
 private:
     std::unique_ptr<clang::ast_matchers::MatchFinder> m_finder;
-    std::vector<std::unique_ptr<ASTRule>> m_rules;
-};
-
-/////////////////////////////////////////////////////////////////////////////////
-
-// Frontend action factory for AST checkers - this is required by clang::tooling::ClangTool interface
-class ColobotLintTokenFrontendActionFactory : public clang::tooling::FrontendActionFactory
-{
-public:
-    ColobotLintTokenFrontendActionFactory(Context &context);
-
-    clang::FrontendAction* create() override;
-
-private:
-    Context& m_context;
-};
-
-/////////////////////////////////////////////////////////////////////////////////
-
-// Frontend action for AST checkers - this is created by above factory
-class ColobotLintTokenFrontendAction : public clang::PreprocessorFrontendAction
-{
-public:
-    ColobotLintTokenFrontendAction(Context &context);
-
-    bool BeginSourceFileAction(clang::CompilerInstance& ci, llvm::StringRef filename) override;
-    void ExecuteAction() override;
-
-private:
-    Context &m_context;
-    BeginSourceFileHandler m_beginSourceFileHandler;
-    std::vector<std::unique_ptr<TokenRule>> m_rules;
+    std::vector<std::unique_ptr<ASTCallbackRule>> m_rules;
 };

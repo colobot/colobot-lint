@@ -21,7 +21,7 @@ def run_colobot_lint(source_file_text):
                 r"""[
                     {{
                         "directory": "{directory}",
-                        "command": "/usr/bin/c++ -c {source_file_name} -o {source_file_name}.o",
+                        "command": "/usr/bin/c++ -c -std=c++11 {source_file_name} -o {source_file_name}.o",
                         "file": "{source_file_name}"
                     }}
                 ]""".format(

@@ -10,7 +10,7 @@ using namespace clang;
 using namespace clang::ast_matchers;
 
 NakedNewRule::NakedNewRule(Context& context)
-    : ASTRule(context),
+    : ASTCallbackRule(context),
       m_matcher(newExpr().bind("new"))
 {}
 

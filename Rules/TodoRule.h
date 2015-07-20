@@ -1,12 +1,12 @@
 #pragma once
 
-#include "ASTRule.h"
+#include "ASTCallbackRule.h"
 
 #include "clang/Lex/Preprocessor.h"
 
 #include <regex>
 
-class TodoRule : public ASTRule,
+class TodoRule : public ASTCallbackRule,
                  public clang::CommentHandler
 {
 public:

@@ -45,11 +45,11 @@ message(STATUS "Version set from git commit hash: ${COLOBOT_LINT_GIT_COMMIT_HASH
 set(COLOBOT_LINT_SRCS
     ColobotLint.cpp
     ActionFactories.cpp
-    DiagnosticHandler/DiagnosticHandler.cpp
-    Common/BeginSourceFileHandler.cpp
     Common/OutputPrinter.cpp
     Common/SourceLocationHelper.cpp
-    Rules/BraceInNewLineRule.cpp
+    Handlers/BeginSourceFileHandler.cpp
+    Handlers/DiagnosticHandler.cpp
+    Rules/BlockPlacementRule.cpp
     Rules/NakedDeleteRule.cpp
     Rules/NakedNewRule.cpp
     Rules/TodoRule.cpp
@@ -165,3 +165,4 @@ else()
 endif()
 
 add_test(TodoRuleTest ${CMAKE_CURRENT_SOURCE_DIR}/Tests/todo_rule_test.py ${COLOBOT_LINT_OUTPUT_BINARY})
+add_test(BracePlacementRuleTest ${CMAKE_CURRENT_SOURCE_DIR}/Tests/block_placement_rule_test.py ${COLOBOT_LINT_OUTPUT_BINARY})

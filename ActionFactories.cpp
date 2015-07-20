@@ -4,10 +4,13 @@
 
 #include "llvm/ADT/STLExtras.h"
 #include "clang/Lex/Preprocessor.h"
+#include "clang/AST/Decl.h"
+#include "clang/AST/RecursiveASTVisitor.h"
 
 using namespace llvm;
 using namespace clang;
 using namespace clang::ast_matchers;
+
 
 ColobotLintASTFrontendActionFactory::ColobotLintASTFrontendActionFactory(Context& context)
     : m_context(context)
@@ -21,8 +24,8 @@ FrontendAction* ColobotLintASTFrontendActionFactory::create()
 ///////////////////////////
 
 ColobotLintASTFrontendAction::ColobotLintASTFrontendAction(Context& context)
-    : m_context(context)
-    , m_beginSourceFileHandler(context)
+    : m_context(context),
+      m_beginSourceFileHandler(context)
 {}
 
 bool ColobotLintASTFrontendAction::BeginSourceFileAction(CompilerInstance& ci, StringRef filename)
@@ -38,8 +41,8 @@ std::unique_ptr<ASTConsumer> ColobotLintASTFrontendAction::CreateASTConsumer(Com
 
     auto finder = make_unique<MatchFinder>();
 
-    auto rules = CreateASTRules(m_context);
-    for (auto& rule : rules)
+    auto astCallbackRules = CreateASTRules(m_context);
+    for (auto& rule : astCallbackRules)
     {
         rule->RegisterASTMatcherCallback(*finder.get());
         rule->RegisterPreProcessorCallbacks(compiler);
@@ -47,9 +50,15 @@ std::unique_ptr<ASTConsumer> ColobotLintASTFrontendAction::CreateASTConsumer(Com
 
     consumers.push_back(finder->newASTConsumer());
 
+    auto directAstConsumerRules = CreateDirectASTConsumerRules(m_context);
+    for (auto& rule : directAstConsumerRules)
+    {
+        consumers.push_back(std::move(rule));
+    }
+
     return make_unique<ColobotLintASTConsumer>(std::move(consumers),
                                                std::move(finder),
-                                               std::move(rules));
+                                               std::move(astCallbackRules));
 }
 
 ///////////////////////////
@@ -57,52 +66,8 @@ std::unique_ptr<ASTConsumer> ColobotLintASTFrontendAction::CreateASTConsumer(Com
 ColobotLintASTConsumer::ColobotLintASTConsumer(
         std::vector<std::unique_ptr<ASTConsumer>>&& consumers,
         std::unique_ptr<MatchFinder>&& finder,
-        std::vector<std::unique_ptr<ASTRule>>&& rules)
+        std::vector<std::unique_ptr<ASTCallbackRule>>&& rules)
     : MultiplexConsumer(std::move(consumers)),
       m_finder(std::move(finder)),
       m_rules(std::move(rules))
 {}
-
-
-///////////////////////////
-
-
-ColobotLintTokenFrontendActionFactory::ColobotLintTokenFrontendActionFactory(Context& context)
-    : m_context(context)
-{}
-
-FrontendAction* ColobotLintTokenFrontendActionFactory::create()
-{
-    return new ColobotLintTokenFrontendAction(m_context);
-}
-
-///////////////////////////
-
-ColobotLintTokenFrontendAction::ColobotLintTokenFrontendAction(Context& context)
-    : m_context(context)
-    , m_beginSourceFileHandler(context)
-{
-    m_rules = CreateTokenRules(m_context);
-}
-
-bool ColobotLintTokenFrontendAction::BeginSourceFileAction(CompilerInstance& ci, StringRef filename)
-{
-    m_beginSourceFileHandler.BeginSourceFileAction(ci, filename);
-    return clang::PreprocessorFrontendAction::BeginSourceFileAction(ci, filename);
-}
-
-void ColobotLintTokenFrontendAction::ExecuteAction()
-{
-    Preprocessor& pp = getCompilerInstance().getPreprocessor();
-    Token token;
-    pp.EnterMainSourceFile();
-    do
-    {
-        pp.Lex(token);
-        for (const auto& consumer : m_rules)
-        {
-            consumer->HandleToken(pp, token);
-        }
-    }
-    while (token.isNot(tok::eof));
-}

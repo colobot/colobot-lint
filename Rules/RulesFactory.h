@@ -1,11 +1,11 @@
 #pragma once
 
-#include "ASTRule.h"
-#include "TokenRule.h"
+#include "ASTCallbackRule.h"
+#include "DirectASTConsumerRule.h"
 
 #include <memory>
 #include <vector>
 
-std::vector<std::unique_ptr<ASTRule>> CreateASTRules(Context& context);
+std::vector<std::unique_ptr<ASTCallbackRule>> CreateASTRules(Context& context);
 
-std::vector<std::unique_ptr<TokenRule>> CreateTokenRules(Context& context);
+std::vector<std::unique_ptr<DirectASTConsumerRule>> CreateDirectASTConsumerRules(Context& context);
