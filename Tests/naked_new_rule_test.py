@@ -6,7 +6,9 @@ import sys
 class TestNakedNewRule(test_support.TestBase):
     def test_naked_new_with_builtin_type(self):
         self.assert_colobot_lint_result(
-            source_file_text = 'int* x = new int;',
+            source_file_lines = [
+                'int* x = new int;'
+            ],
             expected_errors = [
                 {
                     'id': 'naked new',
@@ -18,7 +20,11 @@ class TestNakedNewRule(test_support.TestBase):
 
     def test_naked_new_with_user_type(self):
         self.assert_colobot_lint_result(
-            source_file_text = 'class Foo\n{};\nFoo* foo = new Foo();',
+            source_file_lines = [
+                'class Foo',
+                '{};',
+                'Foo* foo = new Foo();'
+            ],
             expected_errors = [
                 {
                     'id': 'naked new',
@@ -30,7 +36,9 @@ class TestNakedNewRule(test_support.TestBase):
 
     def test_naked_new_with_array_type(self):
         self.assert_colobot_lint_result(
-            source_file_text = 'char* x = new char[256];',
+            source_file_lines = [
+                'char* x = new char[256];'
+            ],
             expected_errors = [
                 {
                     'id': 'naked new',

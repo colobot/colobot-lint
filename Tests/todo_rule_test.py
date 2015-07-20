@@ -6,13 +6,17 @@ import sys
 class TestTodoRule(test_support.TestBase):
     def test_normal_comment(self):
         self.assert_colobot_lint_result(
-            source_file_text = '// Comment',
+            source_file_lines = [
+                '// Comment'
+            ],
             expected_errors = []
         )
 
     def test_single_todo_comment(self):
         self.assert_colobot_lint_result(
-            source_file_text = '// TODO: comment',
+            source_file_lines = [
+                '// TODO: comment'
+            ],
             expected_errors = [
                 {
                     'id': 'TODO comment',
@@ -24,7 +28,10 @@ class TestTodoRule(test_support.TestBase):
 
     def test_two_single_todo_comments(self):
         self.assert_colobot_lint_result(
-            source_file_text = '// TODO: comment1\n// TODO: comment2',
+            source_file_lines = [
+                '// TODO: comment1',
+                '// TODO: comment2'
+            ],
             expected_errors = [
                 {
                     'id': 'TODO comment',
@@ -42,12 +49,16 @@ class TestTodoRule(test_support.TestBase):
 
     def test_normal_star_comment(self):
         self.assert_colobot_lint_result(
-            source_file_text = '/* comment */',
+            source_file_lines = [
+                '/* comment */'
+            ],
             expected_errors = [])
 
     def test_single_todo_star_comment(self):
         self.assert_colobot_lint_result(
-            source_file_text = '/* TODO: comment */',
+            source_file_lines = [
+                '/* TODO: comment */'
+            ],
             expected_errors = [
                 {
                     'id': 'TODO comment',
@@ -59,7 +70,9 @@ class TestTodoRule(test_support.TestBase):
 
     def test_in_source_todo_star_comment(self):
         self.assert_colobot_lint_result(
-            source_file_text = 'int /* TODO: comment */ x;',
+            source_file_lines = [
+                'int /* TODO: comment */ x;'
+            ],
             expected_errors = [
                 {
                     'id': 'TODO comment',
@@ -71,7 +84,11 @@ class TestTodoRule(test_support.TestBase):
 
     def test_multiple_todo_star_comments(self):
         self.assert_colobot_lint_result(
-            source_file_text = '/* TODO: comment1\nSome text\nTODO: comment2 */',
+            source_file_lines = [
+                '/* TODO: comment1',
+                'Some text',
+                'TODO: comment2 */'
+            ],
             expected_errors = [
                 {
                     'id': 'TODO comment',

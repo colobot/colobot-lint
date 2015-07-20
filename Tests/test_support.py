@@ -7,13 +7,13 @@ import xml.etree.ElementTree as ET
 
 colobot_lint_exectuable = './colobot-lint' # default
 
-def run_colobot_lint(source_file_text):
+def run_colobot_lint(source_file_lines):
     temp_dir = tempfile.mkdtemp()
 
     try:
         source_file_name = temp_dir + '/src.cpp'
         with open(source_file_name, 'w') as f:
-            f.write(source_file_text)
+            f.write('\n'.join(source_file_lines))
 
         compilation_database_file_name = temp_dir + '/compile_commands.json'
         with open(compilation_database_file_name, 'w') as f:
@@ -34,8 +34,8 @@ def run_colobot_lint(source_file_text):
         shutil.rmtree(temp_dir)
 
 class TestBase(unittest.TestCase):
-    def assert_colobot_lint_result(self, source_file_text, expected_errors):
-        xml_output = run_colobot_lint(source_file_text)
+    def assert_colobot_lint_result(self, source_file_lines, expected_errors):
+        xml_output = run_colobot_lint(source_file_lines)
 
         results = ET.fromstring(xml_output)
         errors = results.find('errors').findall('error')
