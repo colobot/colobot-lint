@@ -19,8 +19,10 @@ public:
     bool VisitStmt(clang::Stmt* statement);
 
 private:
-    bool IsOpeningBracePlacedCorrectly(const clang::SourceLocation& locStart,
-                                       const clang::SourceLocation& locEnd);
+    bool IsDeclarationOpeningBracePlacedCorrectly(const clang::SourceLocation& locStart,
+                                                  const clang::SourceLocation& locEnd);
+    bool IsStatementOpeningBracePlacedCorrectly(const clang::SourceLocation& parentStartLocation,
+                                                const clang::SourceLocation& braceLocation);
     bool IsClosingBracePlacedCorrectly(const clang::SourceLocation& locStart,
                                        const clang::SourceLocation& locEnd);
 

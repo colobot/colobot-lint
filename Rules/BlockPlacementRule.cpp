@@ -51,7 +51,7 @@ bool BlockPlacementRule::VisitDecl(Decl* declaration)
     if (declarationStartLineNumber == declarationEndLineNumber)
         return true; // recurse further
 
-    if (! IsOpeningBracePlacedCorrectly(declaration->getLocStart(), declaration->getLocEnd()))
+    if (! IsDeclarationOpeningBracePlacedCorrectly(declaration->getLocStart(), declaration->getLocEnd()))
         ReportViolation(declaration->getLocStart(), ViolationType::OpeningBrace);
 
     if (! IsClosingBracePlacedCorrectly(declaration->getLocStart(), declaration->getLocEnd()))
@@ -90,26 +90,29 @@ bool BlockPlacementRule::VisitStmt(Stmt* statement)
     if (startLineNumber == endLineNumber)
         return true; // recurse further
 
-    SourceLocation scanStartLocation;
+    CompoundStmt* compoundStatement = static_cast<CompoundStmt*>(statement);
+
+    SourceLocation openingBraceLocation = compoundStatement->getLBracLoc();
+    SourceLocation parentScopeStartLocation;
 
     auto parents = m_astContext->getParents(*statement);
     if (parents.size() > 0)
     {
         SourceRange range = parents.front().getSourceRange();
         if (range.isValid())
-            scanStartLocation = range.getBegin();
+            parentScopeStartLocation = range.getBegin();
         else
-            scanStartLocation = statement->getLocStart();
+            parentScopeStartLocation = statement->getLocStart();
     }
     else
     {
-        scanStartLocation = statement->getLocStart();
+        parentScopeStartLocation = statement->getLocStart();
     }
 
-    if (! IsOpeningBracePlacedCorrectly(scanStartLocation, statement->getLocEnd()))
+    if (! IsStatementOpeningBracePlacedCorrectly(parentScopeStartLocation, openingBraceLocation))
         ReportViolation(statement->getLocStart(), ViolationType::OpeningBrace);
 
-    if (! IsClosingBracePlacedCorrectly(scanStartLocation, statement->getLocEnd()))
+    if (! IsClosingBracePlacedCorrectly(statement->getLocStart(), statement->getLocEnd()))
     {
         ReportViolation(statement->getLocEnd(), ViolationType::ClosingBrace);
         m_reportedLineNumbers.insert(endLineNumber); // to avoid double errors
@@ -120,13 +123,19 @@ bool BlockPlacementRule::VisitStmt(Stmt* statement)
     return true;
 }
 
-bool BlockPlacementRule::IsOpeningBracePlacedCorrectly(const SourceLocation& locStart,
-                                                       const SourceLocation& locEnd)
+bool BlockPlacementRule::IsDeclarationOpeningBracePlacedCorrectly(const SourceLocation& locStart,
+                                                                  const SourceLocation& locEnd)
 {
     int startOffset = m_astContext->getSourceManager().getFileOffset(locStart);
     int endOffset = m_astContext->getSourceManager().getFileOffset(locEnd);
-
     const char* charData = m_astContext->getSourceManager().getCharacterData(locStart);
+
+    /*
+     * In declarations, we scan from beginning of declaration until first opening brace
+     *  for example: class Foo ... {
+     *               ^             ^
+     *             start          end
+     */
 
     bool haveNewline = false;
     bool haveNonWhitespaceInLine = false;
@@ -136,7 +145,7 @@ bool BlockPlacementRule::IsOpeningBracePlacedCorrectly(const SourceLocation& loc
         char ch = charData[i];
         if (ch == '{')
         {
-            return (haveNewline) && !haveNonWhitespaceInLine;
+            return haveNewline && !haveNonWhitespaceInLine;
         }
         else if (ch == '\n')
         {
@@ -152,13 +161,60 @@ bool BlockPlacementRule::IsOpeningBracePlacedCorrectly(const SourceLocation& loc
     return false;
 }
 
+bool BlockPlacementRule::IsStatementOpeningBracePlacedCorrectly(const SourceLocation& parentStartLocation,
+                                                                const SourceLocation& openingBraceLocation)
+{
+    int startOffset = m_astContext->getSourceManager().getFileOffset(parentStartLocation);
+    int endOffset = m_astContext->getSourceManager().getFileOffset(openingBraceLocation);
+    const char* charData = m_astContext->getSourceManager().getCharacterData(parentStartLocation);
+
+    /*
+     * In statements, we already know location of opening brace, but we scan backwards to check if there
+     *  isn't something else before, for example:
+     *  while (true)
+     *  {
+     *  ^       if (...) { ... }
+     * start             ^
+     * (parent)       opening brace (checked statement)
+     */
+
+    bool haveBrace = false;
+    bool haveNonWhitespaceInLine = false;
+    int scanRange = endOffset - startOffset;
+    for (int i = scanRange; i >= 0; --i)
+    {
+        char ch = charData[i];
+        if (ch == '{')
+        {
+            haveBrace = true;
+        }
+        else if (ch == '\n')
+        {
+            return haveBrace && !haveNonWhitespaceInLine;
+        }
+        else if (ch != ' ' && ch != '\t')
+        {
+            haveNonWhitespaceInLine = true;
+        }
+    }
+
+    return false;
+}
+
 bool BlockPlacementRule::IsClosingBracePlacedCorrectly(const SourceLocation& locStart,
                                                        const SourceLocation& locEnd)
 {
     int startOffset = m_astContext->getSourceManager().getFileOffset(locStart);
     int endOffset = m_astContext->getSourceManager().getFileOffset(locEnd);
-
     const char* charData = m_astContext->getSourceManager().getCharacterData(locStart);
+
+     /*
+     * Closing braces are checked like opening braces in statements, by scanning backwards:
+     *  class Foo {
+     *            ^      int x; };
+     *         start             ^
+     *                          end
+     */
 
     bool haveBrace = false;
     bool haveNonWhitespaceInLine = false;
