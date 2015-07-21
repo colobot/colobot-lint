@@ -30,7 +30,7 @@ private:
         ClosingBrace
     };
 
-    void ReportViolation(const clang::SourceLocation location, ViolationType type);
+    void ReportViolation(const clang::SourceLocation& location, ViolationType type);
 
     clang::ASTContext* m_astContext;
     // forbidden lines are where we know we have closing braces

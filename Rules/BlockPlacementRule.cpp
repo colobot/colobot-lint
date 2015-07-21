@@ -28,8 +28,8 @@ bool BlockPlacementRule::VisitDecl(Decl* declaration)
     if (! m_context.sourceLocationHelper.IsLocationOfInterest(location, m_astContext->getSourceManager()))
         return true; // recurse further
 
-    int declarationStartLineNumber = m_astContext->getSourceManager().getSpellingLineNumber(declaration->getLocStart());
-    int declarationEndLineNumber = m_astContext->getSourceManager().getSpellingLineNumber(declaration->getLocEnd());
+    int declarationStartLineNumber = m_astContext->getSourceManager().getPresumedLineNumber(declaration->getLocStart());
+    int declarationEndLineNumber = m_astContext->getSourceManager().getPresumedLineNumber(declaration->getLocEnd());
 
     if (m_forbiddenLineNumbers.count(declarationStartLineNumber) > 0 ||
         m_forbiddenLineNumbers.count(declarationEndLineNumber) > 0)
@@ -68,8 +68,8 @@ bool BlockPlacementRule::VisitStmt(Stmt* statement)
     if (! m_context.sourceLocationHelper.IsLocationOfInterest(location, m_astContext->getSourceManager()))
         return true; // recurse further
 
-    int startLineNumber = m_astContext->getSourceManager().getSpellingLineNumber(statement->getLocStart());
-    int endLineNumber = m_astContext->getSourceManager().getSpellingLineNumber(statement->getLocEnd());
+    int startLineNumber = m_astContext->getSourceManager().getPresumedLineNumber(statement->getLocStart());
+    int endLineNumber = m_astContext->getSourceManager().getPresumedLineNumber(statement->getLocEnd());
 
     if (m_forbiddenLineNumbers.count(startLineNumber) > 0 ||
         m_forbiddenLineNumbers.count(endLineNumber) > 0)
@@ -180,9 +180,9 @@ bool BlockPlacementRule::IsClosingBracePlacedCorrectly(const SourceLocation& loc
     return false;
 }
 
-void BlockPlacementRule::ReportViolation(const clang::SourceLocation location, ViolationType type)
+void BlockPlacementRule::ReportViolation(const clang::SourceLocation& location, ViolationType type)
 {
-    int lineNumber = m_astContext->getSourceManager().getSpellingLineNumber(location);
+    int lineNumber = m_astContext->getSourceManager().getPresumedLineNumber(location);
     const char* what = (type == ViolationType::OpeningBrace) ? "begins" : "ends";
     if (m_reportedLineNumbers.count(lineNumber) == 0)
     {
