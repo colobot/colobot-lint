@@ -2,6 +2,8 @@
 
 #include "ASTCallbackRule.h"
 
+#include <clang/ASTMatchers/ASTMatchFinder.h>
+
 class NakedDeleteRule : public ASTCallbackRule,
                         public clang::ast_matchers::MatchFinder::MatchCallback
 {

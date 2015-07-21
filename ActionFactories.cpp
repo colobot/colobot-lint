@@ -2,10 +2,8 @@
 
 #include "Rules/RulesFactory.h"
 
-#include "llvm/ADT/STLExtras.h"
-#include "clang/Lex/Preprocessor.h"
-#include "clang/AST/Decl.h"
-#include "clang/AST/RecursiveASTVisitor.h"
+#include <clang/Lex/Preprocessor.h>
+#include <clang/ASTMatchers/ASTMatchFinder.h>
 
 using namespace llvm;
 using namespace clang;
@@ -71,3 +69,7 @@ ColobotLintASTConsumer::ColobotLintASTConsumer(
       m_finder(std::move(finder)),
       m_rules(std::move(rules))
 {}
+
+ColobotLintASTConsumer::~ColobotLintASTConsumer()
+{}
+

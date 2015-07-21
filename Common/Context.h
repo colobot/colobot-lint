@@ -1,8 +1,9 @@
 #pragma once
 
-#include "OutputPrinter.h"
+#include <string>
 
 class SourceLocationHelper;
+class OutputPrinter;
 
 struct Context
 {

@@ -6,7 +6,7 @@
 
 #include "BlockPlacementRule.h"
 
-#include "llvm/ADT/STLExtras.h"
+#include <llvm/ADT/STLExtras.h>
 
 using namespace llvm;
 

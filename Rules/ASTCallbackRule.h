@@ -2,8 +2,17 @@
 
 #include "Rule.h"
 
-#include "clang/ASTMatchers/ASTMatchFinder.h"
-#include "clang/Frontend/CompilerInstance.h"
+namespace clang
+{
+
+class CompilerInstance;
+
+namespace ast_matchers
+{
+class MatchFinder;
+} // namespace ast_matchers
+
+} // namespace clang
 
 class ASTCallbackRule : public Rule
 {

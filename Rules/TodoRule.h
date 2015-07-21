@@ -2,7 +2,7 @@
 
 #include "ASTCallbackRule.h"
 
-#include "clang/Lex/Preprocessor.h"
+#include <clang/Lex/Preprocessor.h>
 
 #include <boost/regex.hpp>
 

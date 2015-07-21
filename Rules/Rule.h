@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Common/Context.h"
+class Context;
 
 class Rule
 {

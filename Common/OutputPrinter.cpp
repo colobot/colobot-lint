@@ -2,6 +2,10 @@
 
 #include "ColobotLintConfig.h"
 
+#include <clang/Basic/SourceLocation.h>
+#include <clang/AST/ASTContext.h>
+
+
 OutputPrinter::OutputPrinter(const std::string& outputFileName)
     : m_outputFileName(outputFileName)
 {

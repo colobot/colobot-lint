@@ -2,7 +2,7 @@
 
 #include "DirectASTConsumerRule.h"
 
-#include "clang/AST/RecursiveASTVisitor.h"
+#include <clang/AST/RecursiveASTVisitor.h>
 
 #include <unordered_set>
 #include <set>

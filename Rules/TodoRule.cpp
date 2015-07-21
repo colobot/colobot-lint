@@ -1,7 +1,10 @@
 #include "TodoRule.h"
 
+#include "../Common/Context.h"
+#include "../Common/OutputPrinter.h"
 #include "../Common/SourceLocationHelper.h"
 
+#include <clang/Frontend/CompilerInstance.h>
 
 using namespace clang;
 

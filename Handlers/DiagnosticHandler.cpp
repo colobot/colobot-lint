@@ -1,5 +1,8 @@
 #include "DiagnosticHandler.h"
 
+#include "../Common/Context.h"
+#include "../Common/OutputPrinter.h"
+
 using namespace clang;
 
 DiagnosticHandler::DiagnosticHandler(Context& context)

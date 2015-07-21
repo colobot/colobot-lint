@@ -4,9 +4,8 @@
 
 #include "Rules/ASTCallbackRule.h"
 
-#include "clang/Frontend/MultiplexConsumer.h"
-#include "clang/ASTMatchers/ASTMatchFinder.h"
-#include "clang/Tooling/Tooling.h"
+#include <clang/Frontend/MultiplexConsumer.h>
+#include <clang/Tooling/Tooling.h>
 
 #include <memory>
 #include <vector>
@@ -50,6 +49,7 @@ public:
     ColobotLintASTConsumer(std::vector<std::unique_ptr<ASTConsumer>>&& consumers,
                            std::unique_ptr<clang::ast_matchers::MatchFinder>&& finder,
                            std::vector<std::unique_ptr<ASTCallbackRule>>&& rules);
+    ~ColobotLintASTConsumer();
 
 private:
     std::unique_ptr<clang::ast_matchers::MatchFinder> m_finder;

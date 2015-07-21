@@ -1,10 +1,12 @@
 #include "NakedDeleteRule.h"
 
+#include "../Common/Context.h"
+#include "../Common/OutputPrinter.h"
 #include "../Common/SourceLocationHelper.h"
 
-#include "clang/Tooling/Tooling.h"
-#include "clang/ASTMatchers/ASTMatchers.h"
-#include "clang/AST/ExprCXX.h"
+#include <clang/Tooling/Tooling.h>
+#include <clang/ASTMatchers/ASTMatchers.h>
+#include <clang/AST/ExprCXX.h>
 
 using namespace clang;
 using namespace clang::ast_matchers;

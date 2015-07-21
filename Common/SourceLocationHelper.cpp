@@ -2,7 +2,7 @@
 
 #include "Context.h"
 
-#include "clang/Basic/SourceManager.h"
+#include <clang/Basic/SourceManager.h>
 
 void SourceLocationHelper::SetContext(Context* context)
 {

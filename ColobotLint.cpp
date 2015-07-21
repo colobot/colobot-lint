@@ -8,10 +8,9 @@
 
 #include "ColobotLintConfig.h"
 
-#include "llvm/Support/CommandLine.h"
-#include "llvm/Config/config.h"
-#include "clang/Frontend/MultiplexConsumer.h"
-#include "clang/Tooling/CommonOptionsParser.h"
+#include <llvm/Support/CommandLine.h>
+#include <llvm/Config/config.h>
+#include <clang/Tooling/CommonOptionsParser.h>
 
 #include <iostream>
 #include <exception>

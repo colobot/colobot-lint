@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../Common/Context.h"
+#include <clang/Basic/Diagnostic.h>
 
-#include "clang/Tooling/Tooling.h"
+class Context;
 
 class DiagnosticHandler : public clang::DiagnosticConsumer
 {

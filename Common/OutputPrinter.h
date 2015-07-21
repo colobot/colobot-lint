@@ -2,10 +2,13 @@
 
 #include "Severity.h"
 
-#include "clang/Basic/SourceLocation.h"
-#include "clang/AST/ASTContext.h"
-
 #include <tinyxml.h>
+
+namespace clang
+{
+class SourceLocation;
+class SourceManager;
+} // namespace clang
 
 class OutputPrinter
 {

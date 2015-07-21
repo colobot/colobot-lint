@@ -1,6 +1,9 @@
 #include "BeginSourceFileHandler.h"
 
 #include "../Common/Context.h"
+#include "../Common/OutputPrinter.h"
+
+#include <llvm/ADT/StringRef.h>
 
 #include <boost/regex.hpp>
 

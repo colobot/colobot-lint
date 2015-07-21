@@ -14,7 +14,6 @@ namespace llvm
 class StringRef;
 }
 
-
 class BeginSourceFileHandler
 {
 public:
