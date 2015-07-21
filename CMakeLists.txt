@@ -175,3 +175,4 @@ add_test(TodoRuleTest ${CMAKE_CURRENT_SOURCE_DIR}/Tests/todo_rule_test.py ${COLO
 add_test(BracePlacementRuleTest ${CMAKE_CURRENT_SOURCE_DIR}/Tests/block_placement_rule_test.py ${COLOBOT_LINT_OUTPUT_BINARY})
 add_test(NakedNewRuleTest ${CMAKE_CURRENT_SOURCE_DIR}/Tests/naked_new_rule_test.py ${COLOBOT_LINT_OUTPUT_BINARY})
 add_test(NakedDeleteRuleTest ${CMAKE_CURRENT_SOURCE_DIR}/Tests/naked_delete_rule_test.py ${COLOBOT_LINT_OUTPUT_BINARY})
+add_test(FakeHeaderSourceTest ${CMAKE_CURRENT_SOURCE_DIR}/Tests/fake_header_source_test.py ${COLOBOT_LINT_OUTPUT_BINARY})
