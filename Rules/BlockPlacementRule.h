@@ -16,26 +16,26 @@ public:
     void HandleTranslationUnit(clang::ASTContext &context) override;
 
     bool VisitDecl(clang::Decl* declaration);
-    bool VisitStmt(clang::Stmt* statement,
-                   clang::SourceLocation* overridenLocStartForFunctionBodies = nullptr);
+    bool VisitStmt(clang::Stmt* statement);
 
 private:
-    bool IsDeclarationLineConfigurationAllowed(
-        int declarationLineNumber,
-        int bodyStartLineNumber,
-        int bodyEndLineNumber) const;
     bool IsOpeningBracePlacedCorrectly(const clang::SourceLocation& locStart,
                                        const clang::SourceLocation& locEnd);
     bool IsClosingBracePlacedCorrectly(const clang::SourceLocation& locStart,
                                        const clang::SourceLocation& locEnd);
 
-    void ReportViolationWithDeclaration(clang::Decl* declaration);
-    void ReportViolationWithStatement(clang::Stmt* statement);
+    enum class ViolationType
+    {
+        OpeningBrace,
+        ClosingBrace
+    };
+
+    void ReportViolation(const clang::SourceLocation location, ViolationType type);
 
     clang::ASTContext* m_astContext;
-    // forbidden lines are lines where we can't have other statements or declarations
+    // forbidden lines are where we know we have closing braces
+    // of previously visited statements or declarations
     std::unordered_set<int> m_forbiddenLineNumbers;
     // where problems have already been reported; this is to avoid doubled errors
     std::unordered_set<int> m_reportedLineNumbers;
-    std::set<clang::SourceLocation> m_visitedFunctionBodies;
 };

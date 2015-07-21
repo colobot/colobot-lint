@@ -31,7 +31,7 @@ class TestBlockPlacementRule(test_support.TestBase):
                 {
                     'id': 'code block placement',
                     'severity': 'style',
-                    'msg': 'Declaration has body that begins or ends in a style that is not allowed',
+                    'msg': 'Body of declaration or statement begins in a style that is not allowed',
                     'line': '1'
                 }
             ])
@@ -47,8 +47,8 @@ class TestBlockPlacementRule(test_support.TestBase):
                 {
                     'id': 'code block placement',
                     'severity': 'style',
-                    'msg': 'Declaration has body that begins or ends in a style that is not allowed',
-                    'line': '1'
+                    'msg': 'Body of declaration or statement ends in a style that is not allowed',
+                    'line': '3'
                 }
             ])
 
@@ -63,7 +63,7 @@ class TestBlockPlacementRule(test_support.TestBase):
                 {
                     'id': 'code block placement',
                     'severity': 'style',
-                    'msg': 'Declaration has body that begins or ends in a style that is not allowed',
+                    'msg': 'Body of declaration or statement ends in a style that is not allowed',
                     'line': '3'
                 }
             ])
@@ -98,7 +98,7 @@ class TestBlockPlacementRule(test_support.TestBase):
                 {
                     'id': 'code block placement',
                     'severity': 'style',
-                    'msg': 'Declaration has body that begins or ends in a style that is not allowed',
+                    'msg': 'Body of declaration or statement begins in a style that is not allowed',
                     'line': '1'
                 }
             ])
@@ -114,8 +114,8 @@ class TestBlockPlacementRule(test_support.TestBase):
                 {
                     'id': 'code block placement',
                     'severity': 'style',
-                    'msg': 'Declaration has body that begins or ends in a style that is not allowed',
-                    'line': '1'
+                    'msg': 'Body of declaration or statement ends in a style that is not allowed',
+                    'line': '3'
                 }
             ])
 
@@ -131,7 +131,7 @@ class TestBlockPlacementRule(test_support.TestBase):
                 {
                     'id': 'code block placement',
                     'severity': 'style',
-                    'msg': 'Declaration has body that begins or ends in a style that is not allowed',
+                    'msg': 'Body of declaration or statement ends in a style that is not allowed',
                     'line': '4'
                 }
             ])
@@ -149,7 +149,7 @@ class TestBlockPlacementRule(test_support.TestBase):
                 {
                     'id': 'code block placement',
                     'severity': 'style',
-                    'msg': 'Declaration has body that begins or ends in a style that is not allowed',
+                    'msg': 'Body of declaration or statement begins in a style that is not allowed',
                     'line': '3'
                 }
             ])
@@ -183,7 +183,7 @@ class TestBlockPlacementRule(test_support.TestBase):
                 {
                     'id': 'code block placement',
                     'severity': 'style',
-                    'msg': 'Statement has body that begins or ends in a style that is not allowed',
+                    'msg': 'Body of declaration or statement begins in a style that is not allowed',
                     'line': '1'
                 }
             ])
@@ -199,8 +199,8 @@ class TestBlockPlacementRule(test_support.TestBase):
                 {
                     'id': 'code block placement',
                     'severity': 'style',
-                    'msg': 'Statement has body that begins or ends in a style that is not allowed',
-                    'line': '2'
+                    'msg': 'Body of declaration or statement ends in a style that is not allowed',
+                    'line': '3'
                 }
             ])
 
@@ -216,7 +216,7 @@ class TestBlockPlacementRule(test_support.TestBase):
                 {
                     'id': 'code block placement',
                     'severity': 'style',
-                    'msg': 'Declaration has body that begins or ends in a style that is not allowed',
+                    'msg': 'Body of declaration or statement ends in a style that is not allowed',
                     'line': '4'
                 }
             ])
@@ -234,7 +234,7 @@ class TestBlockPlacementRule(test_support.TestBase):
                 {
                     'id': 'code block placement',
                     'severity': 'style',
-                    'msg': 'Statement has body that begins or ends in a style that is not allowed',
+                    'msg': 'Body of declaration or statement begins in a style that is not allowed',
                     'line': '3'
                 }
             ])
@@ -250,7 +250,7 @@ class TestBlockPlacementRule(test_support.TestBase):
                 {
                     'id': 'code block placement',
                     'severity': 'style',
-                    'msg': 'Statement has body that begins or ends in a style that is not allowed',
+                    'msg': 'Body of declaration or statement begins in a style that is not allowed',
                     'line': '2'
                 }
             ])
@@ -261,6 +261,56 @@ class TestBlockPlacementRule(test_support.TestBase):
                 'void foo(int a,',
                 'int b)',
                 '{',
+                '}'
+            ],
+            expected_errors = [])
+
+    def test_while_loop(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                'bool foo(int c, int d)',
+                '{',
+                '  while (true)',
+                '  {'
+                '    if (c == 1) return true;',
+                '    if (d == 0) return false;',
+                '  }',
+                '}'
+            ],
+            expected_errors = [])
+
+    def test_for_loop(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                'bool foo(int c, int d)',
+                '{',
+                '  for (int i = 0; i < 10; ++i)',
+                '  {'
+                '    if (c == 1) return true;',
+                '    if (d == 0) return false;',
+                '  }',
+                '  return false;',
+                '}'
+            ],
+            expected_errors = [])
+
+    def test_initializer_list(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                '#include <vector>',
+                'void foo()',
+                '{',
+                '  std::vector<int> vec{1,2,3,4,5};',
+                '}'
+            ],
+            expected_errors = [])
+
+    def test_lambda_function(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                'void foo()',
+                '{',
+                '  auto l = [](int x) { return x+1; };',
                 '}'
             ],
             expected_errors = [])
