@@ -2,7 +2,7 @@
 
 #include "../Common/Context.h"
 
-#include <regex>
+#include <boost/regex.hpp>
 
 BeginSourceFileHandler::BeginSourceFileHandler(Context& context)
     : m_context(context)
@@ -49,11 +49,11 @@ bool BeginSourceFileHandler::IsFakeHeaderSource(llvm::StringRef filename)
 
 std::string BeginSourceFileHandler::GetActualHeaderFileSuffix(llvm::StringRef filename)
 {
-    std::regex searchPattern(std::string(g_fake_header_dir_prefix) + "(.*?)\\.cpp$");
+    boost::regex searchPattern(std::string(g_fake_header_dir_prefix) + "(.*?)\\.cpp$");
 
-    std::smatch match;
+    boost::smatch match;
     std::string filenameStr = filename.str();
-    if (!std::regex_search(filenameStr, match, searchPattern))
+    if (!boost::regex_search(filenameStr, match, searchPattern))
     {
         std::cerr << "Failed to match expected fake source file pattern!" << std::endl;
         return "<not found>"; // should not match anything

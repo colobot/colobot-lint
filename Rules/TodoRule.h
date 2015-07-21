@@ -4,7 +4,7 @@
 
 #include "clang/Lex/Preprocessor.h"
 
-#include <regex>
+#include <boost/regex.hpp>
 
 class TodoRule : public ASTCallbackRule,
                  public clang::CommentHandler
@@ -19,5 +19,5 @@ public:
 private:
     std::vector<std::string> SplitLines(const std::string& text);
 
-    std::regex m_todoPattern;
+    boost::regex m_todoPattern;
 };

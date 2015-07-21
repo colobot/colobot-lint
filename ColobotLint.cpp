@@ -14,6 +14,7 @@
 #include "clang/Tooling/CommonOptionsParser.h"
 
 #include <iostream>
+#include <exception>
 
 using namespace llvm;
 using namespace llvm::cl;
@@ -62,6 +63,15 @@ void printColobotLintVersion()
 }
 
 } // anonymous namespace
+
+namespace boost
+{
+    void throw_exception(std::exception const& e)
+    {
+        std::cerr << "exception from boost: " << e.what() << std::endl;
+        std::terminate();
+    }
+} // namespace boost
 
 int main(int argc, const char **argv)
 {

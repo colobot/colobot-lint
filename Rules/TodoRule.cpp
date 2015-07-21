@@ -30,8 +30,8 @@ bool TodoRule::HandleComment(clang::Preprocessor& pp, clang::SourceRange range)
     int lineOffset = 0;
     for (const auto& commentLine : lines)
     {
-        std::smatch match;
-        if (std::regex_search(commentLine, match, m_todoPattern))
+        boost::smatch match;
+        if (boost::regex_search(commentLine, match, m_todoPattern))
         {
             std::string todoText = match[1];
             m_context.printer.PrintRuleViolation("TODO comment",

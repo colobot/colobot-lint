@@ -18,10 +18,14 @@ find_package(Git REQUIRED)
 
 if(NOT "${PROJECT_NAME}" STREQUAL "LLVM")
     find_package(ZLIB REQUIRED)
+
     option(SKIP_CURSES "Whether to skip finding curses" OFF)
     if(NOT SKIP_CURSES)
        find_package(Curses REQUIRED)
     endif()
+
+    set(Boost_ADDITIONALVERSION "1.49" "1.49.0")
+    find_package(Boost COMPONENTS regex REQUIRED)
 
     option(TESTS "Enable tests" OFF)
     if(TESTS)
@@ -64,7 +68,8 @@ configure_file(Common/ColobotLintConfig.h.in ${CMAKE_CURRENT_BINARY_DIR}/Colobot
 
 include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
-    ${TINYXML_INCLUDE_DIRS})
+    ${TINYXML_INCLUDE_DIRS}
+)
 
 
 if("${PROJECT_NAME}" STREQUAL "LLVM")
@@ -77,7 +82,8 @@ if("${PROJECT_NAME}" STREQUAL "LLVM")
         clangTooling
         clangBasic
         clangASTMatchers
-        ${TINYXML_LIBRARIES})
+        ${TINYXML_LIBRARIES}
+        ${Boost_LIBRARIES})
 else()
     add_executable(colobot-lint ${COLOBOT_LINT_SRCS})
 
@@ -148,6 +154,7 @@ else()
         LLVMMC
         LLVMSupport
         ${TINYXML_LIBRARIES}
+        ${Boost_LIBRARIES}
         ${ZLIB_LIBRARIES}
         ${CURSES_LIBRARIES}
         dl

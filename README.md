@@ -25,6 +25,7 @@ The other requirements necessary for compilation are basically same as for Clang
 However, you will also need:
  - CMake >= 2.8
  - tinyxml >= 2.6
+ - Boost regex >= 1.49
 
 ## Compiling along with Clang and LLVM sources
 
