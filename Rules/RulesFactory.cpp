@@ -5,6 +5,7 @@
 #include "NakedDeleteRule.h"
 #include "NakedNewRule.h"
 #include "TodoRule.h"
+#include "VariableNamingRule.h"
 
 #include "BlockPlacementRule.h"
 
@@ -43,6 +44,7 @@ std::vector<std::unique_ptr<ASTCallbackRule>> CreateASTRules(Context& context)
     AddRule<NakedDeleteRule>(rules, context);
     AddRule<NakedNewRule>(rules, context);
     AddRule<TodoRule>(rules, context);
+    AddRule<VariableNamingRule>(rules, context);
     return rules;
 }
 

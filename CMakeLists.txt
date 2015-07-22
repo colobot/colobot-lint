@@ -56,8 +56,9 @@ set(COLOBOT_LINT_SRCS
     Rules/BlockPlacementRule.cpp
     Rules/NakedDeleteRule.cpp
     Rules/NakedNewRule.cpp
-    Rules/TodoRule.cpp
     Rules/RulesFactory.cpp
+    Rules/TodoRule.cpp
+    Rules/VariableNamingRule.cpp
 )
 
 # The configure file
@@ -171,8 +172,13 @@ else()
     set(COLOBOT_LINT_OUTPUT_BINARY ${CMAKE_CURRENT_BINARY_DIR}/colobot-lint)
 endif()
 
-add_test(TodoRuleTest ${CMAKE_CURRENT_SOURCE_DIR}/Tests/todo_rule_test.py ${COLOBOT_LINT_OUTPUT_BINARY})
-add_test(BracePlacementRuleTest ${CMAKE_CURRENT_SOURCE_DIR}/Tests/block_placement_rule_test.py ${COLOBOT_LINT_OUTPUT_BINARY})
-add_test(NakedNewRuleTest ${CMAKE_CURRENT_SOURCE_DIR}/Tests/naked_new_rule_test.py ${COLOBOT_LINT_OUTPUT_BINARY})
-add_test(NakedDeleteRuleTest ${CMAKE_CURRENT_SOURCE_DIR}/Tests/naked_delete_rule_test.py ${COLOBOT_LINT_OUTPUT_BINARY})
-add_test(FakeHeaderSourceTest ${CMAKE_CURRENT_SOURCE_DIR}/Tests/fake_header_source_test.py ${COLOBOT_LINT_OUTPUT_BINARY})
+macro(add_colobot_lint_test test_name test_target)
+    add_test(${test_name} ${CMAKE_CURRENT_SOURCE_DIR}/${test_target} ${COLOBOT_LINT_OUTPUT_BINARY})
+endmacro()
+
+add_colobot_lint_test(TodoRuleTest Tests/todo_rule_test.py)
+add_colobot_lint_test(BracePlacementRuleTest Tests/block_placement_rule_test.py)
+add_colobot_lint_test(NakedNewRuleTest Tests/naked_new_rule_test.py)
+add_colobot_lint_test(NakedDeleteRuleTest Tests/naked_delete_rule_test.py)
+add_colobot_lint_test(FakeHeaderSourceTest Tests/fake_header_source_test.py)
+add_colobot_lint_test(VariableNamingRule Tests/variable_naming_rule_test.py)
