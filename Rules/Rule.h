@@ -1,6 +1,6 @@
 #pragma once
 
-class Context;
+struct Context;
 
 class Rule
 {

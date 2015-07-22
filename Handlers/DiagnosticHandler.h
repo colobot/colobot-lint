@@ -2,7 +2,7 @@
 
 #include <clang/Basic/Diagnostic.h>
 
-class Context;
+struct Context;
 
 class DiagnosticHandler : public clang::DiagnosticConsumer
 {

@@ -72,7 +72,7 @@ class TestBlockPlacementRule(test_support.TestBase):
     def test_union_braces_in_separate_lines(self):
         self.assert_colobot_lint_result(
             source_file_lines = [
-                'class test',
+                'union test',
                 '{',
                 '  int x;',
                 '  float y;',
