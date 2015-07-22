@@ -14,6 +14,8 @@ public:
 
     void run(const clang::ast_matchers::MatchFinder::MatchResult& result) override;
 
+    static const char* GetName() { return "NakedNewRule"; }
+
 private:
     clang::ast_matchers::StatementMatcher m_matcher;
 };

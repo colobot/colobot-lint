@@ -18,6 +18,8 @@ public:
     bool VisitDecl(clang::Decl* declaration);
     bool VisitStmt(clang::Stmt* statement);
 
+    static const char* GetName() { return "BlockPlacementRule"; }
+
 private:
     bool IsDeclarationOpeningBracePlacedCorrectly(const clang::SourceLocation& locStart,
                                                   const clang::SourceLocation& locEnd);

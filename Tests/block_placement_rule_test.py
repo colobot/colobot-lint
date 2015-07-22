@@ -4,6 +4,9 @@ import test_support
 import sys
 
 class TestBlockPlacementRule(test_support.TestBase):
+    def setUp(self):
+        self.set_rules_selection(['BlockPlacementRule'])
+
     # namespaces
     def test_namespace_braces_in_separate_lines(self):
         self.assert_colobot_lint_result(

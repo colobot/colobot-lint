@@ -4,6 +4,9 @@ import test_support
 import sys
 
 class TestNakedDeleteRule(test_support.TestBase):
+    def setUp(self):
+        self.set_rules_selection(['NakedDeleteRule'])
+
     def test_naked_delete_with_builtin_type(self):
         self.assert_colobot_lint_result(
             source_file_lines = [

@@ -4,6 +4,9 @@ import test_support
 import sys
 
 class TestNakedNewRule(test_support.TestBase):
+    def setUp(self):
+        self.set_rules_selection(['NakedNewRule'])
+
     def test_naked_new_with_builtin_type(self):
         self.assert_colobot_lint_result(
             source_file_lines = [

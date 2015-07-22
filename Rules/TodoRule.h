@@ -16,6 +16,8 @@ public:
 
     bool HandleComment(clang::Preprocessor& pp, clang::SourceRange range) override;
 
+    static const char* GetName() { return "TodoRule"; }
+
 private:
     std::vector<std::string> SplitLines(const std::string& text);
 

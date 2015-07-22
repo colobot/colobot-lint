@@ -1,5 +1,6 @@
 #pragma once
 
+#include <set>
 #include <string>
 
 class SourceLocationHelper;
@@ -9,10 +10,12 @@ struct Context
 {
     Context(SourceLocationHelper& _sourceLocationHelper,
             OutputPrinter& _printer,
+            const std::set<std::string>& _rulesSelection,
             bool _verbose)
         : areWeInFakeHeaderSourceFile(false)
         , sourceLocationHelper(_sourceLocationHelper)
         , printer(_printer)
+        , rulesSelection(_rulesSelection)
         , verbose(_verbose)
     {}
 
@@ -22,6 +25,8 @@ struct Context
     SourceLocationHelper& sourceLocationHelper;
 
     OutputPrinter& printer;
+
+    const std::set<std::string> rulesSelection;
 
     const bool verbose;
 };

@@ -49,19 +49,36 @@ def write_compilation_database(build_directory, source_file_names, additional_co
 
         f.write("]\n")
 
-def run_colobot_lint_with_single_file(source_file_lines):
+def run_colobot_lint_with_single_file(source_file_lines, rules_selection):
     with TempBuildDir() as temp_dir:
         source_file_name = temp_dir + '/src.cpp'
         write_file_lines(source_file_name, source_file_lines)
         write_compilation_database(temp_dir, [source_file_name])
-        return run_colobot_lint(temp_dir, [source_file_name])
+        return run_colobot_lint(build_directory = temp_dir,
+                                source_paths = [source_file_name],
+                                rules_selection = rules_selection)
 
-def run_colobot_lint(build_directory, source_paths):
-    return subprocess.check_output([colobot_lint_exectuable, '-p', build_directory] + source_paths)
+def run_colobot_lint(build_directory, source_paths, rules_selection = []):
+    rules_selection_options = []
+    for rule in rules_selection:
+        rules_selection_options += ['-only-rule', rule]
+
+    return subprocess.check_output([colobot_lint_exectuable] +
+                                   rules_selection_options +
+                                   ['-p', build_directory] +
+                                   source_paths)
 
 class TestBase(unittest.TestCase):
+    def __init__(self, *args, **kwargs):
+        unittest.TestCase.__init__(self, *args, **kwargs)
+        self.rules_selection = []
+
+    def set_rules_selection(self, rules_selection):
+        self.rules_selection = rules_selection
+
+
     def assert_colobot_lint_result(self, source_file_lines, expected_errors):
-        xml_output = run_colobot_lint_with_single_file(source_file_lines)
+        xml_output = run_colobot_lint_with_single_file(source_file_lines, self.rules_selection)
         self.assert_xml_output_match(xml_output, expected_errors)
 
     def assert_xml_output_match(self, xml_output, expected_errors):

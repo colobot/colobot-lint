@@ -4,6 +4,9 @@ import test_support
 import sys
 
 class TestTodoRule(test_support.TestBase):
+    def setUp(self):
+        self.set_rules_selection(['TodoRule'])
+
     def test_normal_comment(self):
         self.assert_colobot_lint_result(
             source_file_lines = [

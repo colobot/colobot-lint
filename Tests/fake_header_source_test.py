@@ -6,6 +6,9 @@ import os
 import sys
 
 class TestFakeHeader(test_support.TestBase):
+    def setUp(self):
+        self.set_rules_selection(['NakedNewRule'])
+
     def test_fake_header(self):
         with TempBuildDir() as temp_dir:
             os.mkdir(temp_dir + '/foo')

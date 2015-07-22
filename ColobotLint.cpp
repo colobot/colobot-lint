@@ -36,6 +36,12 @@ static cl::opt<bool> g_verboseOpt(
     desc("Whether to print verbose output"),
     init(false), cat(g_colobotLintOptionCategory));
 
+static cl::list<std::string> g_onlyRule(
+    "only-rule",
+    desc("Run only these rule(s)"),
+    cat(g_colobotLintOptionCategory)
+);
+
 extrahelp g_moreHelp(
     "Colobot-lint runs just like any other tool based on Clang's libtooling.\n"
     "\n"
@@ -80,10 +86,17 @@ int main(int argc, const char **argv)
     ClangTool tool(optionsParser.getCompilations(),
                    optionsParser.getSourcePathList());
 
+    std::set<std::string> rulesSelection;
+    for (const auto& rule : g_onlyRule)
+        rulesSelection.insert(rule);
+
     SourceLocationHelper sourceLocationHelper;
+
     OutputPrinter outputPrinter(g_outputFileOpt);
+
     Context context(sourceLocationHelper,
                     outputPrinter,
+                    rulesSelection,
                     g_verboseOpt);
     sourceLocationHelper.SetContext(&context);
 
