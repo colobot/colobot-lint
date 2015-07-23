@@ -221,5 +221,193 @@ class TestVariableNamingRule(test_support.TestBase):
                 }
             ])
 
+    def test_public_static_class_member_correct_names(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                '#include <string>',
+                'struct Foo',
+                '{',
+                '   static const int camelCase;',
+                '   static float camelCaseName;',
+                '   static std::string aDDoubledCapitalInCamelCaseName;',
+                '}'
+            ],
+            expected_errors = [])
+
+    def test_public_static_class_member_incorrect_names(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                '#include <string>',
+                'struct Foo',
+                '{',
+                '   static const int under_score_name;',
+                '   static float CapitalCaseName;',
+                '   static std::string ALLCAPS;',
+                '}'
+            ],
+            expected_errors = [
+                {
+                    'id': 'variable naming',
+                    'severity': 'style',
+                    'msg': "Public field 'under_score_name' should be named in camelCase style",
+                    'line': '4'
+                },
+                {
+                    'id': 'variable naming',
+                    'severity': 'style',
+                    'msg': "Public field 'CapitalCaseName' should be named in camelCase style",
+                    'line': '5'
+                },
+                {
+                    'id': 'variable naming',
+                    'severity': 'style',
+                    'msg': "Public field 'ALLCAPS' should be named in camelCase style",
+                    'line': '6'
+                }
+            ])
+
+    def test_private_and_protected_static_class_member_correct_names(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                '#include <string>',
+                'class Foo',
+                '{',
+                '   static const int m_camelCase;',
+                'protected:',
+                '   static float m_camelCaseName;',
+                'private:',
+                '   static std::string m_aDDoubledCapitalInCamelCaseName;',
+                '}'
+            ],
+            expected_errors = [])
+
+    def test_private_and_protected_static_class_member_incorrect_names(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                '#include <string>',
+                'class Foo',
+                '{',
+                '   static int under_score_name;',
+                'protected:',
+                '   static float CapitalCaseName;',
+                'private:',
+                '   static std::string ALLCAPS;',
+                '}'
+            ],
+            expected_errors = [
+                {
+                    'id': 'variable naming',
+                    'severity': 'style',
+                    'msg': "Private field 'under_score_name' should be named in m_camelCase style",
+                    'line': '4'
+                },
+                {
+                    'id': 'variable naming',
+                    'severity': 'style',
+                    'msg': "Protected field 'CapitalCaseName' should be named in m_camelCase style",
+                    'line': '6'
+                },
+                {
+                    'id': 'variable naming',
+                    'severity': 'style',
+                    'msg': "Private field 'ALLCAPS' should be named in m_camelCase style",
+                    'line': '8'
+                }
+            ])
+
+    def test_public_class_member_correct_names(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                '#include <string>',
+                'struct Foo',
+                '{',
+                '   const int camelCase;',
+                '   float camelCaseName;',
+                '   std::string aDDoubledCapitalInCamelCaseName;',
+                '}'
+            ],
+            expected_errors = [])
+
+    def test_public_class_member_incorrect_names(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                '#include <string>',
+                'struct Foo',
+                '{',
+                '   const int under_score_name;',
+                '   float CapitalCaseName;',
+                '   std::string ALLCAPS;',
+                '}'
+            ],
+            expected_errors = [
+                {
+                    'id': 'variable naming',
+                    'severity': 'style',
+                    'msg': "Public field 'under_score_name' should be named in camelCase style",
+                    'line': '4'
+                },
+                {
+                    'id': 'variable naming',
+                    'severity': 'style',
+                    'msg': "Public field 'CapitalCaseName' should be named in camelCase style",
+                    'line': '5'
+                },
+                {
+                    'id': 'variable naming',
+                    'severity': 'style',
+                    'msg': "Public field 'ALLCAPS' should be named in camelCase style",
+                    'line': '6'
+                }
+            ])
+
+    def test_private_and_protected_class_member_correct_names(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                '#include <string>',
+                'class Foo',
+                '{',
+                '   const int m_camelCase;',
+                'protected:',
+                '   float m_camelCaseName;',
+                'private:',
+                '   std::string m_aDDoubledCapitalInCamelCaseName;',
+                '}'
+            ],
+            expected_errors = [])
+
+    def test_private_and_protected_class_member_incorrect_names(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                '#include <string>',
+                'class Foo',
+                '{',
+                '   int under_score_name;',
+                'protected:',
+                '   float CapitalCaseName;',
+                'private:',
+                '   std::string ALLCAPS;',
+                '}'
+            ],
+            expected_errors = [
+                {
+                    'id': 'variable naming',
+                    'severity': 'style',
+                    'msg': "Private field 'under_score_name' should be named in m_camelCase style",
+                    'line': '4'
+                },
+                {
+                    'id': 'variable naming',
+                    'severity': 'style',
+                    'msg': "Protected field 'CapitalCaseName' should be named in m_camelCase style",
+                    'line': '6'
+                },
+                {
+                    'id': 'variable naming',
+                    'severity': 'style',
+                    'msg': "Private field 'ALLCAPS' should be named in m_camelCase style",
+                    'line': '8'
+                }
+            ])
+
 if __name__ == '__main__':
     test_support.main()

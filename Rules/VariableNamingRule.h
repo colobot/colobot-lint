@@ -19,9 +19,21 @@ public:
     static const char* GetName() { return "VariableNamingRule"; }
 
 private:
-    clang::ast_matchers::DeclarationMatcher m_matcher;
+    void HandleVariableDeclaration(const clang::VarDecl* variableDeclaration, clang::ASTContext* context);
+    void HandleFieldDeclaration(const clang::FieldDecl* fieldDeclaration, clang::ASTContext* context);
+    void ValidateFieldDeclaration(const clang::StringRef& name,
+                                  clang::AccessSpecifier access,
+                                  const clang::SourceLocation& location,
+                                  clang::ASTContext* context);
+
+private:
+    clang::ast_matchers::DeclarationMatcher m_variableDeclarationMatcher;
+    clang::ast_matchers::DeclarationMatcher m_fieldDeclarationMatcher;
     boost::regex m_localVariableNamePattern;
     boost::regex m_nonConstGlobalVariableNamePattern;
     boost::regex m_constGlobalVariableNamePattern;
     boost::regex m_deprecatedVariableNamePattern;
+    boost::regex m_publicFieldNamePattern;
+    boost::regex m_privateOrProtectedFieldNamePattern;
+    boost::regex m_deprecatedFieldNamePattern;
 };

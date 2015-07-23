@@ -18,32 +18,53 @@ const char* ALL_CAPS = "[A-Z]+(_[A-Z0-9]+)*";
 
 VariableNamingRule::VariableNamingRule(Context& context)
     : ASTCallbackRule(context),
-      m_matcher(varDecl().bind("varDecl")),
+      m_variableDeclarationMatcher(varDecl().bind("varDecl")),
+      m_fieldDeclarationMatcher(fieldDecl().bind("fieldDecl")),
       m_localVariableNamePattern(CAMEL_CASE),
       m_nonConstGlobalVariableNamePattern(std::string("g_") + CAMEL_CASE),
       m_constGlobalVariableNamePattern(ALL_CAPS),
-      m_deprecatedVariableNamePattern(std::string("[bp]") + UPPER_CAMEL_CASE) // deprecated bBool and pPtr
+      m_deprecatedVariableNamePattern(std::string("[bp]") + UPPER_CAMEL_CASE), // deprecated bBool and pPtr
+      m_publicFieldNamePattern(CAMEL_CASE),
+      m_privateOrProtectedFieldNamePattern(std::string("m_") + CAMEL_CASE),
+      m_deprecatedFieldNamePattern(std::string("m_[bp]") + UPPER_CAMEL_CASE) // deprecated m_bBool and m_pPtr
 {}
 
 void VariableNamingRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
-    finder.addMatcher(m_matcher, this);
+    finder.addMatcher(m_variableDeclarationMatcher, this);
+    finder.addMatcher(m_fieldDeclarationMatcher, this);
 }
 
 void VariableNamingRule::run(const MatchFinder::MatchResult& result)
 {
     const VarDecl* variableDeclaration = result.Nodes.getNodeAs<VarDecl>("varDecl");
-    if (variableDeclaration == nullptr)
-        return;
+    if (variableDeclaration != nullptr)
+        return HandleVariableDeclaration(variableDeclaration, result.Context);
 
+    const FieldDecl* fieldDeclaration = result.Nodes.getNodeAs<FieldDecl>("fieldDecl");
+    if (fieldDeclaration != nullptr)
+        return HandleFieldDeclaration(fieldDeclaration, result.Context);
+}
+
+void VariableNamingRule::HandleVariableDeclaration(const clang::VarDecl* variableDeclaration, clang::ASTContext* context)
+{
     SourceLocation location = variableDeclaration->getLocation();
-    if (! m_context.sourceLocationHelper.IsLocationOfInterest(location, result.Context->getSourceManager()))
+    if (! m_context.sourceLocationHelper.IsLocationOfInterest(location, context->getSourceManager()))
         return;
 
     auto name = variableDeclaration->getName();
 
+    // Unnamed parameters are fine
+    if (name.empty())
+        return;
+
+    // static class members follow same rules as regular class members
+    if (variableDeclaration->isStaticDataMember())
+    {
+        ValidateFieldDeclaration(name, variableDeclaration->getAccess(), location, context);
+    }
     // local, non-static variables in functions
-    if (variableDeclaration->hasLocalStorage())
+    else if (variableDeclaration->hasLocalStorage())
     {
         if (! boost::regex_match(name.str(), m_localVariableNamePattern))
         {
@@ -52,7 +73,7 @@ void VariableNamingRule::run(const MatchFinder::MatchResult& result)
                 Severity::Style,
                 std::string("Local variable '") + name.str() + "'" + " should be named in camelCase style",
                 location,
-                result.Context->getSourceManager());
+                context->getSourceManager());
         }
         else if (boost::regex_match(name.str(), m_deprecatedVariableNamePattern))
         {
@@ -61,7 +82,7 @@ void VariableNamingRule::run(const MatchFinder::MatchResult& result)
                 Severity::Style,
                 std::string("Local variable '") + name.str() + "'" + " is named in a style that is deprecated",
                 location,
-                result.Context->getSourceManager());
+                context->getSourceManager());
         }
     }
     // global variables and constants
@@ -76,7 +97,7 @@ void VariableNamingRule::run(const MatchFinder::MatchResult& result)
                     Severity::Style,
                     std::string("Const global variable '") + name.str() + "'" + " should be named in ALL_CAPS style",
                     location,
-                    result.Context->getSourceManager());
+                    context->getSourceManager());
             }
         }
         else
@@ -88,8 +109,61 @@ void VariableNamingRule::run(const MatchFinder::MatchResult& result)
                     Severity::Style,
                     std::string("Non-const global variable '") + name.str() + "'" + " should be named in g_camelCase style",
                     location,
-                    result.Context->getSourceManager());
+                    context->getSourceManager());
             }
+        }
+    }
+}
+
+void VariableNamingRule::HandleFieldDeclaration(const FieldDecl* fieldDeclaration, ASTContext* context)
+{
+    SourceLocation location = fieldDeclaration->getLocation();
+    if (! m_context.sourceLocationHelper.IsLocationOfInterest(location, context->getSourceManager()))
+        return;
+
+    auto name = fieldDeclaration->getName();
+
+    ValidateFieldDeclaration(name, fieldDeclaration->getAccess(), location, context);
+}
+
+void VariableNamingRule::ValidateFieldDeclaration(const clang::StringRef& name,
+                                                  clang::AccessSpecifier access,
+                                                  const clang::SourceLocation& location,
+                                                  clang::ASTContext* context)
+{
+    if (access == AS_public)
+    {
+        if (! boost::regex_match(name.str(), m_publicFieldNamePattern))
+        {
+            m_context.printer.PrintRuleViolation(
+                "variable naming",
+                Severity::Style,
+                std::string("Public field '") + name.str() + "'" + " should be named in camelCase style",
+                location,
+                context->getSourceManager());
+        }
+    }
+    else if (access == AS_protected || access == AS_private)
+    {
+        if (! boost::regex_match(name.str(), m_privateOrProtectedFieldNamePattern))
+        {
+            std::string which = (access == AS_protected) ? "Protected" : "Private";
+            m_context.printer.PrintRuleViolation(
+                "variable naming",
+                Severity::Style,
+                which +  " field '" + name.str() + "'" + " should be named in m_camelCase style",
+                location,
+                context->getSourceManager());
+        }
+        else if (boost::regex_match(name.str(), m_deprecatedFieldNamePattern))
+        {
+            std::string which = (access == AS_protected) ? "Protected" : "Private";
+            m_context.printer.PrintRuleViolation(
+                "variable naming",
+                Severity::Style,
+                which +  " field '" + name.str() + "'" + " is named in a style that is deprecated",
+                location,
+                context->getSourceManager());
         }
     }
 }
