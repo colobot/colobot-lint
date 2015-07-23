@@ -3,7 +3,7 @@ import unittest
 import test_support
 import sys
 
-class TestBlockPlacementRule(test_support.TestBase):
+class TestVariableNamingRule(test_support.TestBase):
     def setUp(self):
         self.set_rules_selection(['VariableNamingRule'])
 
@@ -222,7 +222,4 @@ class TestBlockPlacementRule(test_support.TestBase):
             ])
 
 if __name__ == '__main__':
-    if len(sys.argv) >= 2:
-        test_support.colobot_lint_exectuable = sys.argv.pop(1)
-
-    unittest.main()
+    test_support.main()

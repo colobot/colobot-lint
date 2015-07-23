@@ -108,7 +108,4 @@ class TestTodoRule(test_support.TestBase):
             ])
 
 if __name__ == '__main__':
-    if len(sys.argv) >= 2:
-        test_support.colobot_lint_exectuable = sys.argv.pop(1)
-
-    unittest.main()
+    test_support.main()

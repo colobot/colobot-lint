@@ -319,7 +319,4 @@ class TestBlockPlacementRule(test_support.TestBase):
             expected_errors = [])
 
 if __name__ == '__main__':
-    if len(sys.argv) >= 2:
-        test_support.colobot_lint_exectuable = sys.argv.pop(1)
-
-    unittest.main()
+    test_support.main()

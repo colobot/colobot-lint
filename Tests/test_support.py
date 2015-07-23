@@ -2,10 +2,12 @@ import subprocess
 import tempfile
 import shutil
 import sys
+import argparse
 import unittest
 import xml.etree.ElementTree as ET
 
 colobot_lint_exectuable = './colobot-lint' # default
+debug_flag = False # default
 
 class TempBuildDir:
     def __init__(self):
@@ -16,7 +18,10 @@ class TempBuildDir:
         return self.path
 
     def __exit__(self, type, value, traceback):
-        shutil.rmtree(self.path)
+        if debug_flag:
+            print("Temporary files left in: " + self.path)
+        else:
+            shutil.rmtree(self.path)
 
 def write_file_lines(file_name, lines):
     with open(file_name, 'w') as f:
@@ -63,10 +68,22 @@ def run_colobot_lint(build_directory, source_paths, rules_selection = []):
     for rule in rules_selection:
         rules_selection_options += ['-only-rule', rule]
 
-    return subprocess.check_output([colobot_lint_exectuable] +
-                                   rules_selection_options +
-                                   ['-p', build_directory] +
-                                   source_paths)
+    whole_command = ([colobot_lint_exectuable] +
+                     rules_selection_options +
+                     ['-p', build_directory] +
+                     source_paths)
+
+    if debug_flag:
+        print("Running colobot-lint command:")
+        print(whole_command)
+
+    command_output = subprocess.check_output(whole_command)
+
+    if debug_flag:
+        print("Command output is:")
+        print(command_output.decode('utf-8'))
+
+    return command_output
 
 class TestBase(unittest.TestCase):
     def __init__(self, *args, **kwargs):
@@ -94,3 +111,17 @@ class TestBase(unittest.TestCase):
 
             location = error.find('location')
             self.assertEqual(location.get('line'), expected_error['line'])
+
+def main():
+    parser = argparse.ArgumentParser(add_help = False)
+    parser.add_argument('--colobot-lint-exec', dest='colobot_lint_executable', required=True)
+    parser.add_argument('--debug', dest='debug_flag', action='store_true')
+    options, args = parser.parse_known_args()
+
+    global colobot_lint_exectuable
+    colobot_lint_exectuable = options.colobot_lint_executable
+
+    global debug_flag
+    debug_flag = options.debug_flag
+
+    unittest.main(argv = sys.argv[:1] + args)

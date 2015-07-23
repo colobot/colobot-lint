@@ -173,7 +173,7 @@ else()
 endif()
 
 macro(add_colobot_lint_test test_name test_target)
-    add_test(${test_name} ${CMAKE_CURRENT_SOURCE_DIR}/${test_target} ${COLOBOT_LINT_OUTPUT_BINARY})
+    add_test(${test_name} ${CMAKE_CURRENT_SOURCE_DIR}/${test_target} --colobot-lint-exec ${COLOBOT_LINT_OUTPUT_BINARY})
 endmacro()
 
 add_colobot_lint_test(TodoRuleTest Tests/todo_rule_test.py)
