@@ -409,5 +409,21 @@ class TestVariableNamingRule(test_support.TestBase):
                 }
             ])
 
+    def test_ignore_compiler_generated_names(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                '#include <vector>',
+                '#include <iostream>',
+                'void printNums(const std::vector<int>& vec)',
+                '{',
+                '   for (auto x : vec) // compiler generates __range, __begin and __end locals here',
+                '   {',
+                '       std::cout << x << std::endl;',
+                '   }',
+                '',
+                '}'
+            ],
+            expected_errors = [])
+
 if __name__ == '__main__':
     test_support.main()

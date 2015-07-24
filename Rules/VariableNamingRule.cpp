@@ -52,18 +52,22 @@ void VariableNamingRule::HandleVariableDeclaration(const clang::VarDecl* variabl
     if (! m_context.sourceLocationHelper.IsLocationOfInterest(location, context->getSourceManager()))
         return;
 
+    // Ignore implicit (compiler-generated) variables
+    if (variableDeclaration->isImplicit())
+        return;
+
     auto name = variableDeclaration->getName();
 
     // Unnamed parameters are fine
     if (name.empty())
         return;
 
-    // static class members follow same rules as regular class members
+    // Static class members follow same rules as regular class members
     if (variableDeclaration->isStaticDataMember())
     {
         ValidateFieldDeclaration(name, variableDeclaration->getAccess(), location, context);
     }
-    // local, non-static variables in functions
+    // Local, non-static variables in functions
     else if (variableDeclaration->hasLocalStorage())
     {
         if (! boost::regex_match(name.str(), m_localVariableNamePattern))
@@ -85,7 +89,7 @@ void VariableNamingRule::HandleVariableDeclaration(const clang::VarDecl* variabl
                 context->getSourceManager());
         }
     }
-    // global variables and constants
+    // Global variables and constants
     else if (variableDeclaration->hasGlobalStorage())
     {
         if (variableDeclaration->getType().isConstQualified())
