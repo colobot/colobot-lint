@@ -425,5 +425,20 @@ class TestVariableNamingRule(test_support.TestBase):
             ],
             expected_errors = [])
 
+    def test_allow_names_with_numbers(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                '#include <string>',
+                'struct Foo { int x; };',
+                'int main()',
+                '{',
+                '   int camel1 = 1;',
+                '   float camelCase2 = 2.0f;',
+                '   std::string camel123CaseName = "3";',
+                '   Foo aDoubled44NumberInCamelCaseName{4};',
+                '}'
+            ],
+            expected_errors = [])
+
 if __name__ == '__main__':
     test_support.main()

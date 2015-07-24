@@ -3,30 +3,26 @@
 #include "../Common/Context.h"
 #include "../Common/OutputPrinter.h"
 #include "../Common/SourceLocationHelper.h"
+#include "../Common/RegexConsts.h"
 
 #include <clang/AST/Decl.h>
 
 using namespace clang;
 using namespace ast_matchers;
 
-namespace
-{
-const char* CAMEL_CASE = "[a-z]+([A-Z0-9]+[a-z0-9]+)*";
-const char* UPPER_CAMEL_CASE = "[A-Z][a-z]+([A-Z0-9]+[a-z0-9]+)*";
-const char* ALL_CAPS = "[A-Z]+(_[A-Z0-9]+)*";
-} // anonymous namespace
+
 
 VariableNamingRule::VariableNamingRule(Context& context)
     : ASTCallbackRule(context),
       m_variableDeclarationMatcher(varDecl().bind("varDecl")),
       m_fieldDeclarationMatcher(fieldDecl().bind("fieldDecl")),
-      m_localVariableNamePattern(CAMEL_CASE),
-      m_nonConstGlobalVariableNamePattern(std::string("g_") + CAMEL_CASE),
-      m_constGlobalVariableNamePattern(ALL_CAPS),
-      m_deprecatedVariableNamePattern(std::string("[bp]") + UPPER_CAMEL_CASE), // deprecated bBool and pPtr
-      m_publicFieldNamePattern(CAMEL_CASE),
-      m_privateOrProtectedFieldNamePattern(std::string("m_") + CAMEL_CASE),
-      m_deprecatedFieldNamePattern(std::string("m_[bp]") + UPPER_CAMEL_CASE) // deprecated m_bBool and m_pPtr
+      m_localVariableNamePattern(LOWER_CAMEL_CASE_STRING),
+      m_nonConstGlobalVariableNamePattern(std::string("g_") + LOWER_CAMEL_CASE_STRING),
+      m_constGlobalVariableNamePattern(ALL_CAPS_UNDERSCORE_STRING),
+      m_deprecatedVariableNamePattern(std::string("[bp]") + UPPER_CAMEL_CASE_STRING), // deprecated bBool and pPtr
+      m_publicFieldNamePattern(LOWER_CAMEL_CASE_STRING),
+      m_privateOrProtectedFieldNamePattern(std::string("m_") + LOWER_CAMEL_CASE_STRING),
+      m_deprecatedFieldNamePattern(std::string("m_[bp]") + UPPER_CAMEL_CASE_STRING) // deprecated m_bBool and m_pPtr
 {}
 
 void VariableNamingRule::RegisterASTMatcherCallback(MatchFinder& finder)
