@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 import unittest
-import test_support
+import os
 import sys
+import test_support
+from test_support import TempBuildDir, write_file_lines, write_compilation_database, run_colobot_lint
 
 class TestUnintializedFieldRule(test_support.TestBase):
     def setUp(self):
@@ -166,6 +168,63 @@ class TestUnintializedFieldRule(test_support.TestBase):
                 '};'
             ],
             expected_errors = [])
+
+    def test_constructor_declared_but_not_defined_in_fake_header_source(self):
+        with TempBuildDir() as temp_dir:
+            os.mkdir(temp_dir + '/foo')
+            os.mkdir(temp_dir + '/fake_header_sources')
+            os.mkdir(temp_dir + '/fake_header_sources/foo')
+
+            cpp_file_name = temp_dir + '/fake_header_sources/foo/bar.cpp'
+            write_file_lines(cpp_file_name, [
+                    '#include "foo/bar.h"'
+                ]
+            )
+
+            hpp_file_name = temp_dir + '/foo/bar.h'
+            write_file_lines(hpp_file_name, [
+                    'class NoConstructor',
+                    '{',
+                    '   int x;',
+                    '};',
+                    'class ConstructorDefined',
+                    '{',
+                    '   ConstructorDefined() {}',
+                    '   int x;',
+                    '};',
+                    'class NotDefinedConstructor',
+                    '{',
+                    '   NotDefinedConstructor();',
+                    '   int x;',
+                    '};'
+                ]
+            )
+
+            write_compilation_database(
+                build_directory = temp_dir,
+                source_file_names = [cpp_file_name],
+                additional_compile_flags = '-I' + temp_dir)
+
+            xml_output = run_colobot_lint(build_directory = temp_dir,
+                                          source_paths = [cpp_file_name],
+                                          rules_selection = ['UninitializedFieldRule'])
+            self.assert_xml_output_match(
+                xml_output = xml_output,
+                expected_errors = [
+                    {
+                        'id': 'uninitialized field',
+                        'severity': 'error',
+                        'msg': "Class 'NoConstructor' field 'x' remains uninitialized",
+                        'line': '1'
+                    },
+                    {
+                        'id': 'uninitialized field',
+                        'severity': 'error',
+                        'msg': "Class 'ConstructorDefined' field 'x' remains uninitialized in constructor",
+                        'line': '7'
+                    }
+                ]
+            )
 
 if __name__ == '__main__':
     test_support.main()

@@ -32,7 +32,7 @@ class TestSourceLocationHelper(test_support.TestBase):
             expected_errors = [],
             rules_selection = ['NakedDeleteRule'])
 
-    def test_fake_header(self):
+    def test_fake_header_source(self):
         with TempBuildDir() as temp_dir:
             os.mkdir(temp_dir + '/foo')
             os.mkdir(temp_dir + '/fake_header_sources')

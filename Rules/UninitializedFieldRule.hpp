@@ -22,11 +22,19 @@ private:
     std::unordered_set<std::string> GetCandidateFieldsList(const clang::RecordDecl* recordDeclaration,
                                                            clang::ASTContext* context);
 
-    bool HandleConstructors(const clang::RecordDecl* recordDeclaration,
+    enum class ConstructorStatus
+    {
+        NoConstructors,
+        SomeConstructorsNotDefined,
+        DefinedConstructors
+    };
+
+    ConstructorStatus CheckConstructorStatus(const clang::RecordDecl* recordDeclaration);
+    void HandleConstructors(const clang::RecordDecl* recordDeclaration,
                             const std::unordered_set<std::string>& candidateFieldList,
                             clang::ASTContext* context);
 
-    bool HandleConstructorDeclaration(const clang::CXXConstructorDecl* constructorDeclaration,
+    void HandleConstructorDeclaration(const clang::CXXConstructorDecl* constructorDeclaration,
                                       std::unordered_set<std::string>& candidateFieldList);
 
     void HandleInitializationList(const clang::CXXConstructorDecl* constructorDeclaration,

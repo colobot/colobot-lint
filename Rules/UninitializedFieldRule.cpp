@@ -34,13 +34,18 @@ void UninitializedFieldRule::run(const MatchFinder::MatchResult& result)
     if (recordDeclaration->isUnion())
         return;
 
+    ConstructorStatus constructorStatus = CheckConstructorStatus(recordDeclaration);
+
+    // Special case when can't see definition of constructors in header file
+    if (m_context.areWeInFakeHeaderSourceFile &&
+        constructorStatus == ConstructorStatus::SomeConstructorsNotDefined)
+    {
+        return;
+    }
+
     std::unordered_set<std::string> candidateFieldList = GetCandidateFieldsList(recordDeclaration, result.Context);
 
-    bool haveConstructors = HandleConstructors(recordDeclaration,
-                                               candidateFieldList,
-                                               result.Context);
-
-    if (!haveConstructors)
+    if (constructorStatus == ConstructorStatus::NoConstructors)
     {
         for (const auto& field : candidateFieldList)
         {
@@ -54,6 +59,35 @@ void UninitializedFieldRule::run(const MatchFinder::MatchResult& result)
                 result.Context->getSourceManager());
         }
     }
+    else
+    {
+        HandleConstructors(recordDeclaration, candidateFieldList, result.Context);
+    }
+}
+
+UninitializedFieldRule::ConstructorStatus UninitializedFieldRule::CheckConstructorStatus(const RecordDecl* recordDeclaration)
+{
+    bool haveConstructorsWithBody = false;
+
+    for (auto it = recordDeclaration->decls_begin();
+         it != recordDeclaration->decls_end();
+         ++it)
+    {
+        if (!CXXConstructorDecl::classof(*it))
+            continue;
+
+        const CXXConstructorDecl* constructorDeclaration = static_cast<const CXXConstructorDecl*>(*it);
+        if (constructorDeclaration->isCopyOrMoveConstructor() &&
+            constructorDeclaration->isImplicit())
+            continue;
+
+        if (! constructorDeclaration->hasBody())
+            return ConstructorStatus::SomeConstructorsNotDefined;
+
+        haveConstructorsWithBody = true;
+    }
+
+    return haveConstructorsWithBody ? ConstructorStatus::DefinedConstructors : ConstructorStatus::NoConstructors;
 }
 
 std::unordered_set<std::string> UninitializedFieldRule::GetCandidateFieldsList(const RecordDecl* recordDeclaration,
@@ -84,12 +118,10 @@ std::unordered_set<std::string> UninitializedFieldRule::GetCandidateFieldsList(c
     return candidates;
 }
 
-bool UninitializedFieldRule::HandleConstructors(const RecordDecl* recordDeclaration,
+void UninitializedFieldRule::HandleConstructors(const RecordDecl* recordDeclaration,
                                                 const std::unordered_set<std::string>& candidateFieldList,
                                                 ASTContext* context)
 {
-    bool haveConstructors = false;
-
     for (auto it = recordDeclaration->decls_begin();
          it != recordDeclaration->decls_end();
          ++it)
@@ -97,14 +129,13 @@ bool UninitializedFieldRule::HandleConstructors(const RecordDecl* recordDeclarat
         if (!CXXConstructorDecl::classof(*it))
             continue;
 
-        std::unordered_set<std::string> constructorCandidateFieldList = candidateFieldList;
-
         const CXXConstructorDecl* constructorDeclaration = static_cast<const CXXConstructorDecl*>(*it);
-        bool validConstructor = HandleConstructorDeclaration(constructorDeclaration, constructorCandidateFieldList);
-        if (!validConstructor)
+        if (constructorDeclaration->isCopyOrMoveConstructor() &&
+            constructorDeclaration->isImplicit())
             continue;
 
-        haveConstructors = true;
+        std::unordered_set<std::string> constructorCandidateFieldList = candidateFieldList;
+        HandleConstructorDeclaration(constructorDeclaration, constructorCandidateFieldList);
 
         for (const auto& field : constructorCandidateFieldList)
         {
@@ -118,29 +149,28 @@ bool UninitializedFieldRule::HandleConstructors(const RecordDecl* recordDeclarat
                 context->getSourceManager());
         }
     }
-
-    return haveConstructors;
 }
 
-bool UninitializedFieldRule::HandleConstructorDeclaration(const clang::CXXConstructorDecl* constructorDeclaration,
+void UninitializedFieldRule::HandleConstructorDeclaration(const clang::CXXConstructorDecl* constructorDeclaration,
                                                           std::unordered_set<std::string>& candidateFieldList)
 {
     // constructor without body is a declaration, not a definition
     if (!constructorDeclaration->hasBody())
-        return false;
+    {
+        std::cerr << "No body!" << std::endl;
+        return;
+    }
 
     const DeclContext* declarationContext = constructorDeclaration->getDeclContext();
     if (declarationContext == nullptr ||
         ! declarationContext->isRecord())
     {
-        return false;
+        return;
     }
 
     HandleInitializationList(constructorDeclaration, candidateFieldList);
 
     HandleConstructorBody(constructorDeclaration, candidateFieldList);
-
-    return true;
 }
 
 void UninitializedFieldRule::HandleInitializationList(const CXXConstructorDecl* constructorDeclaration,
