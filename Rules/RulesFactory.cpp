@@ -2,12 +2,13 @@
 
 #include "../Common/Context.h"
 
+#include "ClassNamingRule.h"
+#include "EnumNamingRule.h"
+#include "FunctionNamingRule.h"
 #include "NakedDeleteRule.h"
 #include "NakedNewRule.h"
 #include "TodoRule.h"
 #include "VariableNamingRule.h"
-#include "FunctionNamingRule.h"
-#include "ClassNamingRule.h"
 
 #include "BlockPlacementRule.h"
 
@@ -49,6 +50,7 @@ std::vector<std::unique_ptr<ASTCallbackRule>> CreateASTRules(Context& context)
     AddRule<VariableNamingRule>(rules, context);
     AddRule<FunctionNamingRule>(rules, context);
     AddRule<ClassNamingRule>(rules, context);
+    AddRule<EnumNamingRule>(rules, context);
     return rules;
 }
 

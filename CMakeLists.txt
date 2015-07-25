@@ -55,6 +55,7 @@ set(COLOBOT_LINT_SRCS
     Handlers/DiagnosticHandler.cpp
     Rules/BlockPlacementRule.cpp
     Rules/ClassNamingRule.cpp
+    Rules/EnumNamingRule.cpp
     Rules/FunctionNamingRule.cpp
     Rules/NakedDeleteRule.cpp
     Rules/NakedNewRule.cpp
@@ -180,6 +181,7 @@ endmacro()
 
 add_colobot_lint_test(BracePlacementRuleTest Tests/block_placement_rule_test.py)
 add_colobot_lint_test(ClassNamingRule Tests/class_naming_rule_test.py)
+add_colobot_lint_test(EnumNamingRule Tests/enum_naming_rule_test.py)
 add_colobot_lint_test(FakeHeaderSourceTest Tests/fake_header_source_test.py)
 add_colobot_lint_test(FunctionNamingRule Tests/function_naming_rule_test.py)
 add_colobot_lint_test(NakedDeleteRuleTest Tests/naked_delete_rule_test.py)
