@@ -112,6 +112,9 @@ std::unordered_set<std::string> UninitializedFieldRule::GetCandidateFieldsList(c
             continue;
         }
 
+        if (fieldDeclaration->isAnonymousStructOrUnion())
+            continue;
+
         candidates.insert(fieldDeclaration->getName().str());
     }
 

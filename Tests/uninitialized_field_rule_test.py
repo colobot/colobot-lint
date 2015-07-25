@@ -169,6 +169,31 @@ class TestUnintializedFieldRule(test_support.TestBase):
             ],
             expected_errors = [])
 
+    def test_ignore_anonymous_union_or_struct(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                'struct Foo',
+                '{',
+                '    struct',
+                '    {',
+                '        int x;',
+                '    };',
+                '    union',
+                '    {',
+                '        int anything;',
+                '        float anythingAtAll;',
+                '    };',
+                '};'
+            ],
+            expected_errors = [
+                {
+                    'id': 'uninitialized field',
+                    'severity': 'error',
+                    'msg': "Struct '' field 'x' remains uninitialized",
+                    'line': '3'
+                }
+            ])
+
     def test_constructor_declared_but_not_defined_in_fake_header_source(self):
         with TempBuildDir() as temp_dir:
             os.mkdir(temp_dir + '/foo')
