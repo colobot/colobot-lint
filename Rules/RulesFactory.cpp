@@ -24,7 +24,7 @@ void AddRule(Container& rules, Context& context)
     if (context.rulesSelection.empty() ||
         context.rulesSelection.count(ruleName) > 0)
     {
-        if (context.verbose)
+        if (context.debug)
         {
             std::cerr << "Using rule " << ruleName << std::endl;
         }
@@ -32,7 +32,7 @@ void AddRule(Container& rules, Context& context)
     }
     else
     {
-        if (context.verbose)
+        if (context.debug)
         {
             std::cerr << "Skipping rule " << ruleName << std::endl;
         }

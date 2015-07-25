@@ -11,12 +11,14 @@ struct Context
     Context(SourceLocationHelper& _sourceLocationHelper,
             OutputPrinter& _printer,
             const std::set<std::string>& _rulesSelection,
-            bool _verbose)
-        : areWeInFakeHeaderSourceFile(false)
-        , sourceLocationHelper(_sourceLocationHelper)
-        , printer(_printer)
-        , rulesSelection(_rulesSelection)
-        , verbose(_verbose)
+            bool _verbose,
+            bool _debug)
+        : areWeInFakeHeaderSourceFile(false),
+          sourceLocationHelper(_sourceLocationHelper),
+          printer(_printer),
+          rulesSelection(_rulesSelection),
+          verbose(_verbose),
+          debug(_debug)
     {}
 
     bool areWeInFakeHeaderSourceFile;
@@ -29,4 +31,5 @@ struct Context
     const std::set<std::string> rulesSelection;
 
     const bool verbose;
+    const bool debug;
 };

@@ -25,7 +25,12 @@ void BeginSourceFileHandler::BeginSourceFileAction(clang::CompilerInstance&, llv
 
         if (m_context.verbose)
         {
-            std::cerr << " (identified as fake header file; header suffix " << m_context.actualHeaderFileSuffix << ")";
+            std::cerr << " [fake header mode]";
+            if (m_context.debug)
+            {
+                std::cerr << std::endl;
+                std::cerr << "Header suffix: " << m_context.actualHeaderFileSuffix;
+            }
         }
     }
     else

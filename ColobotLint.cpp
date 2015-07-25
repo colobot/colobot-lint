@@ -36,6 +36,11 @@ static cl::opt<bool> g_verboseOpt(
     desc("Whether to print verbose output"),
     init(false), cat(g_colobotLintOptionCategory));
 
+static cl::opt<bool> g_debugOpt(
+    "debug",
+    desc("Whether to print even more verbose output"),
+    init(false), cat(g_colobotLintOptionCategory));
+
 static cl::list<std::string> g_onlyRule(
     "only-rule",
     desc("Run only these rule(s)"),
@@ -97,7 +102,8 @@ int main(int argc, const char **argv)
     Context context(sourceLocationHelper,
                     outputPrinter,
                     rulesSelection,
-                    g_verboseOpt);
+                    g_verboseOpt,
+                    g_debugOpt);
     sourceLocationHelper.SetContext(&context);
 
     DiagnosticHandler diagnosticHandler(context);
