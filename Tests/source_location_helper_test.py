@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
-import unittest
 import test_support
 from test_support import TempBuildDir, write_file_lines, write_compilation_database, run_colobot_lint
 import os
-import sys
 
 class TestSourceLocationHelper(test_support.TestBase):
     def test_ignore_macro_body_expansion(self):

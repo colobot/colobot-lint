@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-import unittest
 import test_support
-import sys
 
 class TestTodoRule(test_support.TestBase):
     def setUp(self):

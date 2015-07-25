@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
-import unittest
-import os
-import sys
 import test_support
 from test_support import TempBuildDir, write_file_lines, write_compilation_database, run_colobot_lint
+import os
 
 class TestUnintializedFieldRule(test_support.TestBase):
     def setUp(self):
