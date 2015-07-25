@@ -6,9 +6,6 @@ import os
 import sys
 
 class TestFakeHeader(test_support.TestBase):
-    def setUp(self):
-        self.set_rules_selection(['NakedNewRule'])
-
     def test_fake_header(self):
         with TempBuildDir() as temp_dir:
             os.mkdir(temp_dir + '/foo')
@@ -47,7 +44,9 @@ class TestFakeHeader(test_support.TestBase):
                 source_file_names = [cpp_file_name],
                 additional_compile_flags = '-I' + temp_dir)
 
-            xml_output = run_colobot_lint(temp_dir, [cpp_file_name])
+            xml_output = run_colobot_lint(build_directory = temp_dir,
+                                          source_paths = [cpp_file_name],
+                                          rules_selection = ['NakedNewRule', 'NakedDeleteRule'])
             self.assert_xml_output_match(
                 xml_output = xml_output,
                 expected_errors = [
