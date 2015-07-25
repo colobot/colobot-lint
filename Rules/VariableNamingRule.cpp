@@ -19,10 +19,10 @@ VariableNamingRule::VariableNamingRule(Context& context)
       m_localVariableNamePattern(LOWER_CAMEL_CASE_STRING),
       m_nonConstGlobalVariableNamePattern(std::string("g_") + LOWER_CAMEL_CASE_STRING),
       m_constGlobalVariableNamePattern(ALL_CAPS_UNDERSCORE_STRING),
-      m_deprecatedVariableNamePattern(std::string("[bp]") + UPPER_CAMEL_CASE_STRING), // deprecated bBool and pPtr
+      m_deprecatedVariableNamePattern("[bp][[:upper:]].*"), // deprecated bBool and pPtr
       m_publicFieldNamePattern(LOWER_CAMEL_CASE_STRING),
       m_privateOrProtectedFieldNamePattern(std::string("m_") + LOWER_CAMEL_CASE_STRING),
-      m_deprecatedFieldNamePattern(std::string("m_[bp]") + UPPER_CAMEL_CASE_STRING) // deprecated m_bBool and m_pPtr
+      m_deprecatedFieldNamePattern("m_[bp][[:upper:]].*") // deprecated m_bBool and m_pPtr
 {}
 
 void VariableNamingRule::RegisterASTMatcherCallback(MatchFinder& finder)

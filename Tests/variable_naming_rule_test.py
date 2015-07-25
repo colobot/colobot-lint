@@ -204,6 +204,7 @@ class TestVariableNamingRule(test_support.TestBase):
                 '{',
                 '  bool bBool = false;',
                 '  int* pPtr = nullptr;',
+                '  int p1 = 0; // but this is fine',
                 '}'
             ],
             expected_errors = [
@@ -406,6 +407,31 @@ class TestVariableNamingRule(test_support.TestBase):
                     'severity': 'style',
                     'msg': "Private field 'ALLCAPS' should be named in m_camelCase style",
                     'line': '8'
+                }
+            ])
+
+    def test_deprecated_class_member_names(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                'class Foo',
+                '{',
+                '  bool m_bBool;',
+                '  int* m_pPtr;',
+                '  int m_p1; // but this is fine',
+                '};'
+            ],
+            expected_errors = [
+                {
+                    'id': 'variable naming',
+                    'severity': 'style',
+                    'msg': "Private field 'm_bBool' is named in a style that is deprecated",
+                    'line': '3'
+                },
+                {
+                    'id': 'variable naming',
+                    'severity': 'style',
+                    'msg': "Private field 'm_pPtr' is named in a style that is deprecated",
+                    'line': '4'
                 }
             ])
 
