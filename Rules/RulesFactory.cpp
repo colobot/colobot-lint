@@ -8,6 +8,7 @@
 #include "NakedDeleteRule.h"
 #include "NakedNewRule.h"
 #include "TodoRule.h"
+#include "UninitializedFieldRule.hpp"
 #include "VariableNamingRule.h"
 
 #include "BlockPlacementRule.h"
@@ -51,6 +52,7 @@ std::vector<std::unique_ptr<ASTCallbackRule>> CreateASTRules(Context& context)
     AddRule<FunctionNamingRule>(rules, context);
     AddRule<ClassNamingRule>(rules, context);
     AddRule<EnumNamingRule>(rules, context);
+    AddRule<UninitializedFieldRule>(rules, context);
     return rules;
 }
 
