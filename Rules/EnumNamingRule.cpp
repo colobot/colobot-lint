@@ -40,8 +40,16 @@ void EnumNamingRule::HandleEnumDeclaration(const clang::EnumDecl* enumDeclaratio
         return;
 
     std::string name = enumDeclaration->getName().str();
-    if (name.empty()) // enums can be anonymous
+    if (name.empty())
+    {
+        m_context.printer.PrintRuleViolation(
+            "enum naming",
+            Severity::Information,
+            "Anonymous enums are not allowed",
+            location,
+            context->getSourceManager());
         return;
+    }
 
     if (! enumDeclaration->isScopedUsingClassTag())
     {

@@ -120,5 +120,25 @@ class TestEnumNamingRule(test_support.TestBase):
                 }
             ])
 
+    def test_inform_about_anonymous_enum(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                'class Foo',
+                '{',
+                '   enum',
+                '   {',
+                '      anything',
+                '   };',
+                '};'
+            ],
+            expected_errors = [
+                {
+                    'id': 'enum naming',
+                    'severity': 'information',
+                    'msg': "Anonymous enums are not allowed",
+                    'line': '3'
+                }
+            ])
+
 if __name__ == '__main__':
     test_support.main()
