@@ -94,8 +94,13 @@ class TestBase(unittest.TestCase):
         self.rules_selection = rules_selection
 
 
-    def assert_colobot_lint_result(self, source_file_lines, expected_errors):
-        xml_output = run_colobot_lint_with_single_file(source_file_lines, self.rules_selection)
+    def assert_colobot_lint_result(self, source_file_lines, expected_errors, rules_selection = None):
+        rules = []
+        if rules_selection is not None:
+            rules = rules_selection
+        else:
+            rules = self.rules_selection
+        xml_output = run_colobot_lint_with_single_file(source_file_lines, rules)
         self.assert_xml_output_match(xml_output, expected_errors)
 
     def assert_xml_output_match(self, xml_output, expected_errors):

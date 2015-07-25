@@ -5,7 +5,33 @@ from test_support import TempBuildDir, write_file_lines, write_compilation_datab
 import os
 import sys
 
-class TestFakeHeader(test_support.TestBase):
+class TestSourceLocationHelper(test_support.TestBase):
+    def test_ignore_macro_body_expansion(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                '#define DEFINE_FUNC() \\',
+                '  void deleteMe(int* x) \\',
+                '  { \\',
+                '     delete x; \\',
+                '  }',
+                'DEFINE_FUNC();'
+            ],
+            expected_errors = [],
+            rules_selection = ['NakedDeleteRule'])
+
+    def test_ignore_macro_argument_expansion(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                '#define DEFINE_FUNC_WITH_INSTR(instr) \\',
+                '  void deleteMe(int* x) \\',
+                '  { \\',
+                '     instr; \\',
+                '  }',
+                'DEFINE_FUNC_WITH_INSTR(delete x);'
+            ],
+            expected_errors = [],
+            rules_selection = ['NakedDeleteRule'])
+
     def test_fake_header(self):
         with TempBuildDir() as temp_dir:
             os.mkdir(temp_dir + '/foo')
