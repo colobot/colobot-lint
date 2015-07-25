@@ -7,6 +7,7 @@
 #include "TodoRule.h"
 #include "VariableNamingRule.h"
 #include "FunctionNamingRule.h"
+#include "ClassNamingRule.h"
 
 #include "BlockPlacementRule.h"
 
@@ -47,6 +48,7 @@ std::vector<std::unique_ptr<ASTCallbackRule>> CreateASTRules(Context& context)
     AddRule<TodoRule>(rules, context);
     AddRule<VariableNamingRule>(rules, context);
     AddRule<FunctionNamingRule>(rules, context);
+    AddRule<ClassNamingRule>(rules, context);
     return rules;
 }
 
