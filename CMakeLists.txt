@@ -59,6 +59,7 @@ set(COLOBOT_LINT_SRCS
     Rules/RulesFactory.cpp
     Rules/TodoRule.cpp
     Rules/VariableNamingRule.cpp
+    Rules/FunctionNamingRule.cpp
 )
 
 # The configure file

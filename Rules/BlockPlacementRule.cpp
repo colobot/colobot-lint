@@ -15,7 +15,7 @@ BlockPlacementRule::BlockPlacementRule(Context& context)
     , m_astContext(nullptr)
 {}
 
-void BlockPlacementRule::HandleTranslationUnit(clang::ASTContext &context)
+void BlockPlacementRule::HandleTranslationUnit(ASTContext &context)
 {
     m_forbiddenLineNumbers.clear();
     m_reportedLineNumbers.clear();
@@ -239,7 +239,7 @@ bool BlockPlacementRule::IsClosingBracePlacedCorrectly(const SourceLocation& loc
     return false;
 }
 
-void BlockPlacementRule::ReportViolation(const clang::SourceLocation& location, ViolationType type)
+void BlockPlacementRule::ReportViolation(const SourceLocation& location, ViolationType type)
 {
     int lineNumber = m_astContext->getSourceManager().getPresumedLineNumber(location);
     const char* what = (type == ViolationType::OpeningBrace) ? "begins" : "ends";

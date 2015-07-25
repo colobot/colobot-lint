@@ -13,12 +13,12 @@ TodoRule::TodoRule(Context& context)
       m_todoPattern("(TODO.*?)(\\s*)?(\\*/)?$")
 {}
 
-void TodoRule::RegisterPreProcessorCallbacks(clang::CompilerInstance& compiler)
+void TodoRule::RegisterPreProcessorCallbacks(CompilerInstance& compiler)
 {
     compiler.getPreprocessor().addCommentHandler(this);
 }
 
-bool TodoRule::HandleComment(clang::Preprocessor& pp, clang::SourceRange range)
+bool TodoRule::HandleComment(Preprocessor& pp, SourceRange range)
 {
     SourceLocation location = range.getBegin();
 

@@ -8,7 +8,7 @@
 #include <clang/AST/Decl.h>
 
 using namespace clang;
-using namespace ast_matchers;
+using namespace clang::ast_matchers;
 
 
 
@@ -42,7 +42,7 @@ void VariableNamingRule::run(const MatchFinder::MatchResult& result)
         return HandleFieldDeclaration(fieldDeclaration, result.Context);
 }
 
-void VariableNamingRule::HandleVariableDeclaration(const clang::VarDecl* variableDeclaration, clang::ASTContext* context)
+void VariableNamingRule::HandleVariableDeclaration(const VarDecl* variableDeclaration, ASTContext* context)
 {
     SourceLocation location = variableDeclaration->getLocation();
     if (! m_context.sourceLocationHelper.IsLocationOfInterest(location, context->getSourceManager()))
@@ -126,10 +126,10 @@ void VariableNamingRule::HandleFieldDeclaration(const FieldDecl* fieldDeclaratio
     ValidateFieldDeclaration(name, fieldDeclaration->getAccess(), location, context);
 }
 
-void VariableNamingRule::ValidateFieldDeclaration(const clang::StringRef& name,
-                                                  clang::AccessSpecifier access,
-                                                  const clang::SourceLocation& location,
-                                                  clang::ASTContext* context)
+void VariableNamingRule::ValidateFieldDeclaration(const StringRef& name,
+                                                  AccessSpecifier access,
+                                                  const SourceLocation& location,
+                                                  ASTContext* context)
 {
     if (access == AS_public)
     {
