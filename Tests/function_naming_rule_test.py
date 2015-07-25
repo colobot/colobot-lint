@@ -312,5 +312,13 @@ class TestFunctionNamingRule(test_support.TestBase):
             ],
             expected_errors = [])
 
+    def test_repeating_uppercase_correct_names(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                'void RRepeatingUpperCaseLetterName();',
+                'void LaterRRepeatingUpperCaseLetterName();'
+            ],
+            expected_errors = [])
+
 if __name__ == '__main__':
     test_support.main()
