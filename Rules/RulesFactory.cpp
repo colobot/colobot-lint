@@ -15,6 +15,7 @@
 #include "VariableNamingRule.h"
 
 #include "BlockPlacementRule.h"
+#include "WhitespaceRule.h"
 
 #include <llvm/ADT/STLExtras.h>
 
@@ -66,5 +67,6 @@ std::vector<std::unique_ptr<DirectASTConsumerRule>> CreateDirectASTConsumerRules
 {
     std::vector<std::unique_ptr<DirectASTConsumerRule>> rules;
     AddRule<BlockPlacementRule>(rules, context);
+    AddRule<WhitespaceRule>(rules, context);
     return rules;
 }

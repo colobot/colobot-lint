@@ -22,6 +22,12 @@ public:
                             clang::SourceManager& sourceManager,
                             int lineOffset = 0);
 
+    void PrintRuleViolation(const std::string& ruleName,
+                            Severity severity,
+                            const std::string& description,
+                            const std::string& fileName,
+                            int lineNumber);
+
     void Save();
 
 private:

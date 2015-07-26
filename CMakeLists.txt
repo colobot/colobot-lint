@@ -66,6 +66,7 @@ set(COLOBOT_LINT_SRCS
     Rules/UninitializedFieldRule.cpp
     Rules/UninitializedLocalVariableRule.cpp
     Rules/VariableNamingRule.cpp
+    Rules/WhitespaceRule.cpp
 )
 
 # The configure file
@@ -196,3 +197,4 @@ add_colobot_lint_test(TodoRuleTest Tests/todo_rule_test.py)
 add_colobot_lint_test(UninitializedFieldRule Tests/uninitialized_field_rule_test.py)
 add_colobot_lint_test(UninitializedLocalVariableRule Tests/uninitialized_local_variable_rule_test.py)
 add_colobot_lint_test(VariableNamingRule Tests/variable_naming_rule_test.py)
+add_colobot_lint_test(WhitespaceRule Tests/whitespace_rule_test.py)
