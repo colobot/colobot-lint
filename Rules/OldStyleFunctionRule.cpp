@@ -28,6 +28,8 @@ private:
     ASTContext* m_context;
 };
 
+////////////////////////
+
 
 OldStyleFunctionRule::OldStyleFunctionRule(Context& context)
     : ASTCallbackRule(context),
@@ -101,8 +103,7 @@ std::string OldStyleFunctionRule::GetShortDeclarationsString(const std::vector<s
     return result;
 }
 
-
-///////////////
+////////////////////////
 
 OldStyleDeclarationFinder::OldStyleDeclarationFinder(ASTContext* context)
     : m_context(context)

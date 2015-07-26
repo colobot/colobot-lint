@@ -5,6 +5,7 @@
 #include "ClassNamingRule.h"
 #include "EnumNamingRule.h"
 #include "FunctionNamingRule.h"
+#include "InconsistentDeclarationParameterNameRule.h"
 #include "NakedDeleteRule.h"
 #include "NakedNewRule.h"
 #include "OldStyleFunctionRule.h"
@@ -57,6 +58,7 @@ std::vector<std::unique_ptr<ASTCallbackRule>> CreateASTRules(Context& context)
     AddRule<UninitializedFieldRule>(rules, context);
     AddRule<OldStyleFunctionRule>(rules, context); // must be first
     AddRule<UninitializedLocalVariableRule>(rules, context); // must be second
+    AddRule<InconsistentDeclarationParameterNameRule>(rules, context);
     return rules;
 }
 
