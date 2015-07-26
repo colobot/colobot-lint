@@ -3,7 +3,6 @@
 #include "../Common/Context.h"
 #include "../Common/OutputPrinter.h"
 #include "../Common/SourceLocationHelper.h"
-#include "../Common/RegexConsts.h"
 
 #include <clang/AST/Decl.h>
 #include <clang/AST/Stmt.h>
@@ -108,9 +107,7 @@ std::unordered_set<std::string> UninitializedFieldRule::GetCandidateFieldsList(c
 
         QualType type = fieldDeclaration->getType();
         if (! type.isPODType(*context))
-        {
             continue;
-        }
 
         if (fieldDeclaration->isAnonymousStructOrUnion())
             continue;

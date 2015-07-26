@@ -62,6 +62,7 @@ set(COLOBOT_LINT_SRCS
     Rules/RulesFactory.cpp
     Rules/TodoRule.cpp
     Rules/UninitializedFieldRule.cpp
+    Rules/UninitializedLocalVariableRule.cpp
     Rules/VariableNamingRule.cpp
 )
 
@@ -189,4 +190,5 @@ add_colobot_lint_test(NakedNewRuleTest Tests/naked_new_rule_test.py)
 add_colobot_lint_test(SourceLocationHelperTest Tests/source_location_helper_test.py)
 add_colobot_lint_test(TodoRuleTest Tests/todo_rule_test.py)
 add_colobot_lint_test(UninitializedFieldRule Tests/uninitialized_field_rule_test.py)
+add_colobot_lint_test(UninitializedLocalVariableRule Test/uninitialized_local_variable_rule_test.py)
 add_colobot_lint_test(VariableNamingRule Tests/variable_naming_rule_test.py)
