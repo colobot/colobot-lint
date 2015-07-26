@@ -8,8 +8,8 @@
 #include "NakedDeleteRule.h"
 #include "NakedNewRule.h"
 #include "TodoRule.h"
-#include "UninitializedFieldRule.hpp"
-#include "UninitializedLocalVariableRule.hpp"
+#include "UninitializedFieldRule.h"
+#include "UninitializedLocalVariableRule.h"
 #include "VariableNamingRule.h"
 
 #include "BlockPlacementRule.h"

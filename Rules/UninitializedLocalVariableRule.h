@@ -4,8 +4,6 @@
 
 #include <clang/ASTMatchers/ASTMatchFinder.h>
 
-#include <unordered_set>
-
 class UninitializedLocalVariableRule : public ASTCallbackRule,
                                        public clang::ast_matchers::MatchFinder::MatchCallback
 {

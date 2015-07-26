@@ -5,7 +5,6 @@
 #include <clang/AST/RecursiveASTVisitor.h>
 
 #include <unordered_set>
-#include <set>
 
 class BlockPlacementRule : public DirectASTConsumerRule,
                            public clang::RecursiveASTVisitor<BlockPlacementRule>

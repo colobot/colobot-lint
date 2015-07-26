@@ -1,4 +1,4 @@
-#include "UninitializedLocalVariableRule.hpp"
+#include "UninitializedLocalVariableRule.h"
 
 #include "../Common/Context.h"
 #include "../Common/OutputPrinter.h"

@@ -1,4 +1,4 @@
-#include "UninitializedFieldRule.hpp"
+#include "UninitializedFieldRule.h"
 
 #include "../Common/Context.h"
 #include "../Common/OutputPrinter.h"
