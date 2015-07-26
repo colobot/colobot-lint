@@ -30,12 +30,22 @@ void UninitializedLocalVariableRule::run(const MatchFinder::MatchResult& result)
     if (! m_context.sourceLocationHelper.IsLocationOfInterest(location, result.Context->getSourceManager()))
         return;
 
+    if (! variableDeclaration->hasLocalStorage())
+        return;
+
     // Ignore implicit (compiler-generated) variables
     if (variableDeclaration->isImplicit())
         return;
 
-    if (! variableDeclaration->hasLocalStorage())
-        return;
+    const DeclContext* declarationContext = variableDeclaration->getDeclContext();
+    if (declarationContext->isFunctionOrMethod())
+    {
+        const FunctionDecl* functionDeclaration = static_cast<const FunctionDecl*>(declarationContext);
+        std::string fullyQualifiedName = functionDeclaration->getQualifiedNameAsString();
+        // skip old style functions to avoid a flood of errors
+        if (m_context.reportedOldStyleFunctions.count(fullyQualifiedName) > 0)
+            return;
+    }
 
     QualType type = variableDeclaration->getType();
     if (! type.isPODType(*result.Context))

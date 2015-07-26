@@ -7,6 +7,7 @@
 #include "FunctionNamingRule.h"
 #include "NakedDeleteRule.h"
 #include "NakedNewRule.h"
+#include "OldStyleFunctionRule.h"
 #include "TodoRule.h"
 #include "UninitializedFieldRule.h"
 #include "UninitializedLocalVariableRule.h"
@@ -54,7 +55,8 @@ std::vector<std::unique_ptr<ASTCallbackRule>> CreateASTRules(Context& context)
     AddRule<ClassNamingRule>(rules, context);
     AddRule<EnumNamingRule>(rules, context);
     AddRule<UninitializedFieldRule>(rules, context);
-    AddRule<UninitializedLocalVariableRule>(rules, context);
+    AddRule<OldStyleFunctionRule>(rules, context); // must be first
+    AddRule<UninitializedLocalVariableRule>(rules, context); // must be second
     return rules;
 }
 

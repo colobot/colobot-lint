@@ -66,5 +66,31 @@ class TestUnintializedLocalVariableRule(test_support.TestBase):
             ],
             expected_errors = [])
 
+    def test_skip_old_style_functions(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                '#include <string>',
+                'void Bar(int &x, int &y, int& z);',
+                'void Foo()',
+                '{',
+                '    int x, y, z;',
+                '    float a, b, c',
+                '    std::string str;',
+                '',
+                '    Bar(x, y, z);',
+                '    a = b = c = 10.0f;',
+                '    str = "123";',
+                '}'
+            ],
+            expected_errors = [
+                {
+                    'id': 'old style function',
+                    'severity': 'warning',
+                    'msg': "Function 'Foo' has variables declared far from point of use ('x', 'y', 'z', 'a'... and 3 more)",
+                    'line': '3'
+                }
+            ],
+            rules_selection = ['OldStyleFunctionRule', 'UninitializedLocalVariableRule'])
+
 if __name__ == '__main__':
     test_support.main()

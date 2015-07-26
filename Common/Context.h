@@ -2,6 +2,7 @@
 
 #include <set>
 #include <string>
+#include <unordered_set>
 
 class SourceLocationHelper;
 class OutputPrinter;
@@ -23,6 +24,8 @@ struct Context
 
     bool areWeInFakeHeaderSourceFile;
     std::string actualHeaderFileSuffix;
+
+    std::unordered_set<std::string> reportedOldStyleFunctions;
 
     SourceLocationHelper& sourceLocationHelper;
 
