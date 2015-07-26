@@ -76,5 +76,19 @@ class TestOldStyleFunctionRule(test_support.TestBase):
                 }
             ])
 
+    def test_ignore_function_parameters(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                'void Bar(int &x, int &y, int& z, int& w)',
+                '{',
+                '    x = 1;',
+                '    y = 2;',
+                '    z = 3;',
+                '    w = 4;'
+                '}'
+            ],
+            expected_errors = [])
+
+
 if __name__ == '__main__':
     test_support.main()

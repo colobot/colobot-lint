@@ -66,6 +66,14 @@ class TestUnintializedLocalVariableRule(test_support.TestBase):
             ],
             expected_errors = [])
 
+    def test_skip_function_parameters(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                'void Foo(int x, int y, int z);',
+                'void Bar(int x, int y, int z) {}',
+            ],
+            expected_errors = [])
+
     def test_skip_old_style_functions(self):
         self.assert_colobot_lint_result(
             source_file_lines = [

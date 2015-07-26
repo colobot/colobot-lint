@@ -122,8 +122,11 @@ bool OldStyleDeclarationFinder::VisitStmt(clang::Stmt* statement)
     }
 
     const VarDecl* variableDeclaration = static_cast<const VarDecl*>(declaration);
-    if (! variableDeclaration->hasLocalStorage())
+    if (! variableDeclaration->hasLocalStorage() ||
+        ParmVarDecl::classof(variableDeclaration))
+    {
         return true;
+    }
 
     std::string name = variableDeclaration->getNameAsString();
 

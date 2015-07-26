@@ -30,12 +30,12 @@ void UninitializedLocalVariableRule::run(const MatchFinder::MatchResult& result)
     if (! m_context.sourceLocationHelper.IsLocationOfInterest(location, result.Context->getSourceManager()))
         return;
 
-    if (! variableDeclaration->hasLocalStorage())
+    if (! variableDeclaration->hasLocalStorage() ||
+        ParmVarDecl::classof(variableDeclaration) ||  // ignore function parameters
+        variableDeclaration->isImplicit())            // ignore implicit (compiler-generated) variables
+    {
         return;
-
-    // Ignore implicit (compiler-generated) variables
-    if (variableDeclaration->isImplicit())
-        return;
+    }
 
     const DeclContext* declarationContext = variableDeclaration->getDeclContext();
     if (declarationContext->isFunctionOrMethod())
