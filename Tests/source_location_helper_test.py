@@ -69,6 +69,7 @@ class TestSourceLocationHelper(test_support.TestBase):
                 additional_compile_flags = '-I' + temp_dir)
 
             xml_output = run_colobot_lint(build_directory = temp_dir,
+                                          source_dir = temp_dir,
                                           source_paths = [cpp_file_name],
                                           rules_selection = ['NakedNewRule', 'NakedDeleteRule'])
             self.assert_xml_output_match(

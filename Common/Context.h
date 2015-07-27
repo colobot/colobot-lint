@@ -11,10 +11,12 @@ struct Context
 {
     Context(SourceLocationHelper& _sourceLocationHelper,
             OutputPrinter& _printer,
+            const std::string& _projectSourceDirectory,
             const std::set<std::string>& _rulesSelection,
             bool _verbose,
             bool _debug)
         : areWeInFakeHeaderSourceFile(false),
+          projectSourceDirectory(_projectSourceDirectory),
           sourceLocationHelper(_sourceLocationHelper),
           printer(_printer),
           rulesSelection(_rulesSelection),
@@ -24,6 +26,7 @@ struct Context
 
     bool areWeInFakeHeaderSourceFile;
     std::string actualHeaderFileSuffix;
+    const std::string projectSourceDirectory;
 
     std::unordered_set<std::string> reportedOldStyleFunctions;
 

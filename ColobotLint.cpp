@@ -26,6 +26,12 @@ namespace
 
 OptionCategory g_colobotLintOptionCategory("colobot-lint options");
 
+static cl::opt<std::string> g_projectRootSourceDirectory(
+    Required,
+    "project-root",
+    desc("Full path to project source directory"),
+    value_desc("directory"), cat(g_colobotLintOptionCategory));
+
 static cl::opt<std::string> g_outputFileOpt(
     "output-file",
     desc("Where to save the XML output; if not given, write to stderr"),
@@ -101,6 +107,7 @@ int main(int argc, const char **argv)
 
     Context context(sourceLocationHelper,
                     outputPrinter,
+                    g_projectRootSourceDirectory,
                     rulesSelection,
                     g_verboseOpt,
                     g_debugOpt);

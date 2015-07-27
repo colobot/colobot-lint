@@ -60,10 +60,11 @@ def run_colobot_lint_with_single_file(source_file_lines, rules_selection):
         write_file_lines(source_file_name, source_file_lines)
         write_compilation_database(temp_dir, [source_file_name])
         return run_colobot_lint(build_directory = temp_dir,
+                                source_dir = temp_dir,
                                 source_paths = [source_file_name],
                                 rules_selection = rules_selection)
 
-def run_colobot_lint(build_directory, source_paths, rules_selection = []):
+def run_colobot_lint(build_directory, source_dir, source_paths, rules_selection = []):
     rules_selection_options = []
     for rule in rules_selection:
         rules_selection_options += ['-only-rule', rule]
@@ -71,6 +72,7 @@ def run_colobot_lint(build_directory, source_paths, rules_selection = []):
     whole_command = ([colobot_lint_exectuable] +
                      rules_selection_options +
                      ['-p', build_directory] +
+                     ['-project-root', source_dir] +
                      source_paths)
 
     if debug_flag:
