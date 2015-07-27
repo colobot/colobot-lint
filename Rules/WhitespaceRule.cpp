@@ -21,6 +21,8 @@ void WhitespaceRule::HandleTranslationUnit(ASTContext &context)
     MemoryBuffer* buffer = context.getSourceManager().getBuffer(mainFileID);
     const char* bufferChars = buffer->getBufferStart();
     int bufferSize = buffer->getBufferSize();
+    if (bufferSize == 0)
+        return;
 
     int lineNumber = 1;
     bool haveWhitespace = false;
@@ -82,5 +84,15 @@ void WhitespaceRule::HandleTranslationUnit(ASTContext &context)
         }
 
         haveWhitespace = false;
+    }
+
+    if (bufferChars[bufferSize - 1] != '\n')
+    {
+        m_context.printer.PrintRuleViolation(
+            "whitespace",
+            Severity::Style,
+            "File should end with newline",
+            fileName,
+            lineNumber-1);
     }
 }
