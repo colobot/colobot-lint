@@ -3,7 +3,9 @@ import test_support
 
 class TestClassNamingRule(test_support.TestBase):
     def setUp(self):
-        self.set_rules_selection(['ClassNamingRule'])
+        self.set_default_rules_selection(['ClassNamingRule'])
+        self.set_default_error_id('class naming')
+        self.set_default_error_severity('style')
 
     def test_correct_names(self):
         self.assert_colobot_lint_result(
@@ -25,32 +27,22 @@ class TestClassNamingRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'class naming',
-                    'severity': 'style',
                     'msg': "Class 'Cfoo' should be named in a style like CUpperCamelCase",
                     'line': '1'
                 },
                 {
-                    'id': 'class naming',
-                    'severity': 'style',
                     'msg': "Class 'Foo' should be named in a style like CUpperCamelCase",
                     'line': '2'
                 },
                 {
-                    'id': 'class naming',
-                    'severity': 'style',
                     'msg': "Class 'lowerCase' should be named in a style like CUpperCamelCase",
                     'line': '3'
                 },
                 {
-                    'id': 'class naming',
-                    'severity': 'style',
                     'msg': "Class 'lower_case' should be named in a style like CUpperCamelCase",
                     'line': '4'
                 },
                 {
-                    'id': 'class naming',
-                    'severity': 'style',
                     'msg': "Class 'ALL_CAPS' should be named in a style like CUpperCamelCase",
                     'line': '5'
                 }
@@ -67,38 +59,28 @@ class TestClassNamingRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'class naming',
-                    'severity': 'style',
                     'msg': "Struct 'CFoo' follows class naming style CUpperCamelCase but is not a class",
                     'line': '1'
                 },
                 {
-                    'id': 'class naming',
-                    'severity': 'style',
                     'msg': "Struct 'foo' should be named in a style like UpperCamelCase",
                     'line': '2'
                 },
                 {
-                    'id': 'class naming',
-                    'severity': 'style',
                     'msg': "Union 'lowerCase' should be named in a style like UpperCamelCase",
                     'line': '3'
                 },
                 {
-                    'id': 'class naming',
-                    'severity': 'style',
                     'msg': "Union 'lower_case' should be named in a style like UpperCamelCase",
                     'line': '4'
                 },
                 {
-                    'id': 'class naming',
-                    'severity': 'style',
                     'msg': "Struct 'ALL_CAPS' should be named in a style like UpperCamelCase",
                     'line': '5'
                 }
             ])
 
-    def test_ignore_anonymous_structs(self):
+    def test_inform_about_anonymous_structs(self):
         self.assert_colobot_lint_result(
             source_file_lines = [
                 'struct Foo',
@@ -110,7 +92,13 @@ class TestClassNamingRule(test_support.TestBase):
                 '   } foo;',
                 '};'
             ],
-            expected_errors = [])
+            expected_errors = [
+                {
+                    'severity': 'information',
+                    'msg': 'Anonymous struct',
+                    'line': '3'
+                }
+            ])
 
     def test_ignore_lambdas(self):
         self.assert_colobot_lint_result(

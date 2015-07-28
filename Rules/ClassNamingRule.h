@@ -20,6 +20,10 @@ public:
     static const char* GetName() { return "ClassNamingRule"; }
 
 private:
+    std::string GetRecordTypeString(const clang::RecordDecl* recordDeclaration);
+    std::string GetLowercaseRecordTypeString(const clang::RecordDecl* recordDeclaration);
+
+private:
     clang::ast_matchers::DeclarationMatcher m_matcher;
     boost::regex m_classNamePattern;
     boost::regex m_structOrUnionNamePattern;

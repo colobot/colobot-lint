@@ -45,7 +45,7 @@ void EnumNamingRule::HandleEnumDeclaration(const clang::EnumDecl* enumDeclaratio
         m_context.printer.PrintRuleViolation(
             "enum naming",
             Severity::Information,
-            "Anonymous enums are not allowed",
+            "Anonymous enum",
             location,
             context->getSourceManager());
         return;

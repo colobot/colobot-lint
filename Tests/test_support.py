@@ -87,22 +87,36 @@ def run_colobot_lint(build_directory, source_dir, source_paths, rules_selection 
 
     return command_output
 
+
 class TestBase(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         unittest.TestCase.__init__(self, *args, **kwargs)
-        self.rules_selection = []
+        self.default_rules_selection = []
+        self.default_error_id = ''
+        self.default_error_severity = ''
 
+    # deprecated
     def set_rules_selection(self, rules_selection):
         self.rules_selection = rules_selection
+        self.default_rules_selection = rules_selection
 
+    def set_default_rules_selection(self, rules_selection):
+        self.default_rules_selection = rules_selection
+
+    def set_default_error_id(self, error_id):
+        self.default_error_id = error_id
+
+    def set_default_error_severity(self, error_severity):
+        self.default_error_severity = error_severity
 
     def assert_colobot_lint_result(self, source_file_lines, expected_errors, rules_selection = None):
         rules = []
         if rules_selection is not None:
             rules = rules_selection
         else:
-            rules = self.rules_selection
+            rules = self.default_rules_selection
         xml_output = run_colobot_lint_with_single_file(source_file_lines, rules)
+
         self.assert_xml_output_match(xml_output, expected_errors)
 
     def assert_xml_output_match(self, xml_output, expected_errors):
@@ -112,8 +126,8 @@ class TestBase(unittest.TestCase):
         self.assertEqual(len(errors), len(expected_errors))
 
         for error, expected_error in zip(errors, expected_errors):
-            self.assertEqual(error.get('id'), expected_error['id'])
-            self.assertEqual(error.get('severity'), expected_error['severity'])
+            self.assertEqual(error.get('id'), expected_error.get('id', self.default_error_id))
+            self.assertEqual(error.get('severity'), expected_error.get('severity', self.default_error_severity))
             self.assertEqual(error.get('msg'), expected_error['msg'])
 
             location = error.find('location')

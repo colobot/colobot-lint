@@ -3,7 +3,9 @@ import test_support
 
 class TestEnumNamingRule(test_support.TestBase):
     def setUp(self):
-        self.set_rules_selection(['EnumNamingRule'])
+        self.set_default_rules_selection(['EnumNamingRule'])
+        self.set_default_error_id('enum naming')
+        self.set_default_error_severity('style')
 
     def test_correct_enum_names(self):
         self.assert_colobot_lint_result(
@@ -24,26 +26,18 @@ class TestEnumNamingRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'enum naming',
-                    'severity': 'style',
                     'msg': "Enum class 'lower' should be named in a style like UpperCamelCase",
                     'line': '1'
                 },
                 {
-                    'id': 'enum naming',
-                    'severity': 'style',
                     'msg': "Enum class 'lowerCase' should be named in a style like UpperCamelCase",
                     'line': '2'
                 },
                 {
-                    'id': 'enum naming',
-                    'severity': 'style',
                     'msg': "Enum class 'lower_case' should be named in a style like UpperCamelCase",
                     'line': '3'
                 },
                 {
-                    'id': 'enum naming',
-                    'severity': 'style',
                     'msg': "Enum class 'ALL_CAPS' should be named in a style like UpperCamelCase",
                     'line': '4'
                 }
@@ -74,26 +68,18 @@ class TestEnumNamingRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'enum naming',
-                    'severity': 'style',
                     'msg': "Enum class constant 'lower' should be named in a style like UpperCamelCase",
                     'line': '3'
                 },
                 {
-                    'id': 'enum naming',
-                    'severity': 'style',
                     'msg': "Enum class constant 'lowerCase' should be named in a style like UpperCamelCase",
                     'line': '4'
                 },
                 {
-                    'id': 'enum naming',
-                    'severity': 'style',
                     'msg': "Enum class constant 'lower_case' should be named in a style like UpperCamelCase",
                     'line': '5'
                 },
                 {
-                    'id': 'enum naming',
-                    'severity': 'style',
                     'msg': "Enum class constant 'ALL_CAPS' should be named in a style like UpperCamelCase",
                     'line': '6'
                 }
@@ -111,7 +97,6 @@ class TestEnumNamingRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'enum naming',
                     'severity': 'information',
                     'msg': "Old-style enum 'OldStyleEnum'",
                     'line': '1'
@@ -131,9 +116,8 @@ class TestEnumNamingRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'enum naming',
                     'severity': 'information',
-                    'msg': "Anonymous enums are not allowed",
+                    'msg': "Anonymous enum",
                     'line': '3'
                 }
             ])

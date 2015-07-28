@@ -37,8 +37,16 @@ void ClassNamingRule::run(const MatchFinder::MatchResult& result)
     }
 
     std::string name = recordDeclaration->getName().str();
-    if (name.empty()) // anonymous structs or unions
+    if (name.empty())
+    {
+        m_context.printer.PrintRuleViolation(
+                "class naming",
+                Severity::Information,
+                "Anonymous " + GetLowercaseRecordTypeString(recordDeclaration),
+                location,
+                result.Context->getSourceManager());
         return;
+    }
 
     std::string fullyQualifiedName = recordDeclaration->getQualifiedNameAsString();
     if (m_reportedNames.count(fullyQualifiedName) > 0)
@@ -51,7 +59,7 @@ void ClassNamingRule::run(const MatchFinder::MatchResult& result)
             m_context.printer.PrintRuleViolation(
                 "class naming",
                 Severity::Style,
-                std::string("Class '") + name + "'" + " should be named in a style like CUpperCamelCase",
+                GetRecordTypeString(recordDeclaration) + " '" + name + "'" + " should be named in a style like CUpperCamelCase",
                 location,
                 result.Context->getSourceManager());
             m_reportedNames.insert(fullyQualifiedName);
@@ -60,14 +68,12 @@ void ClassNamingRule::run(const MatchFinder::MatchResult& result)
     else if (recordDeclaration->isStruct() ||
              recordDeclaration->isUnion())
     {
-        std::string which = recordDeclaration->isStruct() ? "Struct" : "Union";
-
         if (! boost::regex_match(name, m_structOrUnionNamePattern))
         {
             m_context.printer.PrintRuleViolation(
                 "class naming",
                 Severity::Style,
-                which + " '" + name + "'" + " should be named in a style like UpperCamelCase",
+                GetRecordTypeString(recordDeclaration) + " '" + name + "'" + " should be named in a style like UpperCamelCase",
                 location,
                 result.Context->getSourceManager());
             m_reportedNames.insert(fullyQualifiedName);
@@ -77,10 +83,33 @@ void ClassNamingRule::run(const MatchFinder::MatchResult& result)
             m_context.printer.PrintRuleViolation(
                 "class naming",
                 Severity::Style,
-                which + " '" + name + "'" + " follows class naming style CUpperCamelCase but is not a class",
+                GetRecordTypeString(recordDeclaration) + " '" + name + "'" + " follows class naming style CUpperCamelCase but is not a class",
                 location,
                 result.Context->getSourceManager());
             m_reportedNames.insert(fullyQualifiedName);
         }
     }
 }
+
+std::string ClassNamingRule::GetRecordTypeString(const clang::RecordDecl* recordDeclaration)
+{
+    if (recordDeclaration->isClass())
+        return "Class";
+    else if (recordDeclaration->isUnion())
+        return "Union";
+    else if (recordDeclaration->isStruct())
+        return "Struct";
+    return "";
+}
+
+std::string ClassNamingRule::GetLowercaseRecordTypeString(const clang::RecordDecl* recordDeclaration)
+{
+    if (recordDeclaration->isClass())
+        return "class";
+    else if (recordDeclaration->isUnion())
+        return "union";
+    else if (recordDeclaration->isStruct())
+        return "struct";
+    return "";
+}
+
