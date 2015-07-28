@@ -3,7 +3,9 @@ import test_support
 
 class TestNakedDeleteRule(test_support.TestBase):
     def setUp(self):
-        self.set_rules_selection(['NakedDeleteRule'])
+        self.set_default_rules_selection(['NakedDeleteRule'])
+        self.set_default_error_id('naked delete')
+        self.set_default_error_severity('warning')
 
     def test_naked_delete_with_builtin_type(self):
         self.assert_colobot_lint_result(
@@ -15,8 +17,6 @@ class TestNakedDeleteRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'naked delete',
-                    'severity': 'warning',
                     'msg': "Naked delete called on type 'int'",
                     'line': '3'
                 }
@@ -34,8 +34,6 @@ class TestNakedDeleteRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'naked delete',
-                    'severity': 'warning',
                     'msg': "Naked delete called on type 'class Foo'",
                     'line': '5'
                 }
@@ -51,8 +49,6 @@ class TestNakedDeleteRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'naked delete',
-                    'severity': 'warning',
                     'msg': "Naked delete called on type 'char'",
                     'line': '3'
                 }

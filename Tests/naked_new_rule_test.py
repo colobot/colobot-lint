@@ -3,7 +3,9 @@ import test_support
 
 class TestNakedNewRule(test_support.TestBase):
     def setUp(self):
-        self.set_rules_selection(['NakedNewRule'])
+        self.set_default_rules_selection(['NakedNewRule'])
+        self.set_default_error_id('naked new')
+        self.set_default_error_severity('warning')
 
     def test_naked_new_with_builtin_type(self):
         self.assert_colobot_lint_result(
@@ -12,8 +14,6 @@ class TestNakedNewRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'naked new',
-                    'severity': 'warning',
                     'msg': "Naked new called with type 'int'",
                     'line': '1'
                 }
@@ -28,8 +28,6 @@ class TestNakedNewRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'naked new',
-                    'severity': 'warning',
                     'msg': "Naked new called with type 'class Foo'",
                     'line': '3'
                 }
@@ -42,8 +40,6 @@ class TestNakedNewRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'naked new',
-                    'severity': 'warning',
                     'msg': "Naked new called with type 'char'",
                     'line': '1'
                 }

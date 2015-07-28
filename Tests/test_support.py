@@ -95,11 +95,6 @@ class TestBase(unittest.TestCase):
         self.default_error_id = ''
         self.default_error_severity = ''
 
-    # deprecated
-    def set_rules_selection(self, rules_selection):
-        self.rules_selection = rules_selection
-        self.default_rules_selection = rules_selection
-
     def set_default_rules_selection(self, rules_selection):
         self.default_rules_selection = rules_selection
 

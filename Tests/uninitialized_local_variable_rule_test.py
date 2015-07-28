@@ -3,7 +3,9 @@ import test_support
 
 class TestUnintializedLocalVariableRule(test_support.TestBase):
     def setUp(self):
-        self.set_rules_selection(['UninitializedLocalVariableRule'])
+        self.set_default_rules_selection(['UninitializedLocalVariableRule'])
+        self.set_default_error_id('uninitialized local variable')
+        self.set_default_error_severity('error')
 
     def test_function_with_builtin_variables_defined(self):
         self.assert_colobot_lint_result(
@@ -27,8 +29,6 @@ class TestUnintializedLocalVariableRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'uninitialized local variable',
-                    'severity': 'error',
                     'msg': "Local variable 'x' is uninitialized",
                     'line': '3'
                 }
@@ -46,8 +46,6 @@ class TestUnintializedLocalVariableRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'uninitialized local variable',
-                    'severity': 'error',
                     'msg': "Local variable 'bar' is uninitialized",
                     'line': '4'
                 }
@@ -74,7 +72,7 @@ class TestUnintializedLocalVariableRule(test_support.TestBase):
             ],
             expected_errors = [])
 
-    def test_skip_old_style_functions(self):
+    def test_dont_report_uninitialized_variables_in_old_style_functions(self):
         self.assert_colobot_lint_result(
             source_file_lines = [
                 '#include <string>',

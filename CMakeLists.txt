@@ -185,7 +185,7 @@ macro(add_colobot_lint_test test_name test_target)
     add_test(${test_name} ${CMAKE_CURRENT_SOURCE_DIR}/${test_target} --colobot-lint-exec ${COLOBOT_LINT_OUTPUT_BINARY})
 endmacro()
 
-add_colobot_lint_test(BracePlacementRuleTest Tests/block_placement_rule_test.py)
+add_colobot_lint_test(BlockPlacementRuleTest Tests/block_placement_rule_test.py)
 add_colobot_lint_test(ClassNamingRule Tests/class_naming_rule_test.py)
 add_colobot_lint_test(EnumNamingRule Tests/enum_naming_rule_test.py)
 add_colobot_lint_test(FunctionNamingRule Tests/function_naming_rule_test.py)

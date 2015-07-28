@@ -3,7 +3,9 @@ import test_support
 
 class TestBlockPlacementRule(test_support.TestBase):
     def setUp(self):
-        self.set_rules_selection(['BlockPlacementRule'])
+        self.set_default_rules_selection(['BlockPlacementRule'])
+        self.set_default_error_id('code block placement')
+        self.set_default_error_severity('style')
 
     # namespaces
     def test_namespace_braces_in_separate_lines(self):
@@ -30,8 +32,6 @@ class TestBlockPlacementRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'code block placement',
-                    'severity': 'style',
                     'msg': 'Body of declaration or statement begins in a style that is not allowed',
                     'line': '1'
                 }
@@ -46,8 +46,6 @@ class TestBlockPlacementRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'code block placement',
-                    'severity': 'style',
                     'msg': 'Body of declaration or statement ends in a style that is not allowed',
                     'line': '3'
                 }
@@ -62,8 +60,6 @@ class TestBlockPlacementRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'code block placement',
-                    'severity': 'style',
                     'msg': 'Body of declaration or statement ends in a style that is not allowed',
                     'line': '3'
                 }
@@ -97,8 +93,6 @@ class TestBlockPlacementRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'code block placement',
-                    'severity': 'style',
                     'msg': 'Body of declaration or statement begins in a style that is not allowed',
                     'line': '1'
                 }
@@ -113,8 +107,6 @@ class TestBlockPlacementRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'code block placement',
-                    'severity': 'style',
                     'msg': 'Body of declaration or statement ends in a style that is not allowed',
                     'line': '3'
                 }
@@ -130,8 +122,6 @@ class TestBlockPlacementRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'code block placement',
-                    'severity': 'style',
                     'msg': 'Body of declaration or statement ends in a style that is not allowed',
                     'line': '4'
                 }
@@ -148,8 +138,6 @@ class TestBlockPlacementRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'code block placement',
-                    'severity': 'style',
                     'msg': 'Body of declaration or statement begins in a style that is not allowed',
                     'line': '3'
                 }
@@ -182,8 +170,6 @@ class TestBlockPlacementRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'code block placement',
-                    'severity': 'style',
                     'msg': 'Body of declaration or statement begins in a style that is not allowed',
                     'line': '1'
                 }
@@ -198,8 +184,6 @@ class TestBlockPlacementRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'code block placement',
-                    'severity': 'style',
                     'msg': 'Body of declaration or statement ends in a style that is not allowed',
                     'line': '3'
                 }
@@ -215,8 +199,6 @@ class TestBlockPlacementRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'code block placement',
-                    'severity': 'style',
                     'msg': 'Body of declaration or statement ends in a style that is not allowed',
                     'line': '4'
                 }
@@ -233,8 +215,6 @@ class TestBlockPlacementRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'code block placement',
-                    'severity': 'style',
                     'msg': 'Body of declaration or statement begins in a style that is not allowed',
                     'line': '3'
                 }
@@ -249,8 +229,6 @@ class TestBlockPlacementRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'code block placement',
-                    'severity': 'style',
                     'msg': 'Body of declaration or statement begins in a style that is not allowed',
                     'line': '2'
                 }

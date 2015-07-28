@@ -3,7 +3,9 @@ import test_support
 
 class TestOldStyleFunctionRule(test_support.TestBase):
     def setUp(self):
-        self.set_rules_selection(['OldStyleFunctionRule'])
+        self.set_default_rules_selection(['OldStyleFunctionRule'])
+        self.set_default_error_id('old style function')
+        self.set_default_error_severity('warning')
 
     def test_declaration_and_point_of_use_in_next_line(self):
         self.assert_colobot_lint_result(
@@ -44,8 +46,6 @@ class TestOldStyleFunctionRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'old style function',
-                    'severity': 'warning',
                     'msg': "Function 'Foo' has variables declared far from point of use ('x')",
                     'line': '2'
                 }
@@ -69,8 +69,6 @@ class TestOldStyleFunctionRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'old style function',
-                    'severity': 'warning',
                     'msg': "Function 'Foo' has variables declared far from point of use ('x', 'y', 'z', 'a'... and 3 more)",
                     'line': '3'
                 }

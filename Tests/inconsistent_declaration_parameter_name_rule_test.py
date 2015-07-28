@@ -3,7 +3,9 @@ import test_support
 
 class TestInconsistentDeclarationParameterNameRule(test_support.TestBase):
     def setUp(self):
-        self.set_rules_selection(['InconsistentDeclarationParameterNameRule'])
+        self.set_default_rules_selection(['InconsistentDeclarationParameterNameRule'])
+        self.set_default_error_id('inconsistent declaration parameter name')
+        self.set_default_error_severity('style')
 
     def test_only_function_declaration(self):
         self.assert_colobot_lint_result(
@@ -43,8 +45,6 @@ class TestInconsistentDeclarationParameterNameRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'inconsistent declaration parameter name',
-                    'severity': 'style',
                     'msg': "Function 'Foo' has other declaration(s) with inconsistently named parameter(s)",
                     'line': '1'
                 }
@@ -59,8 +59,6 @@ class TestInconsistentDeclarationParameterNameRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'inconsistent declaration parameter name',
-                    'severity': 'style',
                     'msg': "Function 'Foo' has other declaration(s) with inconsistently named parameter(s)",
                     'line': '1'
                 }

@@ -3,7 +3,9 @@ import test_support
 
 class TestVariableNamingRule(test_support.TestBase):
     def setUp(self):
-        self.set_rules_selection(['VariableNamingRule'])
+        self.set_default_rules_selection(['VariableNamingRule'])
+        self.set_default_error_id('variable naming')
+        self.set_default_error_severity('style')
 
     def test_function_local_variable_correct_names(self):
         self.assert_colobot_lint_result(
@@ -33,20 +35,14 @@ class TestVariableNamingRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'variable naming',
-                    'severity': 'style',
                     'msg': "Local variable 'under_score_name' should be named in camelCase style",
                     'line': '4'
                 },
                 {
-                    'id': 'variable naming',
-                    'severity': 'style',
                     'msg': "Local variable 'CapitalCaseName' should be named in camelCase style",
                     'line': '5'
                 },
                 {
-                    'id': 'variable naming',
-                    'severity': 'style',
                     'msg': "Local variable 'ALLCAPS' should be named in camelCase style",
                     'line': '6'
                 }
@@ -78,20 +74,14 @@ class TestVariableNamingRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'variable naming',
-                    'severity': 'style',
                     'msg': "Local variable 'under_score_name' should be named in camelCase style",
                     'line': '2'
                 },
                 {
-                    'id': 'variable naming',
-                    'severity': 'style',
                     'msg': "Local variable 'CapitalCaseName' should be named in camelCase style",
                     'line': '3'
                 },
                 {
-                    'id': 'variable naming',
-                    'severity': 'style',
                     'msg': "Local variable 'ALLCAPS' should be named in camelCase style",
                     'line': '4'
                 }
@@ -121,26 +111,18 @@ class TestVariableNamingRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'variable naming',
-                    'severity': 'style',
                     'msg': "Const global variable 'NOT_ALL_capitals' should be named in ALL_CAPS style",
                     'line': '3'
                 },
                 {
-                    'id': 'variable naming',
-                    'severity': 'style',
                     'msg': "Const global variable '_STARTING_FROM_UNDERSCORE' should be named in ALL_CAPS style",
                     'line': '4'
                 },
                 {
-                    'id': 'variable naming',
-                    'severity': 'style',
                     'msg': "Const global variable 'camelCase' should be named in ALL_CAPS style",
                     'line': '5'
                 },
                 {
-                    'id': 'variable naming',
-                    'severity': 'style',
                     'msg': "Const global variable 'g_namedLikeNonConstGlobal' should be named in ALL_CAPS style",
                     'line': '6'
                 }
@@ -170,26 +152,18 @@ class TestVariableNamingRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'variable naming',
-                    'severity': 'style',
                     'msg': "Non-const global variable 'notPrefixedCamelCase' should be named in g_camelCase style",
                     'line': '3'
                 },
                 {
-                    'id': 'variable naming',
-                    'severity': 'style',
                     'msg': "Non-const global variable 'm_wronglyPefixed' should be named in g_camelCase style",
                     'line': '4'
                 },
                 {
-                    'id': 'variable naming',
-                    'severity': 'style',
                     'msg': "Non-const global variable 'ALL_CAPS' should be named in g_camelCase style",
                     'line': '5'
                 },
                 {
-                    'id': 'variable naming',
-                    'severity': 'style',
                     'msg': "Non-const global variable 'CapitalCaseName' should be named in g_camelCase style",
                     'line': '6'
                 }
@@ -207,14 +181,10 @@ class TestVariableNamingRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'variable naming',
-                    'severity': 'style',
                     'msg': "Local variable 'bBool' is named in a style that is deprecated",
                     'line': '3'
                 },
                 {
-                    'id': 'variable naming',
-                    'severity': 'style',
                     'msg': "Local variable 'pPtr' is named in a style that is deprecated",
                     'line': '4'
                 }
@@ -246,20 +216,14 @@ class TestVariableNamingRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'variable naming',
-                    'severity': 'style',
                     'msg': "Public field 'under_score_name' should be named in camelCase style",
                     'line': '4'
                 },
                 {
-                    'id': 'variable naming',
-                    'severity': 'style',
                     'msg': "Public field 'CapitalCaseName' should be named in camelCase style",
                     'line': '5'
                 },
                 {
-                    'id': 'variable naming',
-                    'severity': 'style',
                     'msg': "Public field 'ALLCAPS' should be named in camelCase style",
                     'line': '6'
                 }
@@ -295,20 +259,14 @@ class TestVariableNamingRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'variable naming',
-                    'severity': 'style',
                     'msg': "Private field 'under_score_name' should be named in m_camelCase style",
                     'line': '4'
                 },
                 {
-                    'id': 'variable naming',
-                    'severity': 'style',
                     'msg': "Protected field 'CapitalCaseName' should be named in m_camelCase style",
                     'line': '6'
                 },
                 {
-                    'id': 'variable naming',
-                    'severity': 'style',
                     'msg': "Private field 'ALLCAPS' should be named in m_camelCase style",
                     'line': '8'
                 }
@@ -340,20 +298,14 @@ class TestVariableNamingRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'variable naming',
-                    'severity': 'style',
                     'msg': "Public field 'under_score_name' should be named in camelCase style",
                     'line': '4'
                 },
                 {
-                    'id': 'variable naming',
-                    'severity': 'style',
                     'msg': "Public field 'CapitalCaseName' should be named in camelCase style",
                     'line': '5'
                 },
                 {
-                    'id': 'variable naming',
-                    'severity': 'style',
                     'msg': "Public field 'ALLCAPS' should be named in camelCase style",
                     'line': '6'
                 }
@@ -389,20 +341,14 @@ class TestVariableNamingRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'variable naming',
-                    'severity': 'style',
                     'msg': "Private field 'under_score_name' should be named in m_camelCase style",
                     'line': '4'
                 },
                 {
-                    'id': 'variable naming',
-                    'severity': 'style',
                     'msg': "Protected field 'CapitalCaseName' should be named in m_camelCase style",
                     'line': '6'
                 },
                 {
-                    'id': 'variable naming',
-                    'severity': 'style',
                     'msg': "Private field 'ALLCAPS' should be named in m_camelCase style",
                     'line': '8'
                 }
@@ -420,14 +366,10 @@ class TestVariableNamingRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'variable naming',
-                    'severity': 'style',
                     'msg': "Private field 'm_bBool' is named in a style that is deprecated",
                     'line': '3'
                 },
                 {
-                    'id': 'variable naming',
-                    'severity': 'style',
                     'msg': "Private field 'm_pPtr' is named in a style that is deprecated",
                     'line': '4'
                 }

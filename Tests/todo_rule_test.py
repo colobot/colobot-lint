@@ -3,7 +3,9 @@ import test_support
 
 class TestTodoRule(test_support.TestBase):
     def setUp(self):
-        self.set_rules_selection(['TodoRule'])
+        self.set_default_rules_selection(['TodoRule'])
+        self.set_default_error_id('TODO comment')
+        self.set_default_error_severity('information')
 
     def test_normal_comment(self):
         self.assert_colobot_lint_result(
@@ -20,8 +22,6 @@ class TestTodoRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'TODO comment',
-                    'severity': 'information',
                     'msg': 'TODO: comment',
                     'line': '1'
                 }
@@ -35,14 +35,10 @@ class TestTodoRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'TODO comment',
-                    'severity': 'information',
                     'msg': 'TODO: comment1',
                     'line': '1'
                 },
                 {
-                    'id': 'TODO comment',
-                    'severity': 'information',
                     'msg': 'TODO: comment2',
                     'line': '2'
                 }
@@ -62,8 +58,6 @@ class TestTodoRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'TODO comment',
-                    'severity': 'information',
                     'msg': 'TODO: comment',
                     'line': '1'
                 }
@@ -76,8 +70,6 @@ class TestTodoRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'TODO comment',
-                    'severity': 'information',
                     'msg': 'TODO: comment',
                     'line': '1'
                 }
@@ -92,14 +84,10 @@ class TestTodoRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'TODO comment',
-                    'severity': 'information',
                     'msg': 'TODO: comment1',
                     'line': '1'
                 },
                 {
-                    'id': 'TODO comment',
-                    'severity': 'information',
                     'msg': 'TODO: comment2',
                     'line': '3'
                 }

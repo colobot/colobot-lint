@@ -5,7 +5,9 @@ import os
 
 class TestUnintializedFieldRule(test_support.TestBase):
     def setUp(self):
-        self.set_rules_selection(['UninitializedFieldRule'])
+        self.set_default_rules_selection(['UninitializedFieldRule'])
+        self.set_default_error_id('uninitialized field')
+        self.set_default_error_severity('error')
 
     def test_struct_with_field_initialization_in_declaration(self):
         self.assert_colobot_lint_result(
@@ -31,8 +33,6 @@ class TestUnintializedFieldRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'uninitialized field',
-                    'severity': 'error',
                     'msg': "Struct 'Foo' field 'y' remains uninitialized",
                     'line': '1'
                 }
@@ -64,8 +64,6 @@ class TestUnintializedFieldRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'uninitialized field',
-                    'severity': 'error',
                     'msg': "Struct 'Foo' field 'x' remains uninitialized in constructor",
                     'line': '3'
                 }
@@ -121,14 +119,10 @@ class TestUnintializedFieldRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'uninitialized field',
-                    'severity': 'error',
                     'msg': "Struct 'Bar' field 'x' remains uninitialized",
                     'line': '3'
                 },
                 {
-                    'id': 'uninitialized field',
-                    'severity': 'error',
                     'msg': "Struct 'Foo' field 'z' remains uninitialized",
                     'line': '7'
                 }
@@ -149,8 +143,6 @@ class TestUnintializedFieldRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'uninitialized field',
-                    'severity': 'error',
                     'msg': "Struct 'Foo' field 'z' remains uninitialized in constructor",
                     'line': '5'
                 }
@@ -185,8 +177,6 @@ class TestUnintializedFieldRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'uninitialized field',
-                    'severity': 'error',
                     'msg': "Struct '' field 'x' remains uninitialized",
                     'line': '3'
                 }
@@ -236,14 +226,10 @@ class TestUnintializedFieldRule(test_support.TestBase):
                 xml_output = xml_output,
                 expected_errors = [
                     {
-                        'id': 'uninitialized field',
-                        'severity': 'error',
                         'msg': "Class 'NoConstructor' field 'x' remains uninitialized",
                         'line': '1'
                     },
                     {
-                        'id': 'uninitialized field',
-                        'severity': 'error',
                         'msg': "Class 'ConstructorDefined' field 'x' remains uninitialized in constructor",
                         'line': '7'
                     }

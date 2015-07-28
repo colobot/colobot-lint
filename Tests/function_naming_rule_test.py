@@ -3,7 +3,9 @@ import test_support
 
 class TestFunctionNamingRule(test_support.TestBase):
     def setUp(self):
-        self.set_rules_selection(['FunctionNamingRule'])
+        self.set_default_rules_selection(['FunctionNamingRule'])
+        self.set_default_error_id('function naming')
+        self.set_default_error_severity('style')
 
     def test_function_declaration_correct_names(self):
         self.assert_colobot_lint_result(
@@ -23,20 +25,14 @@ class TestFunctionNamingRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'function naming',
-                    'severity': 'style',
                     'msg': "Function 'under_score_name' should be named in UpperCamelCase style",
                     'line': '1'
                 },
                 {
-                    'id': 'function naming',
-                    'severity': 'style',
                     'msg': "Function 'lowerCamelCaseName' should be named in UpperCamelCase style",
                     'line': '2'
                 },
                 {
-                    'id': 'function naming',
-                    'severity': 'style',
                     'msg': "Function 'ALLCAPS_NAME' should be named in UpperCamelCase style",
                     'line': '3'
                 }
@@ -60,20 +56,14 @@ class TestFunctionNamingRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'function naming',
-                    'severity': 'style',
                     'line': '1',
                     'msg': "Function 'under_score_name' should be named in UpperCamelCase style",
                 },
                 {
-                    'id': 'function naming',
-                    'severity': 'style',
                     'msg': "Function 'lowerCamelCaseName' should be named in UpperCamelCase style",
                     'line': '2'
                 },
                 {
-                    'id': 'function naming',
-                    'severity': 'style',
                     'msg': "Function 'ALLCAPS_NAME' should be named in UpperCamelCase style",
                     'line': '3'
                 }
@@ -91,20 +81,14 @@ class TestFunctionNamingRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'function naming',
-                    'severity': 'style',
                     'line': '1',
                     'msg': "Function 'under_score_name' should be named in UpperCamelCase style",
                 },
                 {
-                    'id': 'function naming',
-                    'severity': 'style',
                     'msg': "Function 'lowerCamelCaseName' should be named in UpperCamelCase style",
                     'line': '3'
                 },
                 {
-                    'id': 'function naming',
-                    'severity': 'style',
                     'msg': "Function 'ALLCAPS_NAME' should be named in UpperCamelCase style",
                     'line': '5'
                 }
@@ -121,14 +105,10 @@ class TestFunctionNamingRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'function naming',
-                    'severity': 'style',
                     'line': '3',
                     'msg': "Function 'under_score_name' should be named in UpperCamelCase style",
                 },
                 {
-                    'id': 'function naming',
-                    'severity': 'style',
                     'line': '5',
                     'msg': "Function 'under_score_name' should be named in UpperCamelCase style",
                 }
@@ -158,20 +138,14 @@ class TestFunctionNamingRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'function naming',
-                    'severity': 'style',
                     'msg': "Method 'under_score_name' should be named in UpperCamelCase style",
                     'line': '3'
                 },
                 {
-                    'id': 'function naming',
-                    'severity': 'style',
                     'msg': "Method 'lowerCamelCaseName' should be named in UpperCamelCase style",
                     'line': '4'
                 },
                 {
-                    'id': 'function naming',
-                    'severity': 'style',
                     'msg': "Method 'ALLCAPS_NAME' should be named in UpperCamelCase style",
                     'line': '5'
                 }
@@ -201,20 +175,14 @@ class TestFunctionNamingRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'function naming',
-                    'severity': 'style',
                     'msg': "Method 'under_score_name' should be named in UpperCamelCase style",
                     'line': '3'
                 },
                 {
-                    'id': 'function naming',
-                    'severity': 'style',
                     'msg': "Method 'lowerCamelCaseName' should be named in UpperCamelCase style",
                     'line': '4'
                 },
                 {
-                    'id': 'function naming',
-                    'severity': 'style',
                     'msg': "Method 'ALLCAPS_NAME' should be named in UpperCamelCase style",
                     'line': '5'
                 }
@@ -235,20 +203,14 @@ class TestFunctionNamingRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'function naming',
-                    'severity': 'style',
                     'msg': "Method 'under_score_name' should be named in UpperCamelCase style",
                     'line': '3'
                 },
                 {
-                    'id': 'function naming',
-                    'severity': 'style',
                     'msg': "Method 'lowerCamelCaseName' should be named in UpperCamelCase style",
                     'line': '4'
                 },
                 {
-                    'id': 'function naming',
-                    'severity': 'style',
                     'msg': "Method 'ALLCAPS_NAME' should be named in UpperCamelCase style",
                     'line': '5'
                 }
@@ -269,8 +231,6 @@ class TestFunctionNamingRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'function naming',
-                    'severity': 'style',
                     'msg': "Method 'under_score_name' should be named in UpperCamelCase style",
                     'line': '4'
                 }

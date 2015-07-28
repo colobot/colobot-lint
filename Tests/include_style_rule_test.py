@@ -1,39 +1,40 @@
 #!/usr/bin/env python3
 import test_support
-from test_support import TempBuildDir, write_file_lines, write_compilation_database, run_colobot_lint
 import os
 
 class TestIncludeStyleRule(test_support.TestBase):
     def setUp(self):
-        self.set_rules_selection(['IncludeStyleRule'])
+        self.set_default_rules_selection(['IncludeStyleRule'])
+        self.set_default_error_id('include style')
+        self.set_default_error_severity('style')
 
     def assert_colobot_lint_result_with_project_headers(self,
                                                         source_file_lines,
                                                         cpp_file_path,
                                                         project_header_paths,
                                                         expected_errors):
-        with TempBuildDir() as temp_dir:
+        with test_support.TempBuildDir() as temp_dir:
             src_dir = temp_dir + '/src'
             os.mkdir(src_dir)
 
             cpp_file_name = src_dir + '/' + cpp_file_path
             os.makedirs(os.path.dirname(cpp_file_name), exist_ok = True)
-            write_file_lines(cpp_file_name, source_file_lines)
+            test_support.write_file_lines(cpp_file_name, source_file_lines)
 
             for header_path in project_header_paths:
                 header_file_name = src_dir + '/' + header_path
                 os.makedirs(os.path.dirname(header_file_name), exist_ok = True)
-                write_file_lines(header_file_name, [''])
+                test_support.write_file_lines(header_file_name, [''])
 
-            write_compilation_database(
+            test_support.write_compilation_database(
                 build_directory = temp_dir,
                 source_file_names = [cpp_file_name],
                 additional_compile_flags = '-I' + src_dir)
 
-            xml_output = run_colobot_lint(build_directory = temp_dir,
-                                          source_dir = src_dir,
-                                          source_paths = [cpp_file_name],
-                                          rules_selection = self.rules_selection)
+            xml_output = test_support.run_colobot_lint(build_directory = temp_dir,
+                                                       source_dir = src_dir,
+                                                       source_paths = [cpp_file_name],
+                                                       rules_selection = self.default_rules_selection)
             self.assert_xml_output_match(xml_output, expected_errors)
 
     def assert_colobot_lint_result_with_project_headers_and_fake_header_source(self,
@@ -42,34 +43,34 @@ class TestIncludeStyleRule(test_support.TestBase):
                                                                                fake_header_source_path,
                                                                                project_headers,
                                                                                expected_errors):
-        with TempBuildDir() as temp_dir:
+        with test_support.TempBuildDir() as temp_dir:
             src_dir = temp_dir + '/src'
             os.mkdir(src_dir)
 
             fake_header_source_file_name = temp_dir + '/' + fake_header_source_path
             os.makedirs(os.path.dirname(fake_header_source_file_name), exist_ok = True)
-            write_file_lines(fake_header_source_file_name, [
+            test_support.write_file_lines(fake_header_source_file_name, [
                 '#include "{0}"'.format(header_file_path)
             ])
 
             header_file_name = src_dir + '/' + header_file_path
             os.makedirs(os.path.dirname(header_file_name), exist_ok = True)
-            write_file_lines(header_file_name, source_file_lines)
+            test_support.write_file_lines(header_file_name, source_file_lines)
 
             for header in project_headers:
                 header_file_name = src_dir + '/' + header['path']
                 os.makedirs(os.path.dirname(header_file_name), exist_ok = True)
-                write_file_lines(header_file_name, header['source_lines'])
+                test_support.write_file_lines(header_file_name, header.get('source_lines', []))
 
-            write_compilation_database(
+            test_support.write_compilation_database(
                 build_directory = temp_dir,
                 source_file_names = [fake_header_source_file_name],
                 additional_compile_flags = '-I' + src_dir)
 
-            xml_output = run_colobot_lint(build_directory = temp_dir,
-                                          source_dir = src_dir,
-                                          source_paths = [fake_header_source_file_name],
-                                          rules_selection = self.rules_selection)
+            xml_output = test_support.run_colobot_lint(build_directory = temp_dir,
+                                                       source_dir = src_dir,
+                                                       source_paths = [fake_header_source_file_name],
+                                                       rules_selection = self.default_rules_selection)
             self.assert_xml_output_match(xml_output, expected_errors)
 
     def test_no_includes(self):
@@ -113,8 +114,6 @@ class TestIncludeStyleRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'include style',
-                    'severity': 'style',
                     'msg': "Include 'def/def.h' breaks alphabetical ordering",
                     'line': '3'
                 }
@@ -145,8 +144,6 @@ class TestIncludeStyleRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'include style',
-                    'severity': 'style',
                     'msg': "Local include 'def/abc.h' should be included with quotes, not angled brackets",
                     'line': '3'
                 }
@@ -161,8 +158,6 @@ class TestIncludeStyleRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'include style',
-                    'severity': 'style',
                     'msg': "Global include 'sstream' should be included with angled brackets, not quotes",
                     'line': '2'
                 }
@@ -185,8 +180,6 @@ class TestIncludeStyleRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'include style',
-                    'severity': 'style',
                     'msg': "Expected local include to be full relative path from project local include search path: 'def/jkl.h', not 'jkl.h'",
                     'line': '4'
                 }
@@ -207,8 +200,6 @@ class TestIncludeStyleRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'include style',
-                    'severity': 'style',
                     'msg': "Expected empty line between include directives",
                     'line': '3'
                 }
@@ -246,8 +237,6 @@ class TestIncludeStyleRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'include style',
-                    'severity': 'style',
                     'msg': "Local include 'def.h' should not be placed after global includes",
                     'line': '5'
                 }
@@ -292,8 +281,6 @@ class TestIncludeStyleRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'include style',
-                    'severity': 'style',
                     'msg': "Expected empty line between include directives",
                     'line': '2'
                 }
@@ -318,14 +305,10 @@ class TestIncludeStyleRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'include style',
-                    'severity': 'style',
                     'msg': "Expected config include directive: 'config/config.h', not 'abc.h'",
                     'line': '1'
                 },
                 {
-                    'id': 'include style',
-                    'severity': 'style',
                     'msg': "Expected empty line between include directives",
                     'line': '2'
                 }
@@ -370,8 +353,6 @@ class TestIncludeStyleRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'include style',
-                    'severity': 'style',
                     'msg': "Expected empty line between include directives",
                     'line': '2'
                 }
@@ -419,20 +400,14 @@ class TestIncludeStyleRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'include style',
-                    'severity': 'style',
                     'msg': "Expected first include directive to be matching header file: 'src.h', not 'abc.h'",
                     'line': '1'
                 },
                 {
-                    'id': 'include style',
-                    'severity': 'style',
                     'msg': "Expected empty line between include directives",
                     'line': '2'
                 },
                 {
-                    'id': 'include style',
-                    'severity': 'style',
                     'msg': "Include 'src.h' breaks alphabetical ordering",
                     'line': '2'
                 }
@@ -453,22 +428,10 @@ class TestIncludeStyleRule(test_support.TestBase):
             header_file_path = 'def/src.h',
             fake_header_source_path = 'fake_header_sources/def/src.cpp',
             project_headers = [
-                {
-                    'path': 'abc/abc.h',
-                    'source_lines': []
-                },
-                {
-                    'path': 'abc/def.h',
-                    'source_lines': []
-                },
-                {
-                    'path': 'def/abc.h',
-                    'source_lines': []
-                },
-                {
-                    'path': 'def/def.h',
-                    'source_lines': []
-                },
+                { 'path': 'abc/abc.h' },
+                { 'path': 'abc/def.h' },
+                { 'path': 'def/abc.h' },
+                { 'path': 'def/def.h' },
                 {
                     'path': 'def/base.h',
                     'source_lines': [
@@ -492,22 +455,10 @@ class TestIncludeStyleRule(test_support.TestBase):
             header_file_path = 'def/src.h',
             fake_header_source_path = 'fake_header_sources/def/src.cpp',
             project_headers = [
-                {
-                    'path': 'abc/abc.h',
-                    'source_lines': []
-                },
-                {
-                    'path': 'abc/def.h',
-                    'source_lines': []
-                },
-                {
-                    'path': 'def/abc.h',
-                    'source_lines': []
-                },
-                {
-                    'path': 'def/def.h',
-                    'source_lines': []
-                },
+                { 'path': 'abc/abc.h' },
+                { 'path': 'abc/def.h' },
+                { 'path': 'def/abc.h' },
+                { 'path': 'def/def.h', },
                 {
                     'path': 'def/base.h',
                     'source_lines': [
@@ -543,26 +494,11 @@ class TestIncludeStyleRule(test_support.TestBase):
             header_file_path = 'def/src.h',
             fake_header_source_path = 'fake_header_sources/def/src.cpp',
             project_headers = [
-                {
-                    'path': 'config/config.h',
-                    'source_lines': []
-                },
-                {
-                    'path': 'abc/abc.h',
-                    'source_lines': []
-                },
-                {
-                    'path': 'abc/def.h',
-                    'source_lines': []
-                },
-                {
-                    'path': 'def/abc.h',
-                    'source_lines': []
-                },
-                {
-                    'path': 'def/def.h',
-                    'source_lines': []
-                },
+                { 'path': 'config/config.h' },
+                { 'path': 'abc/abc.h' },
+                { 'path': 'abc/def.h' },
+                { 'path': 'def/abc.h' },
+                { 'path': 'def/def.h' },
                 {
                     'path': 'def/base.h',
                     'source_lines': [

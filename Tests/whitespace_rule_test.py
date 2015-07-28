@@ -3,7 +3,9 @@ import test_support
 
 class TestWhitespaceRule(test_support.TestBase):
     def setUp(self):
-        self.set_rules_selection(['WhitespaceRule'])
+        self.set_default_rules_selection(['WhitespaceRule'])
+        self.set_default_error_id('whitespace')
+        self.set_default_error_severity('style')
 
     def test_correct_whitespace(self):
         self.assert_colobot_lint_result(
@@ -27,8 +29,6 @@ class TestWhitespaceRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'whitespace',
-                    'severity': 'style',
                     'msg': 'Whitespace at end of line',
                     'line': '3'
                 }
@@ -46,14 +46,10 @@ class TestWhitespaceRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'whitespace',
-                    'severity': 'style',
                     'msg': 'Tab character is not allowed as whitespace',
                     'line': '3'
                 },
                 {
-                    'id': 'whitespace',
-                    'severity': 'style',
                     'msg': 'Tab character is not allowed as whitespace',
                     'line': '4'
                 }
@@ -70,8 +66,6 @@ class TestWhitespaceRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'whitespace',
-                    'severity': 'style',
                     'msg': 'File seems to have DOS style line endings',
                     'line': '1'
                 }
@@ -87,8 +81,6 @@ class TestWhitespaceRule(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'id': 'whitespace',
-                    'severity': 'style',
                     'msg': 'File should end with newline',
                     'line': '3'
                 }
