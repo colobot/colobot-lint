@@ -34,7 +34,6 @@ public:
     static const char* GetName() { return "IncludeStyleRule"; }
 
 private:
-    bool IsLocalInclude(const std::string& fileName);
     void CheckAngledBrackets(const IncludeDirectives& includeDirectives, clang::SourceManager& sourceManager);
 
     IncludeDirectiveIt CheckFirstInclude(IncludeDirectiveIt startIt, IncludeDirectiveIt endIt, clang::SourceManager& sourceManager);
@@ -45,8 +44,9 @@ private:
     void CheckNewBlock(IncludeDirectiveIt currentIt, IncludeDirectiveIt endIt, clang::SourceManager& sourceManager);
     void CheckIncludeRangeIsSorted(IncludeDirectiveIt startIt, IncludeDirectiveIt endIt, clang::SourceManager& sourceManager);
 
-    std::string GetMatchingHeaderFileName(clang::SourceManager& sourceManager);
+    bool IsLocalInclude(const std::string& fileName);
     std::string GetProjectIncludeSubpath(const std::string& fileName);
+    std::string GetMatchingHeaderFileName(clang::SourceManager& sourceManager);
 
 private:
     clang::ast_matchers::DeclarationMatcher m_matcher;

@@ -11,31 +11,30 @@ struct Context
 {
     Context(SourceLocationHelper& _sourceLocationHelper,
             OutputPrinter& _printer,
-            const std::string& _projectSourceDirectory,
-            const std::set<std::string>& _rulesSelection,
+            std::set<std::string>&& _projectLocalIncludePaths,
+            std::set<std::string>&& _rulesSelection,
             bool _verbose,
             bool _debug)
-        : areWeInFakeHeaderSourceFile(false),
-          projectSourceDirectory(_projectSourceDirectory),
-          sourceLocationHelper(_sourceLocationHelper),
-          printer(_printer),
-          rulesSelection(_rulesSelection),
+        : rulesSelection(_rulesSelection),
+          projectLocalIncludePaths(_projectLocalIncludePaths),
           verbose(_verbose),
-          debug(_debug)
+          debug(_debug),
+          areWeInFakeHeaderSourceFile(false),
+          sourceLocationHelper(_sourceLocationHelper),
+          printer(_printer)
     {}
+
+    const std::set<std::string> rulesSelection;
+    const std::set<std::string> projectLocalIncludePaths;
+    const bool verbose;
+    const bool debug;
 
     bool areWeInFakeHeaderSourceFile;
     std::string actualHeaderFileSuffix;
-    const std::string projectSourceDirectory;
 
     std::unordered_set<std::string> reportedOldStyleFunctions;
 
     SourceLocationHelper& sourceLocationHelper;
 
     OutputPrinter& printer;
-
-    const std::set<std::string> rulesSelection;
-
-    const bool verbose;
-    const bool debug;
 };

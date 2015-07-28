@@ -27,7 +27,7 @@ public:
                             const Token& /*includeTok*/,
                             StringRef fileName,
                             bool isAngled,
-                            CharSourceRange filenameRange,
+                            CharSourceRange /*filenameRange*/,
                             const FileEntry* file,
                             StringRef /*searchPath*/,
                             StringRef /*relativePath*/,
@@ -92,6 +92,7 @@ void IncludeStyleRule::run(const MatchFinder::MatchResult& result)
         return;
 
     if (recordDeclaration->isImplicit() ||
+        !recordDeclaration->isCompleteDefinition() ||
         recordDeclaration->getNumBases() == 0)
     {
         return;
@@ -244,7 +245,7 @@ IncludeDirectiveIt IncludeStyleRule::CheckLocalIncludes(IncludeDirectiveIt start
             m_context.printer.PrintRuleViolation(
                 "include style",
                 Severity::Style,
-                std::string("Expected local include to be full relative path from project root directory: '")
+                std::string("Expected local include to be full relative path from project local include search path: '")
                     + projectIncludeSubpath + "', not '" + it->includeFileName + "'",
                 it->location,
                 sourceManager);
@@ -326,7 +327,33 @@ void IncludeStyleRule::CheckIncludeRangeIsSorted(IncludeDirectiveIt startIt, Inc
 
 bool IncludeStyleRule::IsLocalInclude(const std::string& fileName)
 {
-    return StringRef(fileName).startswith(m_context.projectSourceDirectory);
+    for (const auto& path : m_context.projectLocalIncludePaths)
+    {
+        if (StringRef(fileName).startswith(path))
+            return true;
+    }
+
+    return false;
+}
+
+std::string IncludeStyleRule::GetProjectIncludeSubpath(const std::string& fileName)
+{
+    int longestCommonPrefix = 0;
+    for (const auto& path : m_context.projectLocalIncludePaths)
+    {
+        if (StringRef(fileName).startswith(path))
+            longestCommonPrefix = std::max<int>(longestCommonPrefix, path.length());
+    }
+
+    if (longestCommonPrefix == 0)
+        return "";
+
+    StringRef refFileName = StringRef(fileName);
+    refFileName = refFileName.drop_front(longestCommonPrefix);
+    if (refFileName.startswith("/"))
+        refFileName = refFileName.drop_front(1);
+
+    return refFileName.str();
 }
 
 std::string IncludeStyleRule::GetMatchingHeaderFileName(SourceManager& sourceManager)
@@ -344,17 +371,4 @@ std::string IncludeStyleRule::GetMatchingHeaderFileName(SourceManager& sourceMan
         return "";
 
     return GetProjectIncludeSubpath(matchingHeaderFileName);
-}
-
-std::string IncludeStyleRule::GetProjectIncludeSubpath(const std::string& fileName)
-{
-    StringRef refFileName = StringRef(fileName);
-    if (! refFileName.startswith(m_context.projectSourceDirectory))
-        return "";
-
-    refFileName = refFileName.drop_front(m_context.projectSourceDirectory.length());
-    if (refFileName.startswith("/"))
-        refFileName = refFileName.drop_front(1);
-
-    return refFileName.str();
 }

@@ -26,11 +26,10 @@ namespace
 
 OptionCategory g_colobotLintOptionCategory("colobot-lint options");
 
-static cl::opt<std::string> g_projectRootSourceDirectory(
-    Required,
-    "project-root",
-    desc("Full path to project source directory"),
-    value_desc("directory"), cat(g_colobotLintOptionCategory));
+static cl::list<std::string> g_projectLocalIncludePaths(
+    "project-local-include-path",
+    desc("Search path(s) to project local include files"),
+    value_desc("path"), cat(g_colobotLintOptionCategory));
 
 static cl::opt<std::string> g_outputFileOpt(
     "output-file",
@@ -101,14 +100,18 @@ int main(int argc, const char **argv)
     for (const auto& rule : g_onlyRule)
         rulesSelection.insert(rule);
 
+    std::set<std::string> projectLocalIncludePaths;
+    for (const auto& path : g_projectLocalIncludePaths)
+        projectLocalIncludePaths.insert(path);
+
     SourceLocationHelper sourceLocationHelper;
 
     OutputPrinter outputPrinter(g_outputFileOpt);
 
     Context context(sourceLocationHelper,
                     outputPrinter,
-                    g_projectRootSourceDirectory,
-                    rulesSelection,
+                    std::move(projectLocalIncludePaths),
+                    std::move(rulesSelection),
                     g_verboseOpt,
                     g_debugOpt);
     sourceLocationHelper.SetContext(&context);

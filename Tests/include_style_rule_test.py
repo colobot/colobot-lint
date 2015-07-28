@@ -187,7 +187,7 @@ class TestIncludeStyleRule(test_support.TestBase):
                 {
                     'id': 'include style',
                     'severity': 'style',
-                    'msg': "Expected local include to be full relative path from project root directory: 'def/jkl.h', not 'jkl.h'",
+                    'msg': "Expected local include to be full relative path from project local include search path: 'def/jkl.h', not 'jkl.h'",
                     'line': '4'
                 }
             ])

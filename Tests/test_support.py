@@ -72,7 +72,7 @@ def run_colobot_lint(build_directory, source_dir, source_paths, rules_selection 
     whole_command = ([colobot_lint_exectuable] +
                      rules_selection_options +
                      ['-p', build_directory] +
-                     ['-project-root', source_dir] +
+                     ['-project-local-include-path', source_dir] +
                      source_paths)
 
     if debug_flag:

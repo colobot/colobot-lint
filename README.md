@@ -93,7 +93,7 @@ This is enough, you don't need to run `make` itself. Everything that this tool n
 
 Now we can run the tool itself:
 ```
- $ colobot-lint -verbose -output-file=report.xml -p $PWD/colobot-build $(find $PWD/colobot/src -name '*.cpp')
+ $ colobot-lint -verbose -output-file=report.xml -p $PWD/colobot-build -project-local-include-path $PWD/colobot/src $(find $PWD/colobot/src -name '*.cpp')
 ```
 
 (Note the use of `$PWD` - you need to supply full paths to files, exactly as they appear in `compile_commands.json`)
