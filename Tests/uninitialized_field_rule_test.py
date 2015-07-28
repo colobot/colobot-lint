@@ -148,6 +148,21 @@ class TestUnintializedFieldRule(test_support.TestBase):
                 }
             ])
 
+    def test_class_with_constructor_declared_and_defined_elsewhere(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                'struct Foo',
+                '{',
+                '    Foo();',
+                '    int x = 0;',
+                '    float y = 0.0f;',
+                '    bool z;',
+                '};',
+                '',
+                'Foo::Foo() : z(true) {}'
+            ],
+            expected_errors = [])
+
     def test_ignore_union(self):
         self.assert_colobot_lint_result(
             source_file_lines = [

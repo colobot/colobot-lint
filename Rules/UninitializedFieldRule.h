@@ -34,11 +34,8 @@ private:
                             const std::unordered_set<std::string>& candidateFieldList,
                             clang::ASTContext* context);
 
-    void HandleConstructorDeclaration(const clang::CXXConstructorDecl* constructorDeclaration,
-                                      std::unordered_set<std::string>& candidateFieldList);
-
-    void HandleInitializationList(const clang::CXXConstructorDecl* constructorDeclaration,
-                                  std::unordered_set<std::string>& candidateFieldList);
+    void HandleConstructorInitializationList(const clang::CXXConstructorDecl* constructorDeclaration,
+                                             std::unordered_set<std::string>& candidateFieldList);
 
     void HandleConstructorBody(const clang::CXXConstructorDecl* constructorDeclaration,
                                std::unordered_set<std::string>& candidateFieldList);

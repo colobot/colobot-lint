@@ -68,16 +68,13 @@ UninitializedFieldRule::ConstructorStatus UninitializedFieldRule::CheckConstruct
 {
     bool haveConstructorsWithBody = false;
 
-    for (auto it = recordDeclaration->decls_begin();
-         it != recordDeclaration->decls_end();
-         ++it)
+    for (const Decl* decl : recordDeclaration->decls())
     {
-        if (!CXXConstructorDecl::classof(*it))
+        if (!CXXConstructorDecl::classof(decl))
             continue;
 
-        const CXXConstructorDecl* constructorDeclaration = static_cast<const CXXConstructorDecl*>(*it);
-        if (constructorDeclaration->isCopyOrMoveConstructor() &&
-            constructorDeclaration->isImplicit())
+        const CXXConstructorDecl* constructorDeclaration = static_cast<const CXXConstructorDecl*>(decl);
+        if (constructorDeclaration->isImplicit())
             continue;
 
         if (! constructorDeclaration->hasBody())
@@ -94,14 +91,12 @@ std::unordered_set<std::string> UninitializedFieldRule::GetCandidateFieldsList(c
 {
     std::unordered_set<std::string> candidates;
 
-    for (auto it = recordDeclaration->decls_begin();
-         it != recordDeclaration->decls_end();
-         ++it)
+    for (const Decl* decl : recordDeclaration->decls())
     {
-        if (!FieldDecl::classof(*it))
+        if (!FieldDecl::classof(decl))
             continue;
 
-        const FieldDecl* fieldDeclaration = static_cast<const FieldDecl*>(*it);
+        const FieldDecl* fieldDeclaration = static_cast<const FieldDecl*>(decl);
         if (fieldDeclaration->hasInClassInitializer())
             continue;
 
@@ -122,20 +117,22 @@ void UninitializedFieldRule::HandleConstructors(const RecordDecl* recordDeclarat
                                                 const std::unordered_set<std::string>& candidateFieldList,
                                                 ASTContext* context)
 {
-    for (auto it = recordDeclaration->decls_begin();
-         it != recordDeclaration->decls_end();
-         ++it)
+    for (const Decl* decl : recordDeclaration->decls())
     {
-        if (!CXXConstructorDecl::classof(*it))
+        if (!CXXConstructorDecl::classof(decl))
             continue;
 
-        const CXXConstructorDecl* constructorDeclaration = static_cast<const CXXConstructorDecl*>(*it);
-        if (constructorDeclaration->isCopyOrMoveConstructor() &&
-            constructorDeclaration->isImplicit())
+        const CXXConstructorDecl* constructorDeclaration = static_cast<const CXXConstructorDecl*>(decl);
+
+        if (constructorDeclaration->isImplicit() ||
+            ! constructorDeclaration->isThisDeclarationADefinition())
+        {
             continue;
+        }
 
         std::unordered_set<std::string> constructorCandidateFieldList = candidateFieldList;
-        HandleConstructorDeclaration(constructorDeclaration, constructorCandidateFieldList);
+        HandleConstructorInitializationList(constructorDeclaration, constructorCandidateFieldList);
+        HandleConstructorBody(constructorDeclaration, constructorCandidateFieldList);
 
         for (const auto& field : constructorCandidateFieldList)
         {
@@ -151,36 +148,12 @@ void UninitializedFieldRule::HandleConstructors(const RecordDecl* recordDeclarat
     }
 }
 
-void UninitializedFieldRule::HandleConstructorDeclaration(const clang::CXXConstructorDecl* constructorDeclaration,
-                                                          std::unordered_set<std::string>& candidateFieldList)
+void UninitializedFieldRule::HandleConstructorInitializationList(const CXXConstructorDecl* constructorDeclaration,
+                                                                 std::unordered_set<std::string>& candidateFieldList)
 {
-    // constructor without body is a declaration, not a definition
-    if (!constructorDeclaration->hasBody())
+    for (CXXCtorInitializer* init : constructorDeclaration->inits())
     {
-        std::cerr << "No body!" << std::endl;
-        return;
-    }
-
-    const DeclContext* declarationContext = constructorDeclaration->getDeclContext();
-    if (declarationContext == nullptr ||
-        ! declarationContext->isRecord())
-    {
-        return;
-    }
-
-    HandleInitializationList(constructorDeclaration, candidateFieldList);
-
-    HandleConstructorBody(constructorDeclaration, candidateFieldList);
-}
-
-void UninitializedFieldRule::HandleInitializationList(const CXXConstructorDecl* constructorDeclaration,
-                                                      std::unordered_set<std::string>& candidateFieldList)
-{
-    for (auto it = constructorDeclaration->init_begin();
-         it != constructorDeclaration->init_end();
-         ++it)
-    {
-        FieldDecl* member = (*it)->getMember();
+        FieldDecl* member = init->getMember();
         if (member != nullptr)
         {
             candidateFieldList.erase(member->getName().str());
@@ -196,13 +169,11 @@ void UninitializedFieldRule::HandleConstructorBody(const CXXConstructorDecl* con
         CompoundStmt::classof(constructorBody))
     {
         const CompoundStmt* compountStatement = static_cast<const CompoundStmt*>(constructorBody);
-        for (auto it = compountStatement->body_begin();
-             it != compountStatement->body_end();
-             ++it)
+        for (Stmt* statement : compountStatement->body())
         {
-            if (BinaryOperator::classof(*it))
+            if (BinaryOperator::classof(statement))
             {
-                const BinaryOperator* binaryOperator = static_cast<const BinaryOperator*>(*it);
+                const BinaryOperator* binaryOperator = static_cast<const BinaryOperator*>(statement);
                 if (binaryOperator->isAssignmentOp())
                 {
                     HandleAssignStatement(binaryOperator, candidateFieldList);
@@ -216,17 +187,23 @@ void UninitializedFieldRule::HandleAssignStatement(const BinaryOperator* assignS
                                                    std::unordered_set<std::string>& candidateFieldList)
 {
     const Stmt* leftHandSide = assignStatement->getLHS();
-    if (leftHandSide != nullptr &&
-        MemberExpr::classof(leftHandSide))
-    {
-        const MemberExpr* memberExpr = static_cast<const MemberExpr*>(leftHandSide);
-        const Expr* baseExpr = memberExpr->getBase();
-        const ValueDecl* memberDecl = memberExpr->getMemberDecl();
-        if (baseExpr != nullptr &&
-            CXXThisExpr::classof(memberExpr->getBase()) &&
-            memberDecl != nullptr)
-        {
-            candidateFieldList.erase(memberDecl->getName().str());
-        }
-    }
+    if (leftHandSide == nullptr)
+        return;
+
+    if (!MemberExpr::classof(leftHandSide))
+        return;
+
+    const MemberExpr* memberExpr = static_cast<const MemberExpr*>(leftHandSide);
+    const Expr* baseExpr = memberExpr->getBase();
+    if (baseExpr == nullptr)
+        return;
+
+    if (! CXXThisExpr::classof(memberExpr->getBase()))
+        return;
+
+    const ValueDecl* memberDecl = memberExpr->getMemberDecl();
+    if (memberDecl == nullptr)
+        return;
+
+    candidateFieldList.erase(memberDecl->getName().str());
 }
