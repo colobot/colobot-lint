@@ -1,5 +1,6 @@
 #include "UninitializedLocalVariableRule.h"
 
+#include "../Common/ClassofCast.h"
 #include "../Common/Context.h"
 #include "../Common/OutputPrinter.h"
 #include "../Common/SourceLocationHelper.h"
@@ -64,16 +65,12 @@ void UninitializedLocalVariableRule::run(const MatchFinder::MatchResult& result)
 
 bool UninitializedLocalVariableRule::HasImplicitInitialization(const VarDecl* variableDeclaration)
 {
-    const Expr* initExpr = variableDeclaration->getInit();
-    if (initExpr == nullptr)
+    const CXXConstructExpr* constructExpr = classof_cast<const CXXConstructExpr>(variableDeclaration->getInit());
+    if (constructExpr == nullptr ||
+        constructExpr->getConstructor() == nullptr)
+    {
         return false;
-
-    if (! CXXConstructExpr::classof(initExpr))
-        return false;
-
-    const CXXConstructExpr* constructExpr = static_cast<const CXXConstructExpr*>(initExpr);
-    if (constructExpr->getConstructor() == nullptr)
-        return false;
+    }
 
     return constructExpr->getConstructor()->isImplicit();
 }

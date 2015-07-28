@@ -1,5 +1,6 @@
 #include "BlockPlacementRule.h"
 
+#include "../Common/ClassofCast.h"
 #include "../Common/Context.h"
 #include "../Common/OutputPrinter.h"
 #include "../Common/SourceLocationHelper.h"
@@ -81,16 +82,15 @@ bool BlockPlacementRule::VisitStmt(Stmt* statement)
         return true; // recurse further
     }
 
-    // compound statement is name for a group of brace-enclosed statement(s)
-    //  for example: if (x) { foo(); }
-    if (! CompoundStmt::classof(statement))
-        return true; // recurse further
-
     // one-liners are allowed
     if (startLineNumber == endLineNumber)
         return true; // recurse further
 
-    CompoundStmt* compoundStatement = static_cast<CompoundStmt*>(statement);
+    // compound statement is name for a group of brace-enclosed statement(s)
+    //  for example: if (x) { foo(); }
+    CompoundStmt* compoundStatement = classof_cast<CompoundStmt>(statement);
+    if (compoundStatement == nullptr)
+        return true; // recurse further
 
     SourceLocation openingBraceLocation = compoundStatement->getLBracLoc();
     SourceLocation parentScopeStartLocation;

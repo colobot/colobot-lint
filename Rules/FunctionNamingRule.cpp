@@ -1,5 +1,6 @@
 #include "FunctionNamingRule.h"
 
+#include "../Common/ClassofCast.h"
 #include "../Common/Context.h"
 #include "../Common/OutputPrinter.h"
 #include "../Common/SourceLocationHelper.h"
@@ -35,8 +36,9 @@ void FunctionNamingRule::run(const MatchFinder::MatchResult& result)
     if (functionDeclaration->isOverloadedOperator())
         return;
 
-    if (CXXMethodDecl::classof(functionDeclaration))
-        return HandleMethodDeclaration(static_cast<const CXXMethodDecl*>(functionDeclaration), result.Context);
+    const CXXMethodDecl* methodDeclaration = classof_cast<const CXXMethodDecl>(functionDeclaration);
+    if (methodDeclaration != nullptr)
+        return HandleMethodDeclaration(methodDeclaration, result.Context);
 
     return HandleFunctionDeclaration(functionDeclaration, location, result.Context);
 }

@@ -1,5 +1,6 @@
 #include "UninitializedFieldRule.h"
 
+#include "../Common/ClassofCast.h"
 #include "../Common/Context.h"
 #include "../Common/OutputPrinter.h"
 #include "../Common/SourceLocationHelper.h"
@@ -70,12 +71,12 @@ UninitializedFieldRule::ConstructorStatus UninitializedFieldRule::CheckConstruct
 
     for (const Decl* decl : recordDeclaration->decls())
     {
-        if (!CXXConstructorDecl::classof(decl))
+        const CXXConstructorDecl* constructorDeclaration = classof_cast<const CXXConstructorDecl>(decl);
+        if (constructorDeclaration == nullptr ||
+            constructorDeclaration->isImplicit())
+        {
             continue;
-
-        const CXXConstructorDecl* constructorDeclaration = static_cast<const CXXConstructorDecl*>(decl);
-        if (constructorDeclaration->isImplicit())
-            continue;
+        }
 
         if (! constructorDeclaration->hasBody())
             return ConstructorStatus::SomeConstructorsNotDefined;
@@ -93,11 +94,9 @@ std::unordered_set<std::string> UninitializedFieldRule::GetCandidateFieldsList(c
 
     for (const Decl* decl : recordDeclaration->decls())
     {
-        if (!FieldDecl::classof(decl))
-            continue;
-
-        const FieldDecl* fieldDeclaration = static_cast<const FieldDecl*>(decl);
-        if (fieldDeclaration->hasInClassInitializer())
+        const FieldDecl* fieldDeclaration = classof_cast<const FieldDecl>(decl);
+        if (fieldDeclaration == nullptr ||
+            fieldDeclaration->hasInClassInitializer())
             continue;
 
         QualType type = fieldDeclaration->getType();
@@ -119,12 +118,10 @@ void UninitializedFieldRule::HandleConstructors(const RecordDecl* recordDeclarat
 {
     for (const Decl* decl : recordDeclaration->decls())
     {
-        if (!CXXConstructorDecl::classof(decl))
-            continue;
+        const CXXConstructorDecl* constructorDeclaration = classof_cast<const CXXConstructorDecl>(decl);
 
-        const CXXConstructorDecl* constructorDeclaration = static_cast<const CXXConstructorDecl*>(decl);
-
-        if (constructorDeclaration->isImplicit() ||
+        if (constructorDeclaration == nullptr ||
+            constructorDeclaration->isImplicit() ||
             ! constructorDeclaration->isThisDeclarationADefinition())
         {
             continue;
@@ -164,21 +161,17 @@ void UninitializedFieldRule::HandleConstructorInitializationList(const CXXConstr
 void UninitializedFieldRule::HandleConstructorBody(const CXXConstructorDecl* constructorDeclaration,
                                                    std::unordered_set<std::string>& candidateFieldList)
 {
-    const Stmt* constructorBody = constructorDeclaration->getBody();
-    if (constructorBody != nullptr &&
-        CompoundStmt::classof(constructorBody))
+    const CompoundStmt* compountStatement = classof_cast<const CompoundStmt>(constructorDeclaration->getBody());
+    if (compountStatement == nullptr)
+        return;
+
+    for (Stmt* statement : compountStatement->body())
     {
-        const CompoundStmt* compountStatement = static_cast<const CompoundStmt*>(constructorBody);
-        for (Stmt* statement : compountStatement->body())
+        const BinaryOperator* binaryOperator = classof_cast<const BinaryOperator>(statement);
+        if (binaryOperator != nullptr &&
+            binaryOperator->isAssignmentOp())
         {
-            if (BinaryOperator::classof(statement))
-            {
-                const BinaryOperator* binaryOperator = static_cast<const BinaryOperator*>(statement);
-                if (binaryOperator->isAssignmentOp())
-                {
-                    HandleAssignStatement(binaryOperator, candidateFieldList);
-                }
-            }
+            HandleAssignStatement(binaryOperator, candidateFieldList);
         }
     }
 }
@@ -186,19 +179,12 @@ void UninitializedFieldRule::HandleConstructorBody(const CXXConstructorDecl* con
 void UninitializedFieldRule::HandleAssignStatement(const BinaryOperator* assignStatement,
                                                    std::unordered_set<std::string>& candidateFieldList)
 {
-    const Stmt* leftHandSide = assignStatement->getLHS();
-    if (leftHandSide == nullptr)
+    const MemberExpr* memberExpr = classof_cast<const MemberExpr>(assignStatement->getLHS());
+    if (memberExpr == nullptr)
         return;
 
-    if (!MemberExpr::classof(leftHandSide))
-        return;
-
-    const MemberExpr* memberExpr = static_cast<const MemberExpr*>(leftHandSide);
-    const Expr* baseExpr = memberExpr->getBase();
-    if (baseExpr == nullptr)
-        return;
-
-    if (! CXXThisExpr::classof(memberExpr->getBase()))
+    const CXXThisExpr* thisExpr = classof_cast<const CXXThisExpr>(memberExpr->getBase());
+    if (thisExpr == nullptr)
         return;
 
     const ValueDecl* memberDecl = memberExpr->getMemberDecl();

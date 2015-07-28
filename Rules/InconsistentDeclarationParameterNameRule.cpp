@@ -61,20 +61,20 @@ bool InconsistentDeclarationParameterNameRule::HasInconsitentDeclarationParamete
         if (otherDeclaration->getLocation() == location) // skip current one
             continue;
 
-        auto myParam = functionDeclaration->param_begin();
-        auto otherParam = otherDeclaration->param_begin();
-        while (myParam != functionDeclaration->param_end() &&
-               otherParam != otherDeclaration->param_end())
+        auto myParamIt = functionDeclaration->param_begin();
+        auto otherParamIt = otherDeclaration->param_begin();
+        while (myParamIt != functionDeclaration->param_end() &&
+               otherParamIt != otherDeclaration->param_end())
         {
-            auto myParamName = (*myParam)->getName();
-            auto otherParamName = (*otherParam)->getName();
+            auto myParamName = (*myParamIt)->getName();
+            auto otherParamName = (*otherParamIt)->getName();
 
             if (!myParamName.empty() && !otherParamName.empty() && myParamName != otherParamName)
             {
                 return true;
             }
-            ++myParam;
-            ++otherParam;
+            ++myParamIt;
+            ++otherParamIt;
         }
     }
 

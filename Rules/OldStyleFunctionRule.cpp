@@ -1,5 +1,6 @@
 #include "OldStyleFunctionRule.h"
 
+#include "../Common/ClassofCast.h"
 #include "../Common/Context.h"
 #include "../Common/OutputPrinter.h"
 #include "../Common/SourceLocationHelper.h"
@@ -111,20 +112,14 @@ OldStyleDeclarationFinder::OldStyleDeclarationFinder(ASTContext* context)
 
 bool OldStyleDeclarationFinder::VisitStmt(clang::Stmt* statement)
 {
-    if (! DeclRefExpr::classof(statement))
+    const DeclRefExpr* declarationRef = classof_cast<const DeclRefExpr>(statement);
+    if (declarationRef == nullptr)
         return true;
 
-    const DeclRefExpr* declarationRef = static_cast<const DeclRefExpr*>(statement);
-    const ValueDecl* declaration =  declarationRef->getDecl();
-    if (declaration == nullptr ||
-        ! VarDecl::classof(declaration))
-    {
-        return true;
-    }
-
-    const VarDecl* variableDeclaration = static_cast<const VarDecl*>(declaration);
-    if (! variableDeclaration->hasLocalStorage() ||
-        ParmVarDecl::classof(variableDeclaration))
+    const VarDecl* variableDeclaration = classof_cast<const VarDecl>(declarationRef->getDecl());
+    if (variableDeclaration == nullptr ||
+        ParmVarDecl::classof(variableDeclaration) ||
+        ! variableDeclaration->hasLocalStorage())
     {
         return true;
     }
