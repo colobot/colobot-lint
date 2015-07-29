@@ -53,6 +53,7 @@ set(COLOBOT_LINT_SRCS
     Common/SourceLocationHelper.cpp
     Handlers/BeginSourceFileHandler.cpp
     Handlers/DiagnosticHandler.cpp
+    Handlers/ExclusionZoneCommentHandler.cpp
     Rules/BlockPlacementRule.cpp
     Rules/ClassNamingRule.cpp
     Rules/EnumNamingRule.cpp

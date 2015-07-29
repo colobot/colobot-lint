@@ -2,10 +2,12 @@
 
 #include "../Common/Context.h"
 #include "../Common/OutputPrinter.h"
+#include "../Common/RegexHelper.h"
 #include "../Common/SourceLocationHelper.h"
 
 #include <clang/Frontend/CompilerInstance.h>
 
+using namespace llvm;
 using namespace clang;
 
 TodoRule::TodoRule(Context& context)
@@ -22,51 +24,34 @@ bool TodoRule::HandleComment(Preprocessor& pp, SourceRange range)
 {
     SourceLocation location = range.getBegin();
 
-    if (! m_context.sourceLocationHelper.IsLocationOfInterest(location, pp.getSourceManager()))
+    SourceManager& sourceManager = pp.getSourceManager();
+
+    if (! m_context.sourceLocationHelper.IsLocationOfInterest(GetName(), location, sourceManager))
         return false;
 
-    std::string commentText =
-        Lexer::getSourceText(CharSourceRange::getCharRange(range),
-                             pp.getSourceManager(), pp.getLangOpts());
+    StringRef commentText = Lexer::getSourceText(CharSourceRange::getCharRange(range),
+                                                 pp.getSourceManager(),
+                                                 pp.getLangOpts());
 
-    std::vector<std::string> lines = SplitLines(commentText);
     int lineOffset = 0;
-    for (const auto& commentLine : lines)
+    while (! commentText.empty())
     {
-        boost::smatch match;
-        if (boost::regex_search(commentLine, match, m_todoPattern))
+        auto split = commentText.split('\n');
+        StringRef commentLine = split.first;
+        commentText = split.second;
+
+        StringRefMatchResults todoText;
+        if (boost::regex_search(commentLine.begin(), commentLine.end(), todoText, m_todoPattern))
         {
-            std::string todoText = match[1];
             m_context.printer.PrintRuleViolation("TODO comment",
                                                 Severity::Information,
-                                                todoText,
+                                                GetStringRefResult(todoText, 1, commentLine).str(),
                                                 location,
-                                                pp.getSourceManager(),
+                                                sourceManager,
                                                 lineOffset);
         }
         ++lineOffset;
     }
 
     return false;
-}
-
-std::vector<std::string> TodoRule::SplitLines(const std::string& text)
-{
-    std::vector<std::string> lines;
-    size_t pos = 0;
-    while (pos < text.length())
-    {
-        size_t newlinePos = text.find('\n', pos);
-        if (newlinePos != text.npos)
-        {
-            lines.push_back(text.substr(pos, newlinePos - pos));
-            pos = newlinePos+1;
-        }
-        else
-        {
-            lines.push_back(text.substr(pos));
-            break;
-        }
-    }
-    return lines;
 }

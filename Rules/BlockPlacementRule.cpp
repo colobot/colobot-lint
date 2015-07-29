@@ -28,12 +28,14 @@ void BlockPlacementRule::HandleTranslationUnit(ASTContext &context)
 
 bool BlockPlacementRule::VisitDecl(Decl* declaration)
 {
+    SourceManager& sourceManager = m_astContext->getSourceManager();
+
     SourceLocation location = declaration->getLocation();
-    if (! m_context.sourceLocationHelper.IsLocationOfInterest(location, m_astContext->getSourceManager()))
+    if (! m_context.sourceLocationHelper.IsLocationOfInterest(GetName(), location, sourceManager))
         return true; // recurse further
 
-    int declarationStartLineNumber = m_astContext->getSourceManager().getPresumedLineNumber(declaration->getLocStart());
-    int declarationEndLineNumber = m_astContext->getSourceManager().getPresumedLineNumber(declaration->getLocEnd());
+    int declarationStartLineNumber = sourceManager.getPresumedLineNumber(declaration->getLocStart());
+    int declarationEndLineNumber = sourceManager.getPresumedLineNumber(declaration->getLocEnd());
 
     if (m_forbiddenLineNumbers.count(declarationStartLineNumber) > 0 ||
         m_forbiddenLineNumbers.count(declarationEndLineNumber) > 0)
@@ -68,12 +70,14 @@ bool BlockPlacementRule::VisitDecl(Decl* declaration)
 
 bool BlockPlacementRule::VisitStmt(Stmt* statement)
 {
+    SourceManager& sourceManager = m_astContext->getSourceManager();
+
     SourceLocation location = statement->getLocStart();
-    if (! m_context.sourceLocationHelper.IsLocationOfInterest(location, m_astContext->getSourceManager()))
+    if (! m_context.sourceLocationHelper.IsLocationOfInterest(GetName(), location, sourceManager))
         return true; // recurse further
 
-    int startLineNumber = m_astContext->getSourceManager().getPresumedLineNumber(statement->getLocStart());
-    int endLineNumber = m_astContext->getSourceManager().getPresumedLineNumber(statement->getLocEnd());
+    int startLineNumber = sourceManager.getPresumedLineNumber(statement->getLocStart());
+    int endLineNumber = sourceManager.getPresumedLineNumber(statement->getLocEnd());
 
     if (m_forbiddenLineNumbers.count(startLineNumber) > 0 ||
         m_forbiddenLineNumbers.count(endLineNumber) > 0)

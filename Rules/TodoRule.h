@@ -19,7 +19,5 @@ public:
     static const char* GetName() { return "TodoRule"; }
 
 private:
-    std::vector<std::string> SplitLines(const std::string& text);
-
     boost::regex m_todoPattern;
 };

@@ -32,7 +32,7 @@ private:
     ConstructorStatus CheckConstructorStatus(const clang::RecordDecl* recordDeclaration);
     void HandleConstructors(const clang::RecordDecl* recordDeclaration,
                             const std::unordered_set<std::string>& candidateFieldList,
-                            clang::ASTContext* context);
+                            clang::SourceManager& sourceManager);
 
     void HandleConstructorInitializationList(const clang::CXXConstructorDecl* constructorDeclaration,
                                              std::unordered_set<std::string>& candidateFieldList);

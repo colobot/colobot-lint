@@ -27,8 +27,10 @@ void UninitializedFieldRule::run(const MatchFinder::MatchResult& result)
     if (recordDeclaration == nullptr)
         return;
 
+    SourceManager& sourceManager = result.Context->getSourceManager();
+
     SourceLocation location = recordDeclaration->getLocation();
-    if (! m_context.sourceLocationHelper.IsLocationOfInterest(location, result.Context->getSourceManager()))
+    if (! m_context.sourceLocationHelper.IsLocationOfInterest(GetName(), location, sourceManager))
         return;
 
     if (recordDeclaration->isUnion())
@@ -56,12 +58,12 @@ void UninitializedFieldRule::run(const MatchFinder::MatchResult& result)
                 Severity::Error,
                 which + " '" + recordDeclaration->getName().str() + "' field '" + field + "'" + " remains uninitialized",
                 location,
-                result.Context->getSourceManager());
+                sourceManager);
         }
     }
     else
     {
-        HandleConstructors(recordDeclaration, candidateFieldList, result.Context);
+        HandleConstructors(recordDeclaration, candidateFieldList, sourceManager);
     }
 }
 
@@ -114,7 +116,7 @@ std::unordered_set<std::string> UninitializedFieldRule::GetCandidateFieldsList(c
 
 void UninitializedFieldRule::HandleConstructors(const RecordDecl* recordDeclaration,
                                                 const std::unordered_set<std::string>& candidateFieldList,
-                                                ASTContext* context)
+                                                SourceManager& sourceManager)
 {
     for (const Decl* decl : recordDeclaration->decls())
     {
@@ -140,7 +142,7 @@ void UninitializedFieldRule::HandleConstructors(const RecordDecl* recordDeclarat
                 Severity::Error,
                 which + " '" + recordDeclaration->getName().str() + "' field '" + field + "'" + " remains uninitialized in constructor",
                 constructorDeclaration->getLocation(),
-                context->getSourceManager());
+                sourceManager);
         }
     }
 }

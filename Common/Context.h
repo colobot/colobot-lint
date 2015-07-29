@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ExclusionZone.h"
+
 #include <set>
 #include <string>
 #include <unordered_set>
@@ -31,6 +33,8 @@ struct Context
 
     bool areWeInFakeHeaderSourceFile;
     std::string actualHeaderFileSuffix;
+
+    std::unordered_set<ExclusionZone> exclusionZones;
 
     std::unordered_set<std::string> reportedOldStyleFunctions;
 

@@ -39,7 +39,7 @@ void OutputPrinter::Save()
 void OutputPrinter::PrintRuleViolation(const std::string& ruleName,
                                        Severity severity,
                                        const std::string& description,
-                                       const clang::SourceLocation& location,
+                                       clang::SourceLocation location,
                                        clang::SourceManager& sourceManager,
                                        int lineOffset)
 {

@@ -1,14 +1,23 @@
 #pragma once
 
 #include "Handlers/BeginSourceFileHandler.h"
-
-#include "Rules/ASTCallbackRule.h"
+#include "Handlers/ExclusionZoneCommentHandler.h"
 
 #include <clang/Frontend/MultiplexConsumer.h>
 #include <clang/Tooling/Tooling.h>
 
 #include <memory>
 #include <vector>
+
+class ASTCallbackRule;
+
+namespace clang
+{
+namespace ast_matchers
+{
+class MatchFinder;
+} // namespace ast_matchers
+} // namespace clang
 
 // Frontend action factory for AST checkers - this is required by clang::tooling::ClangTool interface
 class ColobotLintASTFrontendActionFactory : public clang::tooling::FrontendActionFactory
@@ -38,6 +47,7 @@ public:
 private:
     Context &m_context;
     BeginSourceFileHandler m_beginSourceFileHandler;
+    ExclusionZoneCommentHandler m_exclusionZoneCommentHandler;
 };
 
 /////////////////////////////////////////////////////////////////////////////////

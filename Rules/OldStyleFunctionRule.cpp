@@ -48,8 +48,10 @@ void OldStyleFunctionRule::run(const MatchFinder::MatchResult& result)
     if (functionDeclaration == nullptr)
         return;
 
+    SourceManager& sourceManager = result.Context->getSourceManager();
+
     SourceLocation location = functionDeclaration->getLocation();
-    if (! m_context.sourceLocationHelper.IsLocationOfInterest(location, result.Context->getSourceManager()))
+    if (! m_context.sourceLocationHelper.IsLocationOfInterest(GetName(), location, sourceManager))
         return;
 
     Stmt* body = functionDeclaration->getBody();
@@ -68,7 +70,7 @@ void OldStyleFunctionRule::run(const MatchFinder::MatchResult& result)
             std::string("Function '") + functionDeclaration->getName().str() + "' has variables declared far from point of use "
                 + GetShortDeclarationsString(finder.GetFirstFewOldStyleDeclarations(), oldStyleDeclarationCount),
             location,
-            result.Context->getSourceManager());
+            sourceManager);
 
         m_context.reportedOldStyleFunctions.insert(functionDeclaration->getQualifiedNameAsString());
     }

@@ -1,9 +1,12 @@
 #include "ActionFactories.h"
 
+#include "Rules/ASTCallbackRule.h"
+#include "Rules/DirectASTConsumerRule.h"
 #include "Rules/RulesFactory.h"
 
-#include <clang/Lex/Preprocessor.h>
 #include <clang/ASTMatchers/ASTMatchFinder.h>
+#include <clang/Frontend/CompilerInstance.h>
+#include <clang/Lex/Preprocessor.h>
 
 using namespace llvm;
 using namespace clang;
@@ -23,7 +26,8 @@ FrontendAction* ColobotLintASTFrontendActionFactory::create()
 
 ColobotLintASTFrontendAction::ColobotLintASTFrontendAction(Context& context)
     : m_context(context),
-      m_beginSourceFileHandler(context)
+      m_beginSourceFileHandler(context),
+      m_exclusionZoneCommentHandler(context)
 {}
 
 bool ColobotLintASTFrontendAction::BeginSourceFileAction(CompilerInstance& ci, StringRef filename)
@@ -38,6 +42,8 @@ std::unique_ptr<ASTConsumer> ColobotLintASTFrontendAction::CreateASTConsumer(Com
     std::vector<std::unique_ptr<ASTConsumer>> consumers;
 
     auto finder = make_unique<MatchFinder>();
+
+    compiler.getPreprocessor().addCommentHandler(&m_exclusionZoneCommentHandler);
 
     auto astCallbackRules = CreateASTRules(m_context);
     for (auto& rule : astCallbackRules)

@@ -21,11 +21,16 @@ public:
 
 private:
     void HandleFunctionDeclaration(const clang::FunctionDecl* functionDeclaration,
-                                   const clang::SourceLocation& location,
-                                   clang::ASTContext* context);
-    void HandleMethodDeclaration(const clang::CXXMethodDecl* methodDeclaration, clang::ASTContext* context);
-    void ValidateName(const char* type, const std::string& name, const std::string& fulllyQualifiedName,
-                      const clang::SourceLocation& location, clang::ASTContext* context);
+                                   clang::SourceLocation location,
+                                   clang::SourceManager& sourceManager);
+    void HandleMethodDeclaration(const clang::CXXMethodDecl* methodDeclaration,
+                                 clang::SourceLocation location,
+                                 clang::SourceManager& sourceManager);
+    void ValidateName(const char* type,
+                      const std::string& name,
+                      const std::string& fullyQualifiedName,
+                      clang::SourceLocation location,
+                      clang::SourceManager& sourceManager);
 
 private:
     clang::ast_matchers::DeclarationMatcher m_matcher;

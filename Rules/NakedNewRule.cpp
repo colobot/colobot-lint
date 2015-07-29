@@ -27,8 +27,10 @@ void NakedNewRule::run(const MatchFinder::MatchResult& result)
     if (newExpr == nullptr)
         return;
 
+    SourceManager& sourceManager = result.Context->getSourceManager();
+
     SourceLocation location = newExpr->getLocStart();
-    if (! m_context.sourceLocationHelper.IsLocationOfInterest(location, result.Context->getSourceManager()))
+    if (! m_context.sourceLocationHelper.IsLocationOfInterest(GetName(), location, sourceManager))
         return;
 
     std::string typeStr = newExpr->getAllocatedType().getAsString();
@@ -38,5 +40,5 @@ void NakedNewRule::run(const MatchFinder::MatchResult& result)
         Severity::Warning,
         std::string("Naked new called with type '") + typeStr + "'",
         location,
-        result.Context->getSourceManager());
+        sourceManager);
 }

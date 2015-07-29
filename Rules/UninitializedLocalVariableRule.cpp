@@ -27,8 +27,10 @@ void UninitializedLocalVariableRule::run(const MatchFinder::MatchResult& result)
     if (variableDeclaration == nullptr)
         return;
 
+    SourceManager& sourceManager = result.Context->getSourceManager();
+
     SourceLocation location = variableDeclaration->getLocation();
-    if (! m_context.sourceLocationHelper.IsLocationOfInterest(location, result.Context->getSourceManager()))
+    if (! m_context.sourceLocationHelper.IsLocationOfInterest(GetName(), location, sourceManager))
         return;
 
     if (! variableDeclaration->hasLocalStorage() ||
@@ -59,7 +61,7 @@ void UninitializedLocalVariableRule::run(const MatchFinder::MatchResult& result)
                 Severity::Error,
                 std::string("Local variable '") + variableDeclaration->getName().str() + "' is uninitialized",
                 location,
-                result.Context->getSourceManager());
+                sourceManager);
     }
 }
 

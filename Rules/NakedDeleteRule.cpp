@@ -27,8 +27,10 @@ void NakedDeleteRule::run(const MatchFinder::MatchResult& result)
     if (deleteExpr == nullptr)
         return;
 
+    SourceManager& sourceManager = result.Context->getSourceManager();
+
     SourceLocation location = deleteExpr->getLocStart();
-    if (! m_context.sourceLocationHelper.IsLocationOfInterest(location, result.Context->getSourceManager()))
+    if (! m_context.sourceLocationHelper.IsLocationOfInterest(GetName(), location, sourceManager))
         return;
 
     std::string typeStr = deleteExpr->getDestroyedType().getAsString();
@@ -38,5 +40,5 @@ void NakedDeleteRule::run(const MatchFinder::MatchResult& result)
         Severity::Warning,
         std::string("Naked delete called on type '") + typeStr + "'",
         location,
-        result.Context->getSourceManager());
+        sourceManager);
 }

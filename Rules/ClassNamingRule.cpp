@@ -2,8 +2,8 @@
 
 #include "../Common/Context.h"
 #include "../Common/OutputPrinter.h"
+#include "../Common/RegexHelper.h"
 #include "../Common/SourceLocationHelper.h"
-#include "../Common/RegexConsts.h"
 
 using namespace clang;
 using namespace clang::ast_matchers;
@@ -11,8 +11,8 @@ using namespace clang::ast_matchers;
 ClassNamingRule::ClassNamingRule(Context& context)
     : ASTCallbackRule(context),
       m_matcher(recordDecl().bind("recordDecl")),
-      m_classNamePattern(std::string("C") + UPPER_CAMEL_CASE_STRING),
-      m_structOrUnionNamePattern(UPPER_CAMEL_CASE_STRING)
+      m_classNamePattern(std::string("C") + UPPER_CAMEL_CASE_PATTERN),
+      m_structOrUnionNamePattern(UPPER_CAMEL_CASE_PATTERN)
 {}
 
 void ClassNamingRule::RegisterASTMatcherCallback(MatchFinder& finder)
@@ -26,8 +26,10 @@ void ClassNamingRule::run(const MatchFinder::MatchResult& result)
     if (recordDeclaration == nullptr)
         return;
 
+    SourceManager& sourceManager = result.Context->getSourceManager();
+
     SourceLocation location = recordDeclaration->getLocation();
-    if (! m_context.sourceLocationHelper.IsLocationOfInterest(location, result.Context->getSourceManager()))
+    if (! m_context.sourceLocationHelper.IsLocationOfInterest(GetName(), location, sourceManager))
         return;
 
     if (recordDeclaration->isImplicit() ||
@@ -44,7 +46,7 @@ void ClassNamingRule::run(const MatchFinder::MatchResult& result)
                 Severity::Information,
                 "Anonymous " + GetLowercaseRecordTypeString(recordDeclaration),
                 location,
-                result.Context->getSourceManager());
+                sourceManager);
         return;
     }
 
@@ -61,7 +63,7 @@ void ClassNamingRule::run(const MatchFinder::MatchResult& result)
                 Severity::Style,
                 GetRecordTypeString(recordDeclaration) + " '" + name + "'" + " should be named in a style like CUpperCamelCase",
                 location,
-                result.Context->getSourceManager());
+                sourceManager);
             m_reportedNames.insert(fullyQualifiedName);
         }
     }
@@ -75,7 +77,7 @@ void ClassNamingRule::run(const MatchFinder::MatchResult& result)
                 Severity::Style,
                 GetRecordTypeString(recordDeclaration) + " '" + name + "'" + " should be named in a style like UpperCamelCase",
                 location,
-                result.Context->getSourceManager());
+                sourceManager);
             m_reportedNames.insert(fullyQualifiedName);
         }
         else if (boost::regex_match(name, m_classNamePattern))
@@ -85,7 +87,7 @@ void ClassNamingRule::run(const MatchFinder::MatchResult& result)
                 Severity::Style,
                 GetRecordTypeString(recordDeclaration) + " '" + name + "'" + " follows class naming style CUpperCamelCase but is not a class",
                 location,
-                result.Context->getSourceManager());
+                sourceManager);
             m_reportedNames.insert(fullyQualifiedName);
         }
     }

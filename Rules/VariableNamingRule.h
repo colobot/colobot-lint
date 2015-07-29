@@ -19,12 +19,16 @@ public:
     static const char* GetName() { return "VariableNamingRule"; }
 
 private:
-    void HandleVariableDeclaration(const clang::VarDecl* variableDeclaration, clang::ASTContext* context);
-    void HandleFieldDeclaration(const clang::FieldDecl* fieldDeclaration, clang::ASTContext* context);
+    void HandleVariableDeclaration(const clang::VarDecl* variableDeclaration,
+                                   clang::SourceManager& sourceManager);
+
+    void HandleFieldDeclaration(const clang::FieldDecl* fieldDeclaration,
+                                clang::SourceManager& sourceManager);
+
     void ValidateFieldDeclaration(const clang::StringRef& name,
                                   clang::AccessSpecifier access,
-                                  const clang::SourceLocation& location,
-                                  clang::ASTContext* context);
+                                  clang::SourceLocation location,
+                                  clang::SourceManager& sourceManager);
 
 private:
     clang::ast_matchers::DeclarationMatcher m_variableDeclarationMatcher;

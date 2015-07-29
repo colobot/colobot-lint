@@ -27,8 +27,10 @@ void InconsistentDeclarationParameterNameRule::run(const MatchFinder::MatchResul
     if (functionDeclaration == nullptr)
         return;
 
+    SourceManager& sourceManager = result.Context->getSourceManager();
+
     SourceLocation location = functionDeclaration->getLocation();
-    if (! m_context.sourceLocationHelper.IsLocationOfInterest(location, result.Context->getSourceManager()))
+    if (! m_context.sourceLocationHelper.IsLocationOfInterest(GetName(), location, sourceManager))
         return;
 
     if (functionDeclaration->isImplicit())
@@ -46,7 +48,7 @@ void InconsistentDeclarationParameterNameRule::run(const MatchFinder::MatchResul
                 std::string("Function '") + functionDeclaration->getNameAsString() +
                     "' has other declaration(s) with inconsistently named parameter(s)",
                 location,
-                result.Context->getSourceManager());
+                sourceManager);
 
         m_reportedFunctions.insert(fullyQualifiedName);
     }

@@ -12,13 +12,15 @@ WhitespaceRule::WhitespaceRule(Context& context)
     : DirectASTConsumerRule(context)
 {}
 
-void WhitespaceRule::HandleTranslationUnit(ASTContext &context)
+void WhitespaceRule::HandleTranslationUnit(ASTContext& context)
 {
-    auto mainFileID = context.getSourceManager().getMainFileID();
+    SourceManager& sourceManager = context.getSourceManager();
 
-    std::string fileName = context.getSourceManager().getFileEntryForID(mainFileID)->getName();
+    auto mainFileID = sourceManager.getMainFileID();
 
-    MemoryBuffer* buffer = context.getSourceManager().getBuffer(mainFileID);
+    std::string fileName = sourceManager.getFileEntryForID(mainFileID)->getName();
+
+    MemoryBuffer* buffer = sourceManager.getBuffer(mainFileID);
     const char* bufferChars = buffer->getBufferStart();
     int bufferSize = buffer->getBufferSize();
     if (bufferSize == 0)

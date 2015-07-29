@@ -3,8 +3,8 @@
 #include "../Common/ClassofCast.h"
 #include "../Common/Context.h"
 #include "../Common/OutputPrinter.h"
+#include "../Common/RegexHelper.h"
 #include "../Common/SourceLocationHelper.h"
-#include "../Common/RegexConsts.h"
 
 #include <clang/AST/Decl.h>
 
@@ -14,7 +14,7 @@ using namespace clang::ast_matchers;
 FunctionNamingRule::FunctionNamingRule(Context& context)
     : ASTCallbackRule(context),
       m_matcher(functionDecl().bind("functionDecl")),
-      m_functionOrMethodNamePattern(UPPER_CAMEL_CASE_STRING)
+      m_functionOrMethodNamePattern(UPPER_CAMEL_CASE_PATTERN)
 {}
 
 void FunctionNamingRule::RegisterASTMatcherCallback(MatchFinder& finder)
@@ -28,8 +28,10 @@ void FunctionNamingRule::run(const MatchFinder::MatchResult& result)
     if (functionDeclaration == nullptr)
         return;
 
+    SourceManager& sourceManager = result.Context->getSourceManager();
+
     SourceLocation location = functionDeclaration->getLocation();
-    if (! m_context.sourceLocationHelper.IsLocationOfInterest(location, result.Context->getSourceManager()))
+    if (! m_context.sourceLocationHelper.IsLocationOfInterest(GetName(), location, sourceManager))
         return;
 
     // skip operator overloads
@@ -38,26 +40,24 @@ void FunctionNamingRule::run(const MatchFinder::MatchResult& result)
 
     const CXXMethodDecl* methodDeclaration = classof_cast<const CXXMethodDecl>(functionDeclaration);
     if (methodDeclaration != nullptr)
-        return HandleMethodDeclaration(methodDeclaration, result.Context);
+        return HandleMethodDeclaration(methodDeclaration, location, sourceManager);
 
-    return HandleFunctionDeclaration(functionDeclaration, location, result.Context);
+    return HandleFunctionDeclaration(functionDeclaration, location, sourceManager);
 }
 
 void FunctionNamingRule::HandleFunctionDeclaration(const FunctionDecl* functionDeclaration,
-                                                   const SourceLocation& location,
-                                                   ASTContext* context)
+                                                   SourceLocation location,
+                                                   SourceManager& sourceManager)
 {
     auto name = functionDeclaration->getName();
     std::string fullyQualifiedName = functionDeclaration->getQualifiedNameAsString();
-    ValidateName("Function", name.str(), fullyQualifiedName, location, context);
+    ValidateName("Function", name.str(), fullyQualifiedName, location, sourceManager);
 }
 
-void FunctionNamingRule::HandleMethodDeclaration(const CXXMethodDecl* methodDeclaration, ASTContext* context)
+void FunctionNamingRule::HandleMethodDeclaration(const CXXMethodDecl* methodDeclaration,
+                                                 SourceLocation location,
+                                                 SourceManager& sourceManager)
 {
-    SourceLocation location = methodDeclaration->getLocation();
-    if (! m_context.sourceLocationHelper.IsLocationOfInterest(location, context->getSourceManager()))
-        return;
-
     // skip constructors, destructors and conversion operators (operator Type() methods)
     if (CXXDestructorDecl::classof(methodDeclaration) ||
         CXXConstructorDecl::classof(methodDeclaration) ||
@@ -80,12 +80,14 @@ void FunctionNamingRule::HandleMethodDeclaration(const CXXMethodDecl* methodDecl
         return;
 
     std::string fullyQualifiedName = methodDeclaration->getQualifiedNameAsString();
-    ValidateName("Method", name.str(), fullyQualifiedName, location, context);
+    ValidateName("Method", name.str(), fullyQualifiedName, location, sourceManager);
 }
 
-void FunctionNamingRule::ValidateName(const char* type, const std::string& name,
+void FunctionNamingRule::ValidateName(const char* type,
+                                      const std::string& name,
                                       const std::string& fullyQualifiedName,
-                                      const SourceLocation& location, ASTContext* context)
+                                      SourceLocation location,
+                                      SourceManager& sourceManager)
 {
     if (m_reportedFunctionNames.count(fullyQualifiedName) > 0)
         return; // already reported
@@ -98,7 +100,7 @@ void FunctionNamingRule::ValidateName(const char* type, const std::string& name,
                 Severity::Style,
                 std::string(type) + " '" + name + "'" + " should be named in UpperCamelCase style",
                 location,
-                context->getSourceManager());
+                sourceManager);
 
         m_reportedFunctionNames.insert(fullyQualifiedName);
     }

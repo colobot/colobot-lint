@@ -33,7 +33,7 @@ public:
                             StringRef /*relativePath*/,
                             const Module* /*imported*/) override
     {
-        if (! m_context.sourceLocationHelper.IsLocationOfInterest(hashLoc, m_sourceManager))
+        if (! m_context.sourceLocationHelper.IsLocationOfInterest(IncludeStyleRule::GetName(), hashLoc, m_sourceManager))
             return;
 
         if (file == nullptr)
@@ -88,7 +88,7 @@ void IncludeStyleRule::run(const MatchFinder::MatchResult& result)
     SourceManager& sourceManager = result.Context->getSourceManager();
 
     SourceLocation location = recordDeclaration->getLocation();
-    if (! m_context.sourceLocationHelper.IsLocationOfInterest(location, sourceManager))
+    if (! m_context.sourceLocationHelper.IsLocationOfInterest(GetName(), location, sourceManager))
         return;
 
     if (recordDeclaration->isImplicit() ||
