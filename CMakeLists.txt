@@ -16,20 +16,20 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
 find_package(TinyXML REQUIRED)
 find_package(Git REQUIRED)
 
+set(Boost_ADDITIONALVERSION "1.49" "1.49.0")
+find_package(Boost COMPONENTS regex REQUIRED)
+
+option(TESTS "Enable tests" OFF)
+if(TESTS)
+    enable_testing()
+endif()
+
 if(NOT "${PROJECT_NAME}" STREQUAL "LLVM")
     find_package(ZLIB REQUIRED)
 
     option(SKIP_CURSES "Whether to skip finding curses" OFF)
     if(NOT SKIP_CURSES)
        find_package(Curses REQUIRED)
-    endif()
-
-    set(Boost_ADDITIONALVERSION "1.49" "1.49.0")
-    find_package(Boost COMPONENTS regex REQUIRED)
-
-    option(TESTS "Enable tests" OFF)
-    if(TESTS)
-        enable_testing()
     endif()
 endif()
 
@@ -83,6 +83,8 @@ include_directories(
 )
 
 
+# Main target
+
 if("${PROJECT_NAME}" STREQUAL "LLVM")
     set(LLVM_LINK_COMPONENTS support)
     set(LLVM_USED_LIBS clangTooling clangBasic clangAST)
@@ -95,6 +97,8 @@ if("${PROJECT_NAME}" STREQUAL "LLVM")
         clangASTMatchers
         ${TINYXML_LIBRARIES}
         ${Boost_LIBRARIES})
+
+    set(COLOBOT_LINT_OUTPUT_BINARY ${LLVM_BINARY_DIR}/bin/colobot-lint)
 else()
     add_executable(colobot-lint ${COLOBOT_LINT_SRCS})
 
@@ -170,13 +174,12 @@ else()
         ${CURSES_LIBRARIES}
         dl
     )
-endif()
 
-if("${PROJECT_NAME}" STREQUAL "LLVM")
-    set(COLOBOT_LINT_OUTPUT_BINARY ${LLVM_BINARY_DIR}/bin/colobot-lint)
-else()
     set(COLOBOT_LINT_OUTPUT_BINARY ${CMAKE_CURRENT_BINARY_DIR}/colobot-lint)
 endif()
+
+
+# Test targets
 
 macro(add_colobot_lint_test test_name test_target)
     add_test(${test_name} ${CMAKE_CURRENT_SOURCE_DIR}/${test_target} --colobot-lint-exec ${COLOBOT_LINT_OUTPUT_BINARY})
