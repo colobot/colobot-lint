@@ -8,6 +8,8 @@
 #include <clang/AST/Decl.h>
 #include <clang/AST/Stmt.h>
 
+#include <boost/format.hpp>
+
 using namespace clang;
 using namespace clang::ast_matchers;
 
@@ -56,7 +58,10 @@ void UninitializedFieldRule::run(const MatchFinder::MatchResult& result)
             m_context.printer.PrintRuleViolation(
                 "uninitialized field",
                 Severity::Error,
-                which + " '" + recordDeclaration->getName().str() + "' field '" + field.str() + "'" + " remains uninitialized",
+                boost::str(boost::format("%s '%s' field '%s' remains uninitialized")
+                    % which
+                    % recordDeclaration->getName().str()
+                    % field.str()),
                 location,
                 sourceManager);
         }
@@ -140,7 +145,10 @@ void UninitializedFieldRule::HandleConstructors(const RecordDecl* recordDeclarat
             m_context.printer.PrintRuleViolation(
                 "uninitialized field",
                 Severity::Error,
-                which + " '" + recordDeclaration->getName().str() + "' field '" + field.str() + "'" + " remains uninitialized in constructor",
+                boost::str(boost::format("%s '%s' field '%s' remains uninitialized in constructor")
+                    % which
+                    % recordDeclaration->getName().str()
+                    % field.str()),
                 constructorDeclaration->getLocation(),
                 sourceManager);
         }

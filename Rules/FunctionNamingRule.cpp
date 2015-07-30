@@ -8,6 +8,8 @@
 
 #include <clang/AST/Decl.h>
 
+#include <boost/format.hpp>
+
 using namespace clang;
 using namespace clang::ast_matchers;
 
@@ -98,7 +100,9 @@ void FunctionNamingRule::ValidateName(const char* type,
         m_context.printer.PrintRuleViolation(
                 "function naming",
                 Severity::Style,
-                std::string(type) + " '" + name.str() + "'" + " should be named in UpperCamelCase style",
+                boost::str(boost::format("%s '%s' should be named in UpperCamelCase style")
+                    % type
+                    % name.str()),
                 location,
                 sourceManager);
 

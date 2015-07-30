@@ -7,6 +7,8 @@
 
 #include <clang/AST/Decl.h>
 
+#include <boost/format.hpp>
+
 using namespace clang;
 using namespace clang::ast_matchers;
 
@@ -59,7 +61,8 @@ void UninitializedLocalVariableRule::run(const MatchFinder::MatchResult& result)
         m_context.printer.PrintRuleViolation(
                 "uninitialized local variable",
                 Severity::Error,
-                std::string("Local variable '") + variableDeclaration->getName().str() + "' is uninitialized",
+                boost::str(boost::format("Local variable '%s' is uninitialized")
+                    % variableDeclaration->getName().str()),
                 location,
                 sourceManager);
     }

@@ -5,6 +5,8 @@
 #include "../Common/RegexHelper.h"
 #include "../Common/SourceLocationHelper.h"
 
+#include <boost/format.hpp>
+
 using namespace clang;
 using namespace clang::ast_matchers;
 
@@ -58,7 +60,7 @@ void EnumNamingRule::HandleEnumDeclaration(const clang::EnumDecl* enumDeclaratio
         m_context.printer.PrintRuleViolation(
             "enum naming",
             Severity::Information,
-            std::string("Old-style enum '") + name.str() + "'",
+            boost::str(boost::format("Old-style enum '%s'") % name.str()),
             location,
             sourceManager);
         return;
@@ -69,7 +71,7 @@ void EnumNamingRule::HandleEnumDeclaration(const clang::EnumDecl* enumDeclaratio
         m_context.printer.PrintRuleViolation(
             "enum naming",
             Severity::Style,
-            std::string("Enum class '") + name.str() + "'" + " should be named in a style like UpperCamelCase",
+            boost::str(boost::format("Enum class '%s' should be named in a style like UpperCamelCase") % name.str()),
             location,
             sourceManager);
     }
@@ -96,7 +98,8 @@ void EnumNamingRule::HandleEnumConstantDeclaration(const clang::EnumConstantDecl
                 m_context.printer.PrintRuleViolation(
                     "enum naming",
                     Severity::Style,
-                    std::string("Enum class constant '") + name.str() + "'" + " should be named in a style like UpperCamelCase",
+                    boost::str(boost::format("Enum class constant '%s' should be named in a style like UpperCamelCase")
+                        % name.str()),
                     location,
                     sourceManager);
             }

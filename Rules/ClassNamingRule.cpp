@@ -5,6 +5,8 @@
 #include "../Common/RegexHelper.h"
 #include "../Common/SourceLocationHelper.h"
 
+#include <boost/format.hpp>
+
 using namespace clang;
 using namespace clang::ast_matchers;
 
@@ -44,7 +46,7 @@ void ClassNamingRule::run(const MatchFinder::MatchResult& result)
         m_context.printer.PrintRuleViolation(
                 "class naming",
                 Severity::Information,
-                "Anonymous " + GetLowercaseRecordTypeString(recordDeclaration),
+                boost::str(boost::format("Anonymous %s") % GetLowercaseRecordTypeString(recordDeclaration)),
                 location,
                 sourceManager);
         return;
@@ -61,7 +63,9 @@ void ClassNamingRule::run(const MatchFinder::MatchResult& result)
             m_context.printer.PrintRuleViolation(
                 "class naming",
                 Severity::Style,
-                GetRecordTypeString(recordDeclaration) + " '" + name.str() + "'" + " should be named in a style like CUpperCamelCase",
+                boost::str(boost::format("%s '%s' should be named in a style like CUpperCamelCase")
+                    % GetRecordTypeString(recordDeclaration)
+                    % name.str()),
                 location,
                 sourceManager);
             m_reportedNames.insert(fullyQualifiedName);
@@ -75,7 +79,9 @@ void ClassNamingRule::run(const MatchFinder::MatchResult& result)
             m_context.printer.PrintRuleViolation(
                 "class naming",
                 Severity::Style,
-                GetRecordTypeString(recordDeclaration) + " '" + name.str() + "'" + " should be named in a style like UpperCamelCase",
+                boost::str(boost::format("%s '%s' should be named in a style like UpperCamelCase")
+                    % GetRecordTypeString(recordDeclaration)
+                    % name.str()),
                 location,
                 sourceManager);
             m_reportedNames.insert(fullyQualifiedName);
@@ -85,7 +91,9 @@ void ClassNamingRule::run(const MatchFinder::MatchResult& result)
             m_context.printer.PrintRuleViolation(
                 "class naming",
                 Severity::Style,
-                GetRecordTypeString(recordDeclaration) + " '" + name.str() + "'" + " follows class naming style CUpperCamelCase but is not a class",
+                boost::str(boost::format("%s '%s' follows class naming style CUpperCamelCase but is not a class")
+                    % GetRecordTypeString(recordDeclaration)
+                    % name.str()),
                 location,
                 sourceManager);
             m_reportedNames.insert(fullyQualifiedName);

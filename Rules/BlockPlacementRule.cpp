@@ -9,6 +9,8 @@
 #include <clang/AST/Decl.h>
 #include <clang/AST/Stmt.h>
 
+#include <boost/format.hpp>
+
 using namespace clang;
 
 BlockPlacementRule::BlockPlacementRule(Context& context)
@@ -252,7 +254,8 @@ void BlockPlacementRule::ReportViolation(const SourceLocation& location, Violati
         m_context.printer.PrintRuleViolation(
             "code block placement",
             Severity::Style,
-            std::string("Body of declaration or statement ") + what + " in a style that is not allowed",
+            boost::str(boost::format("Body of declaration or statement %s in a style that is not allowed")
+                % what),
             location,
             m_astContext->getSourceManager());
 

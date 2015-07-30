@@ -7,6 +7,8 @@
 
 #include <clang/AST/Decl.h>
 
+#include <boost/format.hpp>
+
 using namespace clang;
 using namespace clang::ast_matchers;
 
@@ -72,7 +74,8 @@ void VariableNamingRule::HandleVariableDeclaration(const VarDecl* variableDeclar
               m_context.printer.PrintRuleViolation(
                 "variable naming",
                 Severity::Style,
-                std::string("Local variable '") + name.str() + "'" + " should be named in camelCase style",
+                boost::str(boost::format("Local variable '%s' should be named in camelCase style")
+                    % name.str()),
                 location,
                 sourceManager);
         }
@@ -81,7 +84,8 @@ void VariableNamingRule::HandleVariableDeclaration(const VarDecl* variableDeclar
             m_context.printer.PrintRuleViolation(
                 "variable naming",
                 Severity::Style,
-                std::string("Local variable '") + name.str() + "'" + " is named in a style that is deprecated",
+                boost::str(boost::format("Local variable '%s' is named in a style that is deprecated")
+                    % name.str()),
                 location,
                 sourceManager);
         }
@@ -96,7 +100,8 @@ void VariableNamingRule::HandleVariableDeclaration(const VarDecl* variableDeclar
                 m_context.printer.PrintRuleViolation(
                     "variable naming",
                     Severity::Style,
-                    std::string("Const global variable '") + name.str() + "'" + " should be named in ALL_CAPS style",
+                    boost::str(boost::format("Const global variable '%s' should be named in ALL_CAPS style")
+                        % name.str()),
                     location,
                     sourceManager);
             }
@@ -108,7 +113,8 @@ void VariableNamingRule::HandleVariableDeclaration(const VarDecl* variableDeclar
                 m_context.printer.PrintRuleViolation(
                     "variable naming",
                     Severity::Style,
-                    std::string("Non-const global variable '") + name.str() + "'" + " should be named in g_camelCase style",
+                    boost::str(boost::format("Non-const global variable '%s' should be named in g_camelCase style")
+                        % name.str()),
                     location,
                     sourceManager);
             }
@@ -140,7 +146,8 @@ void VariableNamingRule::ValidateFieldDeclaration(StringRef name,
             m_context.printer.PrintRuleViolation(
                 "variable naming",
                 Severity::Style,
-                std::string("Public field '") + name.str() + "'" + " should be named in camelCase style",
+                boost::str(boost::format("Public field '%s' should be named in camelCase style")
+                    % name.str()),
                 location,
                 sourceManager);
         }
@@ -153,7 +160,9 @@ void VariableNamingRule::ValidateFieldDeclaration(StringRef name,
             m_context.printer.PrintRuleViolation(
                 "variable naming",
                 Severity::Style,
-                which +  " field '" + name.str() + "'" + " should be named in m_camelCase style",
+                boost::str(boost::format("%s field '%s' should be named in m_camelCase style")
+                    % which
+                    % name.str()),
                 location,
                 sourceManager);
         }
@@ -163,7 +172,9 @@ void VariableNamingRule::ValidateFieldDeclaration(StringRef name,
             m_context.printer.PrintRuleViolation(
                 "variable naming",
                 Severity::Style,
-                which +  " field '" + name.str() + "'" + " is named in a style that is deprecated",
+                boost::str(boost::format("%s field '%s' is named in a style that is deprecated")
+                    % which
+                    % name.str()),
                 location,
                 sourceManager);
         }

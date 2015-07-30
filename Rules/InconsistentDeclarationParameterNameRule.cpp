@@ -7,6 +7,8 @@
 #include <clang/AST/RecursiveASTVisitor.h>
 #include <clang/AST/Decl.h>
 
+#include <boost/format.hpp>
+
 using namespace clang;
 using namespace clang::ast_matchers;
 
@@ -45,8 +47,8 @@ void InconsistentDeclarationParameterNameRule::run(const MatchFinder::MatchResul
         m_context.printer.PrintRuleViolation(
                 "inconsistent declaration parameter name",
                 Severity::Style,
-                std::string("Function '") + functionDeclaration->getNameAsString() +
-                    "' has other declaration(s) with inconsistently named parameter(s)",
+                boost::str(boost::format("Function '%s' has other declaration(s) with inconsistently named parameter(s)")
+                    % functionDeclaration->getNameAsString()),
                 location,
                 sourceManager);
 

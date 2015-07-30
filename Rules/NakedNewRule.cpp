@@ -8,6 +8,8 @@
 #include <clang/ASTMatchers/ASTMatchers.h>
 #include <clang/AST/ExprCXX.h>
 
+#include <boost/format.hpp>
+
 using namespace clang;
 using namespace clang::ast_matchers;
 
@@ -38,7 +40,7 @@ void NakedNewRule::run(const MatchFinder::MatchResult& result)
     m_context.printer.PrintRuleViolation(
         "naked new",
         Severity::Warning,
-        std::string("Naked new called with type '") + typeStr + "'",
+        boost::str(boost::format("Naked new called with type '%s'") % typeStr),
         location,
         sourceManager);
 }

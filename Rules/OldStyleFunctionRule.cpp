@@ -8,6 +8,8 @@
 #include <clang/AST/RecursiveASTVisitor.h>
 #include <clang/AST/Decl.h>
 
+#include <boost/format.hpp>
+
 using namespace clang;
 using namespace clang::ast_matchers;
 
@@ -67,8 +69,9 @@ void OldStyleFunctionRule::run(const MatchFinder::MatchResult& result)
         m_context.printer.PrintRuleViolation(
             "old style function",
             Severity::Warning,
-            std::string("Function '") + functionDeclaration->getName().str() + "' has variables declared far from point of use "
-                + GetShortDeclarationsString(finder.GetFirstFewOldStyleDeclarations(), oldStyleDeclarationCount),
+            boost::str(boost::format("Function '%s' has variables declared far from point of use %s")
+                % functionDeclaration->getNameAsString()
+                % GetShortDeclarationsString(finder.GetFirstFewOldStyleDeclarations(), oldStyleDeclarationCount)),
             location,
             sourceManager);
 

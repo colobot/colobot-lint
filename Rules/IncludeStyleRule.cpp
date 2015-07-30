@@ -10,6 +10,8 @@
 
 #include <set>
 
+#include <boost/format.hpp>
+
 using namespace clang;
 using namespace clang::ast_matchers;
 using namespace llvm;
@@ -33,8 +35,11 @@ public:
                             StringRef /*relativePath*/,
                             const Module* /*imported*/) override
     {
-        if (! m_context.sourceLocationHelper.IsLocationOfInterest(IncludeStyleRule::GetName(), hashLoc, m_sourceManager))
+        if (! m_context.sourceLocationHelper.IsLocationOfInterest(
+            IncludeStyleRule::GetName(), hashLoc, m_sourceManager))
+        {
             return;
+        }
 
         if (file == nullptr)
             return;
@@ -138,7 +143,8 @@ void IncludeStyleRule::CheckAngledBrackets(const IncludeDirectives& includeDirec
                 m_context.printer.PrintRuleViolation(
                     "include style",
                     Severity::Style,
-                    std::string("Local include '" + include.includeFileName + "' should be included with quotes, not angled brackets"),
+                    boost::str(boost::format("Local include '%s' should be included with quotes, not angled brackets")
+                        % include.includeFileName),
                     include.location,
                     sourceManager);
             }
@@ -150,7 +156,8 @@ void IncludeStyleRule::CheckAngledBrackets(const IncludeDirectives& includeDirec
                 m_context.printer.PrintRuleViolation(
                     "include style",
                     Severity::Style,
-                    std::string("Global include '" + include.includeFileName + "' should be included with angled brackets, not quotes"),
+                    boost::str(boost::format("Global include '%s' should be included with angled brackets, not quotes")
+                        % include.includeFileName),
                     include.location,
                     sourceManager);
             }
@@ -158,7 +165,9 @@ void IncludeStyleRule::CheckAngledBrackets(const IncludeDirectives& includeDirec
     }
 }
 
-IncludeDirectiveIt IncludeStyleRule::CheckFirstInclude(IncludeDirectiveIt startIt, IncludeDirectiveIt endIt, SourceManager& sourceManager)
+IncludeDirectiveIt IncludeStyleRule::CheckFirstInclude(IncludeDirectiveIt startIt,
+                                                       IncludeDirectiveIt endIt,
+                                                       SourceManager& sourceManager)
 {
     if (startIt == endIt)
         return startIt;
@@ -177,7 +186,10 @@ IncludeDirectiveIt IncludeStyleRule::CheckFirstInclude(IncludeDirectiveIt startI
         m_context.printer.PrintRuleViolation(
             "include style",
             Severity::Style,
-            std::string("Expected first include directive to be matching header file: '") + matchingHeaderInclude + "', not '" + startIt->includeFileName + "'",
+            boost::str(boost::format("Expected first include directive to be"
+                " matching header file: '%s', not '%s'")
+                % matchingHeaderInclude
+                % startIt->includeFileName),
             startIt->location,
             sourceManager);
     }
@@ -188,7 +200,9 @@ IncludeDirectiveIt IncludeStyleRule::CheckFirstInclude(IncludeDirectiveIt startI
     return startIt;
 }
 
-IncludeDirectiveIt IncludeStyleRule::CheckConfigInclude(IncludeDirectiveIt startIt, IncludeDirectiveIt endIt, SourceManager& sourceManager)
+IncludeDirectiveIt IncludeStyleRule::CheckConfigInclude(IncludeDirectiveIt startIt,
+                                                        IncludeDirectiveIt endIt,
+                                                        SourceManager& sourceManager)
 {
     if (startIt == endIt)
         return startIt;
@@ -211,7 +225,9 @@ IncludeDirectiveIt IncludeStyleRule::CheckConfigInclude(IncludeDirectiveIt start
         m_context.printer.PrintRuleViolation(
             "include style",
             Severity::Style,
-            std::string("Expected config include directive: '") + configIncludeIt->includeFileName + "', not '" + startIt->includeFileName + "'",
+            boost::str(boost::format("Expected config include directive: '%s', not '%s'")
+                % configIncludeIt->includeFileName
+                % startIt->includeFileName),
             startIt->location,
             sourceManager);
     }
@@ -222,7 +238,9 @@ IncludeDirectiveIt IncludeStyleRule::CheckConfigInclude(IncludeDirectiveIt start
     return startIt;
 }
 
-IncludeDirectiveIt IncludeStyleRule::CheckLocalIncludes(IncludeDirectiveIt startIt, IncludeDirectiveIt endIt, SourceManager& sourceManager)
+IncludeDirectiveIt IncludeStyleRule::CheckLocalIncludes(IncludeDirectiveIt startIt,
+                                                        IncludeDirectiveIt endIt,
+                                                        SourceManager& sourceManager)
 {
     if (startIt == endIt)
         return startIt;
@@ -245,8 +263,10 @@ IncludeDirectiveIt IncludeStyleRule::CheckLocalIncludes(IncludeDirectiveIt start
             m_context.printer.PrintRuleViolation(
                 "include style",
                 Severity::Style,
-                std::string("Expected local include to be full relative path from project local include search path: '")
-                    + projectIncludeSubpath + "', not '" + it->includeFileName + "'",
+                boost::str(boost::format("Expected local include to be full relative path"
+                    " from project local include search path: '%s', not '%s'")
+                    % projectIncludeSubpath
+                    % it->includeFileName),
                 it->location,
                 sourceManager);
         }
@@ -259,7 +279,9 @@ IncludeDirectiveIt IncludeStyleRule::CheckLocalIncludes(IncludeDirectiveIt start
     return endLocalIncludesIt;
 }
 
-void IncludeStyleRule::CheckGlobalIncludes(IncludeDirectiveIt startIt, IncludeDirectiveIt endIt, SourceManager& sourceManager)
+void IncludeStyleRule::CheckGlobalIncludes(IncludeDirectiveIt startIt,
+                                           IncludeDirectiveIt endIt,
+                                           SourceManager& sourceManager)
 {
     if (startIt == endIt)
         return;
@@ -271,14 +293,17 @@ void IncludeStyleRule::CheckGlobalIncludes(IncludeDirectiveIt startIt, IncludeDi
             m_context.printer.PrintRuleViolation(
                 "include style",
                 Severity::Style,
-                std::string("Local include '") + it->includeFileName + "' should not be placed after global includes",
+                boost::str(boost::format("Local include '%s' should not be placed after global includes")
+                    % it->includeFileName),
                 it->location,
                 sourceManager);
         }
     }
 }
 
-void IncludeStyleRule::CheckNewBlock(IncludeDirectiveIt currentIt, IncludeDirectiveIt endIt, SourceManager& sourceManager)
+void IncludeStyleRule::CheckNewBlock(IncludeDirectiveIt currentIt,
+                                     IncludeDirectiveIt endIt,
+                                     SourceManager& sourceManager)
 {
     if (currentIt == endIt)
         return;
@@ -300,7 +325,9 @@ void IncludeStyleRule::CheckNewBlock(IncludeDirectiveIt currentIt, IncludeDirect
     }
 }
 
-void IncludeStyleRule::CheckIncludeRangeIsSorted(IncludeDirectiveIt startIt, IncludeDirectiveIt endIt, SourceManager& sourceManager)
+void IncludeStyleRule::CheckIncludeRangeIsSorted(IncludeDirectiveIt startIt,
+                                                 IncludeDirectiveIt endIt,
+                                                 SourceManager& sourceManager)
 {
     std::multiset<std::string> sortedIncludes;
     for (auto it = startIt; it != endIt; ++it)
@@ -315,7 +342,8 @@ void IncludeStyleRule::CheckIncludeRangeIsSorted(IncludeDirectiveIt startIt, Inc
             m_context.printer.PrintRuleViolation(
                 "include style",
                 Severity::Style,
-                std::string("Include '") + it->includeFileName + "' breaks alphabetical ordering",
+                boost::str(boost::format("Include '%s' breaks alphabetical ordering")
+                    % it->includeFileName),
                 it->location,
                 sourceManager);
             break;
