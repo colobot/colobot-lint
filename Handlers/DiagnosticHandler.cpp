@@ -3,6 +3,8 @@
 #include "../Common/Context.h"
 #include "../Common/OutputPrinter.h"
 
+#include <boost/format.hpp>
+
 using namespace clang;
 
 DiagnosticHandler::DiagnosticHandler(Context& context)
@@ -18,7 +20,8 @@ void DiagnosticHandler::HandleDiagnostic(DiagnosticsEngine::Level level, const D
             m_context.printer.PrintRuleViolation(
                 "header file not self-contained",
                 Severity::Error,
-                "Including single header file should not result in compile error. Error reported was: " + GetDiagnosticString(info),
+                boost::str(boost::format("Including single header file should not result in compile error: %s")
+                    % GetDiagnosticString(info)),
                 info.getLocation(),
                 info.getSourceManager());
         }

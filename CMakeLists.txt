@@ -187,6 +187,7 @@ endmacro()
 
 add_colobot_lint_test(BlockPlacementRuleTest Tests/block_placement_rule_test.py)
 add_colobot_lint_test(ClassNamingRule Tests/class_naming_rule_test.py)
+add_colobot_lint_test(DiagnosticHandlerTest Tests/diagnostic_handler_test.py)
 add_colobot_lint_test(EnumNamingRule Tests/enum_naming_rule_test.py)
 add_colobot_lint_test(FunctionNamingRule Tests/function_naming_rule_test.py)
 add_colobot_lint_test(InconsistentDeclarationParameterNameRule Tests/inconsistent_declaration_parameter_name_rule_test.py)
