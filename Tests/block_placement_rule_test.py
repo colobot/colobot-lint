@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import test_support
 
-class TestBlockPlacementRule(test_support.TestBase):
+class BlockPlacementRuleTest(test_support.TestBase):
     def setUp(self):
         self.set_default_rules_selection(['BlockPlacementRule'])
         self.set_default_error_id('code block placement')

@@ -2,7 +2,7 @@
 import test_support
 import os
 
-class TestDiagnosticHandler(test_support.TestBase):
+class DiagnosticHandlerTest(test_support.TestBase):
     def test_compile_warning_in_source_file(self):
         self.assert_colobot_lint_result(
             source_file_lines = [

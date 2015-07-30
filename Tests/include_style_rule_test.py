@@ -2,7 +2,7 @@
 import test_support
 import os
 
-class TestIncludeStyleRule(test_support.TestBase):
+class IncludeStyleRuleTest(test_support.TestBase):
     def setUp(self):
         self.set_default_rules_selection(['IncludeStyleRule'])
         self.set_default_error_id('include style')

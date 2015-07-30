@@ -2,7 +2,7 @@
 import test_support
 import os
 
-class TestSourceLocationHelper(test_support.TestBase):
+class SourceLocationHelperTest(test_support.TestBase):
     def test_ignore_macro_body_expansion(self):
         self.assert_colobot_lint_result(
             source_file_lines = [

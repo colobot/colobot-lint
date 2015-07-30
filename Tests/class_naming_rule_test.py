@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import test_support
 
-class TestClassNamingRule(test_support.TestBase):
+class ClassNamingRuleTest(test_support.TestBase):
     def setUp(self):
         self.set_default_rules_selection(['ClassNamingRule'])
         self.set_default_error_id('class naming')

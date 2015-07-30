@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import test_support
 
-class TestEnumNamingRule(test_support.TestBase):
+class EnumNamingRuleTest(test_support.TestBase):
     def setUp(self):
         self.set_default_rules_selection(['EnumNamingRule'])
         self.set_default_error_id('enum naming')

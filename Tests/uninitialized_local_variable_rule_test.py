@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import test_support
 
-class TestUnintializedLocalVariableRule(test_support.TestBase):
+class UnintializedLocalVariableRuleTest(test_support.TestBase):
     def setUp(self):
         self.set_default_rules_selection(['UninitializedLocalVariableRule'])
         self.set_default_error_id('uninitialized local variable')

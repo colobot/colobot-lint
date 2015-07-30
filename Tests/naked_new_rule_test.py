@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import test_support
 
-class TestNakedNewRule(test_support.TestBase):
+class NakedNewRuleTest(test_support.TestBase):
     def setUp(self):
         self.set_default_rules_selection(['NakedNewRule'])
         self.set_default_error_id('naked new')

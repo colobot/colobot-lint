@@ -3,7 +3,7 @@ import test_support
 from test_support import TempBuildDir, write_file_lines, write_compilation_database, run_colobot_lint
 import os
 
-class TestUnintializedFieldRule(test_support.TestBase):
+class UnintializedFieldRuleTest(test_support.TestBase):
     def setUp(self):
         self.set_default_rules_selection(['UninitializedFieldRule'])
         self.set_default_error_id('uninitialized field')

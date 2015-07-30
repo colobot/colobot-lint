@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import test_support
 
-class TestFunctionNamingRule(test_support.TestBase):
+class FunctionNamingRuleTest(test_support.TestBase):
     def setUp(self):
         self.set_default_rules_selection(['FunctionNamingRule'])
         self.set_default_error_id('function naming')

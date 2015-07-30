@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import test_support
 
-class TestNakedDeleteRule(test_support.TestBase):
+class NakedDeleteRuleTest(test_support.TestBase):
     def setUp(self):
         self.set_default_rules_selection(['NakedDeleteRule'])
         self.set_default_error_id('naked delete')

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import test_support
 
-class TestOldStyleFunctionRule(test_support.TestBase):
+class OldStyleFunctionRuleTest(test_support.TestBase):
     def setUp(self):
         self.set_default_rules_selection(['OldStyleFunctionRule'])
         self.set_default_error_id('old style function')

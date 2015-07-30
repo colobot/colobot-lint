@@ -2,7 +2,7 @@
 import test_support
 import os
 
-class TestWhitespaceRule(test_support.TestBase):
+class WhitespaceRuleTest(test_support.TestBase):
     def setUp(self):
         self.set_default_rules_selection(['WhitespaceRule'])
         self.set_default_error_id('whitespace')
