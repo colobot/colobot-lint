@@ -14,4 +14,7 @@ public:
     void HandleTranslationUnit(clang::ASTContext &context) override;
 
     static const char* GetName() { return "WhitespaceRule"; }
+
+private:
+    clang::FileID GetMainFileID(clang::SourceManager& sourceManager);
 };

@@ -16,7 +16,7 @@ void WhitespaceRule::HandleTranslationUnit(ASTContext& context)
 {
     SourceManager& sourceManager = context.getSourceManager();
 
-    auto mainFileID = sourceManager.getMainFileID();
+    FileID mainFileID = GetMainFileID(sourceManager);
 
     std::string fileName = sourceManager.getFileEntryForID(mainFileID)->getName();
 
@@ -98,3 +98,29 @@ void WhitespaceRule::HandleTranslationUnit(ASTContext& context)
             lineNumber-1);
     }
 }
+
+FileID WhitespaceRule::GetMainFileID(SourceManager& sourceManager)
+{
+    FileID mainFileID{};
+
+    if (m_context.areWeInFakeHeaderSourceFile)
+    {
+        for (auto it = sourceManager.fileinfo_begin();
+             it != sourceManager.fileinfo_end();
+             ++it)
+        {
+            if (StringRef(it->first->getName()).endswith(m_context.actualHeaderFileSuffix))
+            {
+                mainFileID = sourceManager.translateFile(it->first);
+                break;
+            }
+        }
+    }
+    else
+    {
+        mainFileID = sourceManager.getMainFileID();
+    }
+
+    return mainFileID;
+}
+
