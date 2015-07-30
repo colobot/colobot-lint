@@ -2,6 +2,8 @@
 
 #include "ASTCallbackRule.h"
 
+#include "../Common/StringRefHash.h"
+
 #include <clang/ASTMatchers/ASTMatchFinder.h>
 
 #include <unordered_set>
@@ -19,8 +21,10 @@ public:
     static const char* GetName() { return "UninitializedFieldRule"; }
 
 private:
-    std::unordered_set<std::string> GetCandidateFieldsList(const clang::RecordDecl* recordDeclaration,
-                                                           clang::ASTContext* context);
+    using StringRefSet = std::unordered_set<llvm::StringRef>;
+
+    StringRefSet GetCandidateFieldsList(const clang::RecordDecl* recordDeclaration,
+                                        clang::ASTContext* context);
 
     enum class ConstructorStatus
     {
@@ -31,17 +35,17 @@ private:
 
     ConstructorStatus CheckConstructorStatus(const clang::RecordDecl* recordDeclaration);
     void HandleConstructors(const clang::RecordDecl* recordDeclaration,
-                            const std::unordered_set<std::string>& candidateFieldList,
+                            const StringRefSet& candidateFieldList,
                             clang::SourceManager& sourceManager);
 
     void HandleConstructorInitializationList(const clang::CXXConstructorDecl* constructorDeclaration,
-                                             std::unordered_set<std::string>& candidateFieldList);
+                                             StringRefSet& candidateFieldList);
 
     void HandleConstructorBody(const clang::CXXConstructorDecl* constructorDeclaration,
-                               std::unordered_set<std::string>& candidateFieldList);
+                               StringRefSet& candidateFieldList);
 
     void HandleAssignStatement(const clang::BinaryOperator* assignStatement,
-                               std::unordered_set<std::string>& candidateFieldList);
+                               StringRefSet& candidateFieldList);
 
 private:
     clang::ast_matchers::DeclarationMatcher m_matcher;

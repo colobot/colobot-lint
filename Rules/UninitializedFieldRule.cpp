@@ -45,7 +45,7 @@ void UninitializedFieldRule::run(const MatchFinder::MatchResult& result)
         return;
     }
 
-    std::unordered_set<std::string> candidateFieldList = GetCandidateFieldsList(recordDeclaration, result.Context);
+    StringRefSet candidateFieldList = GetCandidateFieldsList(recordDeclaration, result.Context);
 
     if (constructorStatus == ConstructorStatus::NoConstructors)
     {
@@ -56,7 +56,7 @@ void UninitializedFieldRule::run(const MatchFinder::MatchResult& result)
             m_context.printer.PrintRuleViolation(
                 "uninitialized field",
                 Severity::Error,
-                which + " '" + recordDeclaration->getName().str() + "' field '" + field + "'" + " remains uninitialized",
+                which + " '" + recordDeclaration->getName().str() + "' field '" + field.str() + "'" + " remains uninitialized",
                 location,
                 sourceManager);
         }
@@ -89,10 +89,10 @@ UninitializedFieldRule::ConstructorStatus UninitializedFieldRule::CheckConstruct
     return haveConstructorsWithBody ? ConstructorStatus::DefinedConstructors : ConstructorStatus::NoConstructors;
 }
 
-std::unordered_set<std::string> UninitializedFieldRule::GetCandidateFieldsList(const RecordDecl* recordDeclaration,
-                                                                               ASTContext* context)
+UninitializedFieldRule::StringRefSet UninitializedFieldRule::GetCandidateFieldsList(const RecordDecl* recordDeclaration,
+                                                                                    ASTContext* context)
 {
-    std::unordered_set<std::string> candidates;
+    StringRefSet candidates;
 
     for (const Decl* decl : recordDeclaration->decls())
     {
@@ -108,14 +108,14 @@ std::unordered_set<std::string> UninitializedFieldRule::GetCandidateFieldsList(c
         if (fieldDeclaration->isAnonymousStructOrUnion())
             continue;
 
-        candidates.insert(fieldDeclaration->getName().str());
+        candidates.insert(fieldDeclaration->getName());
     }
 
     return candidates;
 }
 
 void UninitializedFieldRule::HandleConstructors(const RecordDecl* recordDeclaration,
-                                                const std::unordered_set<std::string>& candidateFieldList,
+                                                const UninitializedFieldRule::StringRefSet& candidateFieldList,
                                                 SourceManager& sourceManager)
 {
     for (const Decl* decl : recordDeclaration->decls())
@@ -129,7 +129,7 @@ void UninitializedFieldRule::HandleConstructors(const RecordDecl* recordDeclarat
             continue;
         }
 
-        std::unordered_set<std::string> constructorCandidateFieldList = candidateFieldList;
+        auto constructorCandidateFieldList = candidateFieldList;
         HandleConstructorInitializationList(constructorDeclaration, constructorCandidateFieldList);
         HandleConstructorBody(constructorDeclaration, constructorCandidateFieldList);
 
@@ -140,7 +140,7 @@ void UninitializedFieldRule::HandleConstructors(const RecordDecl* recordDeclarat
             m_context.printer.PrintRuleViolation(
                 "uninitialized field",
                 Severity::Error,
-                which + " '" + recordDeclaration->getName().str() + "' field '" + field + "'" + " remains uninitialized in constructor",
+                which + " '" + recordDeclaration->getName().str() + "' field '" + field.str() + "'" + " remains uninitialized in constructor",
                 constructorDeclaration->getLocation(),
                 sourceManager);
         }
@@ -148,20 +148,20 @@ void UninitializedFieldRule::HandleConstructors(const RecordDecl* recordDeclarat
 }
 
 void UninitializedFieldRule::HandleConstructorInitializationList(const CXXConstructorDecl* constructorDeclaration,
-                                                                 std::unordered_set<std::string>& candidateFieldList)
+                                                                 UninitializedFieldRule::StringRefSet& candidateFieldList)
 {
     for (CXXCtorInitializer* init : constructorDeclaration->inits())
     {
         FieldDecl* member = init->getMember();
         if (member != nullptr)
         {
-            candidateFieldList.erase(member->getName().str());
+            candidateFieldList.erase(member->getName());
         }
     }
 }
 
 void UninitializedFieldRule::HandleConstructorBody(const CXXConstructorDecl* constructorDeclaration,
-                                                   std::unordered_set<std::string>& candidateFieldList)
+                                                   UninitializedFieldRule::StringRefSet& candidateFieldList)
 {
     const CompoundStmt* compountStatement = classof_cast<const CompoundStmt>(constructorDeclaration->getBody());
     if (compountStatement == nullptr)
@@ -179,7 +179,7 @@ void UninitializedFieldRule::HandleConstructorBody(const CXXConstructorDecl* con
 }
 
 void UninitializedFieldRule::HandleAssignStatement(const BinaryOperator* assignStatement,
-                                                   std::unordered_set<std::string>& candidateFieldList)
+                                                   UninitializedFieldRule::StringRefSet& candidateFieldList)
 {
     const MemberExpr* memberExpr = classof_cast<const MemberExpr>(assignStatement->getLHS());
     if (memberExpr == nullptr)
@@ -193,5 +193,5 @@ void UninitializedFieldRule::HandleAssignStatement(const BinaryOperator* assignS
     if (memberDecl == nullptr)
         return;
 
-    candidateFieldList.erase(memberDecl->getName().str());
+    candidateFieldList.erase(memberDecl->getName());
 }

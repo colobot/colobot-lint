@@ -41,7 +41,7 @@ void EnumNamingRule::HandleEnumDeclaration(const clang::EnumDecl* enumDeclaratio
     if (! m_context.sourceLocationHelper.IsLocationOfInterest(GetName(), location, sourceManager))
         return;
 
-    std::string name = enumDeclaration->getName().str();
+    StringRef name = enumDeclaration->getName();
     if (name.empty())
     {
         m_context.printer.PrintRuleViolation(
@@ -58,18 +58,18 @@ void EnumNamingRule::HandleEnumDeclaration(const clang::EnumDecl* enumDeclaratio
         m_context.printer.PrintRuleViolation(
             "enum naming",
             Severity::Information,
-            std::string("Old-style enum '") + name + "'",
+            std::string("Old-style enum '") + name.str() + "'",
             location,
             sourceManager);
         return;
     }
 
-    if (! boost::regex_match(name, m_enumNamePattern))
+    if (! boost::regex_match(name.begin(), name.end(), m_enumNamePattern))
     {
         m_context.printer.PrintRuleViolation(
             "enum naming",
             Severity::Style,
-            std::string("Enum class '") + name + "'" + " should be named in a style like UpperCamelCase",
+            std::string("Enum class '") + name.str() + "'" + " should be named in a style like UpperCamelCase",
             location,
             sourceManager);
     }
@@ -89,14 +89,14 @@ void EnumNamingRule::HandleEnumConstantDeclaration(const clang::EnumConstantDecl
         const EnumDecl* enumDeclaration = static_cast<const EnumDecl*>(declarationContext);
         if (enumDeclaration->isScopedUsingClassTag())
         {
-            std::string name = enumConstantDeclaration->getName().str();
+            StringRef name = enumConstantDeclaration->getName();
 
-            if (! boost::regex_match(name, m_enumConstantPattern))
+            if (! boost::regex_match(name.begin(), name.end(), m_enumConstantPattern))
             {
                 m_context.printer.PrintRuleViolation(
                     "enum naming",
                     Severity::Style,
-                    std::string("Enum class constant '") + name + "'" + " should be named in a style like UpperCamelCase",
+                    std::string("Enum class constant '") + name.str() + "'" + " should be named in a style like UpperCamelCase",
                     location,
                     sourceManager);
             }

@@ -27,7 +27,7 @@ private:
                                  clang::SourceLocation location,
                                  clang::SourceManager& sourceManager);
     void ValidateName(const char* type,
-                      const std::string& name,
+                      llvm::StringRef name,
                       const std::string& fullyQualifiedName,
                       clang::SourceLocation location,
                       clang::SourceManager& sourceManager);

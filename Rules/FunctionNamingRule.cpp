@@ -51,7 +51,7 @@ void FunctionNamingRule::HandleFunctionDeclaration(const FunctionDecl* functionD
 {
     auto name = functionDeclaration->getName();
     std::string fullyQualifiedName = functionDeclaration->getQualifiedNameAsString();
-    ValidateName("Function", name.str(), fullyQualifiedName, location, sourceManager);
+    ValidateName("Function", name, fullyQualifiedName, location, sourceManager);
 }
 
 void FunctionNamingRule::HandleMethodDeclaration(const CXXMethodDecl* methodDeclaration,
@@ -80,11 +80,11 @@ void FunctionNamingRule::HandleMethodDeclaration(const CXXMethodDecl* methodDecl
         return;
 
     std::string fullyQualifiedName = methodDeclaration->getQualifiedNameAsString();
-    ValidateName("Method", name.str(), fullyQualifiedName, location, sourceManager);
+    ValidateName("Method", name, fullyQualifiedName, location, sourceManager);
 }
 
 void FunctionNamingRule::ValidateName(const char* type,
-                                      const std::string& name,
+                                      StringRef name,
                                       const std::string& fullyQualifiedName,
                                       SourceLocation location,
                                       SourceManager& sourceManager)
@@ -93,12 +93,12 @@ void FunctionNamingRule::ValidateName(const char* type,
         return; // already reported
 
 
-    if (! boost::regex_match(name, m_functionOrMethodNamePattern))
+    if (! boost::regex_match(name.begin(), name.end(), m_functionOrMethodNamePattern))
     {
         m_context.printer.PrintRuleViolation(
                 "function naming",
                 Severity::Style,
-                std::string(type) + " '" + name + "'" + " should be named in UpperCamelCase style",
+                std::string(type) + " '" + name.str() + "'" + " should be named in UpperCamelCase style",
                 location,
                 sourceManager);
 

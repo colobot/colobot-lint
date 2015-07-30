@@ -25,7 +25,7 @@ private:
     void HandleFieldDeclaration(const clang::FieldDecl* fieldDeclaration,
                                 clang::SourceManager& sourceManager);
 
-    void ValidateFieldDeclaration(const clang::StringRef& name,
+    void ValidateFieldDeclaration(clang::StringRef name,
                                   clang::AccessSpecifier access,
                                   clang::SourceLocation location,
                                   clang::SourceManager& sourceManager);

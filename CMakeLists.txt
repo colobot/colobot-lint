@@ -172,10 +172,6 @@ else()
     )
 endif()
 
-set(TESTS
-    Test/todo_rule_test.py
-)
-
 if("${PROJECT_NAME}" STREQUAL "LLVM")
     set(COLOBOT_LINT_OUTPUT_BINARY ${LLVM_BINARY_DIR}/bin/colobot-lint)
 else()

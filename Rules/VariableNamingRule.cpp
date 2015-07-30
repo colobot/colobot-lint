@@ -67,7 +67,7 @@ void VariableNamingRule::HandleVariableDeclaration(const VarDecl* variableDeclar
     // Local, non-static variables in functions
     else if (variableDeclaration->hasLocalStorage())
     {
-        if (! boost::regex_match(name.str(), m_localVariableNamePattern))
+        if (! boost::regex_match(name.begin(), name.end(), m_localVariableNamePattern))
         {
               m_context.printer.PrintRuleViolation(
                 "variable naming",
@@ -76,7 +76,7 @@ void VariableNamingRule::HandleVariableDeclaration(const VarDecl* variableDeclar
                 location,
                 sourceManager);
         }
-        else if (boost::regex_match(name.str(), m_deprecatedVariableNamePattern))
+        else if (boost::regex_match(name.begin(), name.end(), m_deprecatedVariableNamePattern))
         {
             m_context.printer.PrintRuleViolation(
                 "variable naming",
@@ -91,7 +91,7 @@ void VariableNamingRule::HandleVariableDeclaration(const VarDecl* variableDeclar
     {
         if (variableDeclaration->getType().isConstQualified())
         {
-            if (! boost::regex_match(name.str(), m_constGlobalVariableNamePattern))
+            if (! boost::regex_match(name.begin(), name.end(), m_constGlobalVariableNamePattern))
             {
                 m_context.printer.PrintRuleViolation(
                     "variable naming",
@@ -103,7 +103,7 @@ void VariableNamingRule::HandleVariableDeclaration(const VarDecl* variableDeclar
         }
         else
         {
-            if (! boost::regex_match(name.str(), m_nonConstGlobalVariableNamePattern))
+            if (! boost::regex_match(name.begin(), name.end(), m_nonConstGlobalVariableNamePattern))
             {
                 m_context.printer.PrintRuleViolation(
                     "variable naming",
@@ -128,14 +128,14 @@ void VariableNamingRule::HandleFieldDeclaration(const FieldDecl* fieldDeclaratio
     ValidateFieldDeclaration(name, fieldDeclaration->getAccess(), location, sourceManager);
 }
 
-void VariableNamingRule::ValidateFieldDeclaration(const StringRef& name,
+void VariableNamingRule::ValidateFieldDeclaration(StringRef name,
                                                   AccessSpecifier access,
                                                   SourceLocation location,
                                                   SourceManager& sourceManager)
 {
     if (access == AS_public)
     {
-        if (! boost::regex_match(name.str(), m_publicFieldNamePattern))
+        if (! boost::regex_match(name.begin(), name.end(), m_publicFieldNamePattern))
         {
             m_context.printer.PrintRuleViolation(
                 "variable naming",
@@ -147,7 +147,7 @@ void VariableNamingRule::ValidateFieldDeclaration(const StringRef& name,
     }
     else if (access == AS_protected || access == AS_private)
     {
-        if (! boost::regex_match(name.str(), m_privateOrProtectedFieldNamePattern))
+        if (! boost::regex_match(name.begin(), name.end(), m_privateOrProtectedFieldNamePattern))
         {
             std::string which = (access == AS_protected) ? "Protected" : "Private";
             m_context.printer.PrintRuleViolation(
@@ -157,7 +157,7 @@ void VariableNamingRule::ValidateFieldDeclaration(const StringRef& name,
                 location,
                 sourceManager);
         }
-        else if (boost::regex_match(name.str(), m_deprecatedFieldNamePattern))
+        else if (boost::regex_match(name.begin(), name.end(), m_deprecatedFieldNamePattern))
         {
             std::string which = (access == AS_protected) ? "Protected" : "Private";
             m_context.printer.PrintRuleViolation(
