@@ -23,5 +23,5 @@ public:
                                                    clang::SourceManager& sourceManager);
 
 private:
-    Context* m_context;
+    Context* m_context = nullptr;
 };

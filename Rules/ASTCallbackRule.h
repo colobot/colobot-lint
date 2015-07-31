@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Rule.h"
+#include "Rules/Rule.h"
 
 namespace clang
 {
@@ -21,9 +21,9 @@ public:
         : Rule(context)
     {}
 
-    virtual void RegisterASTMatcherCallback(clang::ast_matchers::MatchFinder& finder)
+    virtual void RegisterASTMatcherCallback(clang::ast_matchers::MatchFinder& /*finder*/)
     {}
 
-    virtual void RegisterPreProcessorCallbacks(clang::CompilerInstance& compiler)
+    virtual void RegisterPreProcessorCallbacks(clang::CompilerInstance& /*ci*/)
     {}
 };

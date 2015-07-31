@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Rule.h"
+#include "Rules/Rule.h"
 
 #include <clang/AST/ASTConsumer.h>
 

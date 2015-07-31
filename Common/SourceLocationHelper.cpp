@@ -1,6 +1,6 @@
-#include "SourceLocationHelper.h"
+#include "Common/SourceLocationHelper.h"
 
-#include "Context.h"
+#include "Common/Context.h"
 
 #include <clang/Basic/SourceManager.h>
 

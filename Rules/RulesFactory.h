@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ASTCallbackRule.h"
-#include "DirectASTConsumerRule.h"
+#include "Rules/ASTCallbackRule.h"
+#include "Rules/DirectASTConsumerRule.h"
 
 #include <memory>
 #include <vector>

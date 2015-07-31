@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ASTCallbackRule.h"
+#include "Rules/ASTCallbackRule.h"
 
 #include <clang/ASTMatchers/ASTMatchFinder.h>
 

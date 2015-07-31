@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DirectASTConsumerRule.h"
+#include "Rules/DirectASTConsumerRule.h"
 
 #include <clang/AST/RecursiveASTVisitor.h>
 

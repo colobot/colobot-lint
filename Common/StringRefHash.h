@@ -1,7 +1,7 @@
 #pragma once
 
-#include "llvm/ADT/Hashing.h"
-#include "llvm/ADT/StringRef.h"
+#include <llvm/ADT/Hashing.h>
+#include <llvm/ADT/StringRef.h>
 
 #include <functional>
 

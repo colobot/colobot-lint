@@ -1,8 +1,8 @@
-#include "InconsistentDeclarationParameterNameRule.h"
+#include "Rules/InconsistentDeclarationParameterNameRule.h"
 
-#include "../Common/Context.h"
-#include "../Common/OutputPrinter.h"
-#include "../Common/SourceLocationHelper.h"
+#include "Common/Context.h"
+#include "Common/OutputPrinter.h"
+#include "Common/SourceLocationHelper.h"
 
 #include <clang/AST/RecursiveASTVisitor.h>
 #include <clang/AST/Decl.h>

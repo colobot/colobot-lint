@@ -37,7 +37,7 @@ bool ColobotLintASTFrontendAction::BeginSourceFileAction(CompilerInstance& ci, S
 }
 
 std::unique_ptr<ASTConsumer> ColobotLintASTFrontendAction::CreateASTConsumer(CompilerInstance& compiler,
-                                                                             StringRef file)
+                                                                             StringRef /*file*/)
 {
     std::vector<std::unique_ptr<ASTConsumer>> consumers;
 

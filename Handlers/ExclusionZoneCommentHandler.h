@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Common/StringRefHash.h"
+#include "Common/StringRefHash.h"
 
 #include <clang/Lex/Preprocessor.h>
 

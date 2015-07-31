@@ -1,9 +1,9 @@
-#include "ClassNamingRule.h"
+#include "Rules/ClassNamingRule.h"
 
-#include "../Common/Context.h"
-#include "../Common/OutputPrinter.h"
-#include "../Common/RegexHelper.h"
-#include "../Common/SourceLocationHelper.h"
+#include "Common/Context.h"
+#include "Common/OutputPrinter.h"
+#include "Common/RegexHelper.h"
+#include "Common/SourceLocationHelper.h"
 
 #include <boost/format.hpp>
 

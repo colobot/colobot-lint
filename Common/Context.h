@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ExclusionZone.h"
+#include "Common/ExclusionZone.h"
 
 #include <set>
 #include <string>
@@ -11,19 +11,19 @@ class OutputPrinter;
 
 struct Context
 {
-    Context(SourceLocationHelper& _sourceLocationHelper,
-            OutputPrinter& _printer,
-            std::set<std::string>&& _projectLocalIncludePaths,
-            std::set<std::string>&& _rulesSelection,
-            bool _verbose,
-            bool _debug)
-        : rulesSelection(_rulesSelection),
-          projectLocalIncludePaths(_projectLocalIncludePaths),
-          verbose(_verbose),
-          debug(_debug),
+    Context(SourceLocationHelper& sourceLocationHelper,
+            OutputPrinter& printer,
+            std::set<std::string>&& projectLocalIncludePaths,
+            std::set<std::string>&& rulesSelection,
+            bool verbose,
+            bool debug)
+        : rulesSelection(rulesSelection),
+          projectLocalIncludePaths(projectLocalIncludePaths),
+          verbose(verbose),
+          debug(debug),
           areWeInFakeHeaderSourceFile(false),
-          sourceLocationHelper(_sourceLocationHelper),
-          printer(_printer)
+          sourceLocationHelper(sourceLocationHelper),
+          printer(printer)
     {}
 
     const std::set<std::string> rulesSelection;

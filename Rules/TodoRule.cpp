@@ -1,9 +1,9 @@
-#include "TodoRule.h"
+#include "Rules/TodoRule.h"
 
-#include "../Common/Context.h"
-#include "../Common/OutputPrinter.h"
-#include "../Common/RegexHelper.h"
-#include "../Common/SourceLocationHelper.h"
+#include "Common/Context.h"
+#include "Common/OutputPrinter.h"
+#include "Common/RegexHelper.h"
+#include "Common/SourceLocationHelper.h"
 
 #include <clang/Frontend/CompilerInstance.h>
 

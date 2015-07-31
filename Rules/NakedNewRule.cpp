@@ -1,8 +1,8 @@
-#include "NakedNewRule.h"
+#include "Rules/NakedNewRule.h"
 
-#include "../Common/Context.h"
-#include "../Common/OutputPrinter.h"
-#include "../Common/SourceLocationHelper.h"
+#include "Common/Context.h"
+#include "Common/OutputPrinter.h"
+#include "Common/SourceLocationHelper.h"
 
 #include <clang/Tooling/Tooling.h>
 #include <clang/ASTMatchers/ASTMatchers.h>

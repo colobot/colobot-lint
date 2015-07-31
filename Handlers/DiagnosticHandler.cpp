@@ -1,7 +1,7 @@
-#include "DiagnosticHandler.h"
+#include "Handlers/DiagnosticHandler.h"
 
-#include "../Common/Context.h"
-#include "../Common/OutputPrinter.h"
+#include "Common/Context.h"
+#include "Common/OutputPrinter.h"
 
 #include <boost/format.hpp>
 

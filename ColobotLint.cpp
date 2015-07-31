@@ -1,12 +1,12 @@
+#include "ActionFactories.h"
+
+#include "ColobotLintConfig.h"
+
 #include "Common/Context.h"
 #include "Common/OutputPrinter.h"
 #include "Common/SourceLocationHelper.h"
 
 #include "Handlers/DiagnosticHandler.h"
-
-#include "ActionFactories.h"
-
-#include "ColobotLintConfig.h"
 
 #include <llvm/Support/CommandLine.h>
 #include <llvm/Config/config.h>
@@ -70,7 +70,7 @@ extrahelp g_moreHelp(
     "cppcheck plugin.\n"
 );
 
-void printColobotLintVersion()
+void PrintColobotLintVersion()
 {
     std::cout << "colobot-lint version " << COLOBOT_LINT_VERSION_STR <<  " built with LLVM " << LLVM_VERSION_STRING << std::endl;
     std::cout << "(C) 2015 Piotr Dziwinski <piotrdz@gmail.com>" << std::endl;
@@ -90,7 +90,7 @@ namespace boost
 
 int main(int argc, const char **argv)
 {
-    SetVersionPrinter(printColobotLintVersion);
+    SetVersionPrinter(PrintColobotLintVersion);
     CommonOptionsParser optionsParser(argc, argv, g_colobotLintOptionCategory);
 
     ClangTool tool(optionsParser.getCompilations(),

@@ -1,11 +1,16 @@
 #pragma once
 
-#include "StringRefHash.h"
+#include "Common/StringRefHash.h"
 
 #include <llvm/ADT/StringRef.h>
 
 struct ExclusionZone
 {
+    ExclusionZone(int lineNumber = 0, llvm::StringRef ruleName = {})
+        : lineNumber(lineNumber),
+          ruleName(ruleName)
+    {}
+
     int lineNumber;
     llvm::StringRef ruleName;
 };

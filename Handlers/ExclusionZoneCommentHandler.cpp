@@ -1,9 +1,9 @@
-#include "ExclusionZoneCommentHandler.h"
+#include "Handlers/ExclusionZoneCommentHandler.h"
 
-#include "../Common/Context.h"
-#include "../Common/SourceLocationHelper.h"
-#include "../Common/RegexHelper.h"
-#include "../Common/TextHelper.h"
+#include "Common/Context.h"
+#include "Common/RegexHelper.h"
+#include "Common/SourceLocationHelper.h"
+#include "Common/TextHelper.h"
 
 #include <iostream>
 
@@ -13,7 +13,7 @@ using namespace clang;
 class ExclusionZonePPCallbacks : public PPCallbacks
 {
 public:
-    ExclusionZonePPCallbacks(ExclusionZoneCommentHandler& handler, SourceManager& sourceManager)
+    ExclusionZonePPCallbacks(ExclusionZoneCommentHandler& handler)
         : m_handler(handler)
     {}
 
@@ -38,17 +38,17 @@ ExclusionZoneCommentHandler::ExclusionZoneCommentHandler(Context& context)
 
 void ExclusionZoneCommentHandler::RegisterPPCallbacks(Preprocessor& pp)
 {
-    pp.addPPCallbacks(make_unique<ExclusionZonePPCallbacks>(*this, pp.getSourceManager()));
+    pp.addPPCallbacks(make_unique<ExclusionZonePPCallbacks>(*this));
 }
 
-bool ExclusionZoneCommentHandler::HandleComment(Preprocessor& pp, SourceRange range)
+bool ExclusionZoneCommentHandler::HandleComment(Preprocessor& pp, SourceRange comment)
 {
-    SourceLocation location = range.getBegin();
+    SourceLocation location = comment.getBegin();
 
     if (! m_context.sourceLocationHelper.IsLocationOfInterestIgnoringExclusionZone(location, pp.getSourceManager()))
         return false;
 
-    StringRef commentText = Lexer::getSourceText(CharSourceRange::getCharRange(range),
+    StringRef commentText = Lexer::getSourceText(CharSourceRange::getCharRange(comment),
                                                  pp.getSourceManager(),
                                                  pp.getLangOpts());
 

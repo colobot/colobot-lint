@@ -1,8 +1,8 @@
-#include "IncludeStyleRule.h"
+#include "Rules/IncludeStyleRule.h"
 
-#include "../Common/Context.h"
-#include "../Common/OutputPrinter.h"
-#include "../Common/SourceLocationHelper.h"
+#include "Common/Context.h"
+#include "Common/OutputPrinter.h"
+#include "Common/SourceLocationHelper.h"
 
 #include <clang/Frontend/CompilerInstance.h>
 #include <clang/Lex/Preprocessor.h>

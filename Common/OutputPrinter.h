@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Severity.h"
+#include "Common/Severity.h"
 
 #include <tinyxml.h>
 

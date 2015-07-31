@@ -78,6 +78,7 @@ configure_file(Common/ColobotLintConfig.h.in ${CMAKE_CURRENT_BINARY_DIR}/Colobot
 # Include dirs
 
 include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
     ${TINYXML_INCLUDE_DIRS}
 )

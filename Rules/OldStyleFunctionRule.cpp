@@ -1,9 +1,9 @@
-#include "OldStyleFunctionRule.h"
+#include "Rules/OldStyleFunctionRule.h"
 
-#include "../Common/ClassofCast.h"
-#include "../Common/Context.h"
-#include "../Common/OutputPrinter.h"
-#include "../Common/SourceLocationHelper.h"
+#include "Common/ClassofCast.h"
+#include "Common/Context.h"
+#include "Common/OutputPrinter.h"
+#include "Common/SourceLocationHelper.h"
 
 #include <clang/AST/RecursiveASTVisitor.h>
 #include <clang/AST/Decl.h>

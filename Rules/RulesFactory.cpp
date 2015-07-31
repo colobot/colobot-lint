@@ -1,22 +1,21 @@
-#include "RulesFactory.h"
+#include "Rules/RulesFactory.h"
 
-#include "../Common/Context.h"
+#include "Common/Context.h"
 
-#include "ClassNamingRule.h"
-#include "EnumNamingRule.h"
-#include "FunctionNamingRule.h"
-#include "IncludeStyleRule.h"
-#include "InconsistentDeclarationParameterNameRule.h"
-#include "NakedDeleteRule.h"
-#include "NakedNewRule.h"
-#include "OldStyleFunctionRule.h"
-#include "TodoRule.h"
-#include "UninitializedFieldRule.h"
-#include "UninitializedLocalVariableRule.h"
-#include "VariableNamingRule.h"
-
-#include "BlockPlacementRule.h"
-#include "WhitespaceRule.h"
+#include "Rules/BlockPlacementRule.h"
+#include "Rules/ClassNamingRule.h"
+#include "Rules/EnumNamingRule.h"
+#include "Rules/FunctionNamingRule.h"
+#include "Rules/IncludeStyleRule.h"
+#include "Rules/InconsistentDeclarationParameterNameRule.h"
+#include "Rules/NakedDeleteRule.h"
+#include "Rules/NakedNewRule.h"
+#include "Rules/OldStyleFunctionRule.h"
+#include "Rules/TodoRule.h"
+#include "Rules/UninitializedFieldRule.h"
+#include "Rules/UninitializedLocalVariableRule.h"
+#include "Rules/VariableNamingRule.h"
+#include "Rules/WhitespaceRule.h"
 
 #include <llvm/ADT/STLExtras.h>
 

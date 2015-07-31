@@ -1,4 +1,4 @@
-#include "OutputPrinter.h"
+#include "Common/OutputPrinter.h"
 
 #include "ColobotLintConfig.h"
 

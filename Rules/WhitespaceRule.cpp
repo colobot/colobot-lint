@@ -1,7 +1,7 @@
-#include "WhitespaceRule.h"
+#include "Rules/WhitespaceRule.h"
 
-#include "../Common/Context.h"
-#include "../Common/OutputPrinter.h"
+#include "Common/Context.h"
+#include "Common/OutputPrinter.h"
 
 #include <clang/AST/ASTContext.h>
 

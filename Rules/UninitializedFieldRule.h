@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ASTCallbackRule.h"
+#include "Rules/ASTCallbackRule.h"
 
-#include "../Common/StringRefHash.h"
+#include "Common/StringRefHash.h"
 
 #include <clang/ASTMatchers/ASTMatchFinder.h>
 
