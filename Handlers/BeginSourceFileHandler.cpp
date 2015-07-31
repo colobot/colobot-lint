@@ -47,17 +47,17 @@ void BeginSourceFileHandler::BeginSourceFileAction(clang::CompilerInstance&, llv
 
 namespace
 {
-    const char* g_fake_header_dir_prefix = "fake_header_sources/";
-}
+    const char* const FAKE_HEADER_DIR_PREFIX = "fake_header_sources/";
+} // anonymous namespace
 
 bool BeginSourceFileHandler::IsFakeHeaderSource(llvm::StringRef filename)
 {
-    return filename.find(g_fake_header_dir_prefix) != filename.npos;
+    return filename.find(FAKE_HEADER_DIR_PREFIX) != filename.npos;
 }
 
 std::string BeginSourceFileHandler::GetActualHeaderFileSuffix(llvm::StringRef filename)
 {
-    boost::regex searchPattern(std::string(g_fake_header_dir_prefix) + "(.*?)\\.cpp$");
+    boost::regex searchPattern(std::string(FAKE_HEADER_DIR_PREFIX) + "(.*?)\\.cpp$");
 
     boost::smatch match;
     std::string filenameStr = filename.str();

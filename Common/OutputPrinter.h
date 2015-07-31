@@ -4,6 +4,8 @@
 
 #include <tinyxml.h>
 
+#include <memory>
+
 namespace clang
 {
 class SourceLocation;
@@ -35,5 +37,6 @@ private:
 
     std::string m_outputFileName;
     TiXmlDocument m_document;
-    TiXmlElement* m_errorsElement;
+    std::unique_ptr<TiXmlElement> m_resultsElement;
+    std::unique_ptr<TiXmlElement> m_errorsElement;
 };

@@ -4,28 +4,33 @@
 
 #include <clang/Basic/SourceLocation.h>
 #include <clang/AST/ASTContext.h>
+#include <llvm/ADT/STLExtras.h>
+
+using namespace clang;
+using namespace llvm;
 
 
 OutputPrinter::OutputPrinter(const std::string& outputFileName)
     : m_outputFileName(outputFileName)
 {
-    TiXmlDeclaration* decl = new TiXmlDeclaration("1.0", "", "");
-    m_document.LinkEndChild(decl);
+    auto decl = make_unique<TiXmlDeclaration>("1.0", "", "");
+    m_document.LinkEndChild(decl.release());
 
-    TiXmlElement* resultsElement = new TiXmlElement("results");
-    resultsElement->SetAttribute("version", "2");
-    m_document.LinkEndChild(resultsElement);
+    m_resultsElement = make_unique<TiXmlElement>("results");
+    m_resultsElement->SetAttribute("version", "2");
 
-    TiXmlElement* colobotLintElement = new TiXmlElement("cppcheck");
+    auto colobotLintElement = make_unique<TiXmlElement>("cppcheck");
     colobotLintElement->SetAttribute("version", "colobot-lint-" COLOBOT_LINT_VERSION_STR);
-    resultsElement->LinkEndChild(colobotLintElement);
+    m_resultsElement->LinkEndChild(colobotLintElement.release());
 
-    m_errorsElement = new TiXmlElement("errors");
-    resultsElement->LinkEndChild(m_errorsElement);
+    m_errorsElement = make_unique<TiXmlElement>("errors");
 }
 
 void OutputPrinter::Save()
 {
+    m_resultsElement->LinkEndChild(m_errorsElement.release());
+    m_document.LinkEndChild(m_resultsElement.release());
+
     if (m_outputFileName.empty())
     {
         m_document.Print();
@@ -39,8 +44,8 @@ void OutputPrinter::Save()
 void OutputPrinter::PrintRuleViolation(const std::string& ruleName,
                                        Severity severity,
                                        const std::string& description,
-                                       clang::SourceLocation location,
-                                       clang::SourceManager& sourceManager,
+                                       SourceLocation location,
+                                       SourceManager& sourceManager,
                                        int lineOffset)
 {
     std::string fileName = sourceManager.getFilename(location).str();
@@ -55,19 +60,19 @@ void OutputPrinter::PrintRuleViolation(const std::string& ruleName,
                                        const std::string& fileName,
                                        int lineNumber)
 {
-    TiXmlElement* errorElement = new TiXmlElement("error");
+    auto errorElement = make_unique<TiXmlElement>("error");
 
     errorElement->SetAttribute("id", ruleName);
     errorElement->SetAttribute("severity", GetSeverityString(severity));
     errorElement->SetAttribute("msg", description);
     errorElement->SetAttribute("verbose", description);
 
-    TiXmlElement* locationElement = new TiXmlElement("location");
+    auto locationElement = make_unique<TiXmlElement>("location");
     locationElement->SetAttribute("file", fileName);
     locationElement->SetAttribute("line", std::to_string(lineNumber));
-    errorElement->LinkEndChild(locationElement);
+    errorElement->LinkEndChild(locationElement.release());
 
-    m_errorsElement->LinkEndChild(errorElement);
+    m_errorsElement->LinkEndChild(errorElement.release());
 }
 
 std::string OutputPrinter::GetSeverityString(Severity severity)

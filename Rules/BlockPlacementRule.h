@@ -23,7 +23,7 @@ private:
     bool IsDeclarationOpeningBracePlacedCorrectly(const clang::SourceLocation& locStart,
                                                   const clang::SourceLocation& locEnd);
     bool IsStatementOpeningBracePlacedCorrectly(const clang::SourceLocation& parentStartLocation,
-                                                const clang::SourceLocation& braceLocation);
+                                                const clang::SourceLocation& openingBraceLocation);
     bool IsClosingBracePlacedCorrectly(const clang::SourceLocation& locStart,
                                        const clang::SourceLocation& locEnd);
 
