@@ -8,6 +8,10 @@ It uses Clang's extensive API to implement a tool that "sees" the code exactly a
 
 If you're not familiar with Clang's LibTooling, you should start by reading [a few tutorials](http://clang.llvm.org/docs/LibASTMatchersTutorial.html).
 
+# Supported checks
+
+List of rules that colobot-lint checks is documented in [RULES.md file](https://github.com/piotrdz/colobot-lint/blob/master/RULES.md).
+
 # Compiling
 
 There are two possible ways of compiling colobot-lint:
