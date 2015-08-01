@@ -4,6 +4,7 @@
 #include "Common/Context.h"
 #include "Common/OutputPrinter.h"
 #include "Common/SourceLocationHelper.h"
+#include "Common/UninitializedPodVariableHelper.h"
 
 #include <clang/AST/Decl.h>
 
@@ -35,7 +36,7 @@ void UninitializedLocalVariableRule::run(const MatchFinder::MatchResult& result)
     if (! m_context.sourceLocationHelper.IsLocationOfInterest(GetName(), location, sourceManager))
         return;
 
-    if (! variableDeclaration->hasLocalStorage() ||
+    if (! variableDeclaration->hasLocalStorage() ||   // skip global/static variables
         ParmVarDecl::classof(variableDeclaration) ||  // ignore function parameters
         variableDeclaration->isImplicit())            // ignore implicit (compiler-generated) variables
     {
@@ -52,11 +53,7 @@ void UninitializedLocalVariableRule::run(const MatchFinder::MatchResult& result)
             return;
     }
 
-    QualType type = variableDeclaration->getType();
-    if (! type.isPODType(*result.Context))
-        return;
-
-    if (!variableDeclaration->hasInit() || (type->isRecordType() && HasImplicitInitialization(variableDeclaration)))
+    if (IsUninitializedPodVariable(variableDeclaration, result.Context))
     {
         m_context.printer.PrintRuleViolation(
                 "uninitialized local variable",
@@ -66,16 +63,4 @@ void UninitializedLocalVariableRule::run(const MatchFinder::MatchResult& result)
                 location,
                 sourceManager);
     }
-}
-
-bool UninitializedLocalVariableRule::HasImplicitInitialization(const VarDecl* variableDeclaration)
-{
-    const CXXConstructExpr* constructExpr = classof_cast<const CXXConstructExpr>(variableDeclaration->getInit());
-    if (constructExpr == nullptr ||
-        constructExpr->getConstructor() == nullptr)
-    {
-        return false;
-    }
-
-    return constructExpr->getConstructor()->isImplicit();
 }

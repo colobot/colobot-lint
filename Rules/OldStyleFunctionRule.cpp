@@ -4,6 +4,8 @@
 #include "Common/Context.h"
 #include "Common/OutputPrinter.h"
 #include "Common/SourceLocationHelper.h"
+#include "Common/StringRefHash.h"
+#include "Common/UninitializedPodVariableHelper.h"
 
 #include <clang/AST/RecursiveASTVisitor.h>
 #include <clang/AST/Decl.h>
@@ -22,12 +24,15 @@ public:
     bool VisitStmt(Stmt* statement);
 
     int GetOldStyleDeclarationsCount() const;
-    const std::vector<std::string>& GetFirstFewOldStyleDeclarations() const;
+    const std::vector<StringRef>& GetFirstFewOldStyleDeclarations() const;
 
 private:
-    std::unordered_set<std::string> m_oldStyleDeclarations;
-    std::unordered_set<std::string> m_correctStyleDeclarations;
-    std::vector<std::string> m_firstFewOldStyleDeclarations;
+    bool IsInteresting(const VarDecl* variableDeclaration);
+
+private:
+    std::unordered_set<StringRef> m_oldStyleDeclarations;
+    std::unordered_set<StringRef> m_correctStyleDeclarations;
+    std::vector<StringRef> m_firstFewOldStyleDeclarations;
     ASTContext* m_context;
 };
 
@@ -69,7 +74,8 @@ void OldStyleFunctionRule::run(const MatchFinder::MatchResult& result)
         m_context.printer.PrintRuleViolation(
             "old style function",
             Severity::Warning,
-            boost::str(boost::format("Function '%s' has variables declared far from point of use %s")
+            boost::str(boost::format("Function '%s' seems to be written in legacy C style: "
+                                     "it has uninitialized POD type variables declared far from their point of use %s")
                 % functionDeclaration->getNameAsString()
                 % GetShortDeclarationsString(finder.GetFirstFewOldStyleDeclarations(), oldStyleDeclarationCount)),
             location,
@@ -79,7 +85,7 @@ void OldStyleFunctionRule::run(const MatchFinder::MatchResult& result)
     }
 }
 
-std::string OldStyleFunctionRule::GetShortDeclarationsString(const std::vector<std::string>& declarations, int totalCount)
+std::string OldStyleFunctionRule::GetShortDeclarationsString(const std::vector<StringRef>& declarations, int totalCount)
 {
     std::string result;
     result += "(";
@@ -91,7 +97,7 @@ std::string OldStyleFunctionRule::GetShortDeclarationsString(const std::vector<s
             result += ", ";
 
         result += "'";
-        result += declaration;
+        result += declaration.str();
         result += "'";
 
         ++count;
@@ -115,28 +121,42 @@ OldStyleDeclarationFinder::OldStyleDeclarationFinder(ASTContext* context)
     : m_context(context)
 {}
 
-bool OldStyleDeclarationFinder::VisitStmt(clang::Stmt* statement)
+bool OldStyleDeclarationFinder::IsInteresting(const VarDecl* variableDeclaration)
+{
+    if (variableDeclaration == nullptr ||
+        ! variableDeclaration->hasLocalStorage() ||        // skip global/static variables
+        ParmVarDecl::classof(variableDeclaration) ||       // ignore function parameters
+        variableDeclaration->isImplicit() ||               // ignore implicit (compiler-generated) variables
+        ! IsUninitializedPodVariable(variableDeclaration, m_context)) // we're only interested in uninitialized POD types
+    {
+        return false;
+    }
+
+    StringRef name = variableDeclaration->getName();
+
+    // already visited?
+    if (m_oldStyleDeclarations.count(name) > 0 ||
+        m_correctStyleDeclarations.count(name) > 0)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool OldStyleDeclarationFinder::VisitStmt(Stmt* statement)
 {
     const DeclRefExpr* declarationRef = classof_cast<const DeclRefExpr>(statement);
     if (declarationRef == nullptr)
-        return true;
+        return true; // recurse further
 
     const VarDecl* variableDeclaration = classof_cast<const VarDecl>(declarationRef->getDecl());
-    if (variableDeclaration == nullptr ||
-        ParmVarDecl::classof(variableDeclaration) ||
-        ! variableDeclaration->hasLocalStorage())
-    {
-        return true;
-    }
-
-    std::string name = variableDeclaration->getNameAsString();
-
-    if (m_oldStyleDeclarations.count(name) > 0 ||
-        m_correctStyleDeclarations.count(name) > 0)
-        return true; // already visited
+    if (! IsInteresting(variableDeclaration))
+        return true; // recurse further
 
     int declarationLineNumber = m_context->getSourceManager().getPresumedLineNumber(variableDeclaration->getLocation());
     int firstUseLineNumber = m_context->getSourceManager().getPresumedLineNumber(statement->getLocStart());
+    StringRef name = variableDeclaration->getName();
 
     if (firstUseLineNumber < declarationLineNumber + 3)
     {
@@ -149,7 +169,7 @@ bool OldStyleDeclarationFinder::VisitStmt(clang::Stmt* statement)
             m_firstFewOldStyleDeclarations.push_back(name);
     }
 
-    return true;
+    return true; // recurse further
 }
 
 int OldStyleDeclarationFinder::GetOldStyleDeclarationsCount() const
@@ -157,7 +177,7 @@ int OldStyleDeclarationFinder::GetOldStyleDeclarationsCount() const
     return m_oldStyleDeclarations.size();
 }
 
-const std::vector<std::string>& OldStyleDeclarationFinder::GetFirstFewOldStyleDeclarations() const
+const std::vector<StringRef>& OldStyleDeclarationFinder::GetFirstFewOldStyleDeclarations() const
 {
     return m_firstFewOldStyleDeclarations;
 }

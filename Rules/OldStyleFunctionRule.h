@@ -19,7 +19,7 @@ public:
     static const char* GetName() { return "OldStyleFunctionRule"; }
 
 private:
-    std::string GetShortDeclarationsString(const std::vector<std::string>& declarations, int totalCount);
+    std::string GetShortDeclarationsString(const std::vector<llvm::StringRef>& declarations, int totalCount);
 
 private:
     clang::ast_matchers::DeclarationMatcher m_matcher;

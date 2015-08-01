@@ -17,8 +17,5 @@ public:
     static const char* GetName() { return "UninitializedLocalVariableRule"; }
 
 private:
-    bool HasImplicitInitialization(const clang::VarDecl* variableDeclaration);
-
-private:
     clang::ast_matchers::DeclarationMatcher m_matcher;
 };

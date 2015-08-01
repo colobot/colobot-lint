@@ -51,6 +51,7 @@ set(COLOBOT_LINT_SRCS
     ActionFactories.cpp
     Common/OutputPrinter.cpp
     Common/SourceLocationHelper.cpp
+    Common/UninitializedPodVariableHelper.cpp
     Handlers/BeginSourceFileHandler.cpp
     Handlers/DiagnosticHandler.cpp
     Handlers/ExclusionZoneCommentHandler.cpp

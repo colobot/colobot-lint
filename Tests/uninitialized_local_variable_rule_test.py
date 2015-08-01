@@ -92,7 +92,8 @@ class UnintializedLocalVariableRuleTest(test_support.TestBase):
                 {
                     'id': 'old style function',
                     'severity': 'warning',
-                    'msg': "Function 'Foo' has variables declared far from point of use ('x', 'y', 'z', 'a'... and 3 more)",
+                    'msg': "Function 'Foo' seems to be written in legacy C style: " +
+                           "it has uninitialized POD type variables declared far from their point of use ('x', 'y', 'z', 'a'... and 2 more)",
                     'line': '3'
                 }
             ],

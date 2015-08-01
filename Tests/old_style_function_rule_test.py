@@ -13,7 +13,7 @@ class OldStyleFunctionRuleTest(test_support.TestBase):
                 'int Bar() { return 42; }',
                 'void Foo()',
                 '{',
-                '    int x{};',
+                '    int x;',
                 '    x = Bar();',
                 '}'
             ],
@@ -25,8 +25,8 @@ class OldStyleFunctionRuleTest(test_support.TestBase):
                 'void Bar(int &x, int &y);',
                 'void Foo()',
                 '{',
-                '    int x{};',
-                '    int y{};',
+                '    int x;',
+                '    int y;',
                 '    Bar(x, y);',
                 '}'
             ],
@@ -38,15 +38,16 @@ class OldStyleFunctionRuleTest(test_support.TestBase):
                 'void Bar(int &x, int &y, int& z);',
                 'void Foo()',
                 '{',
-                '    int x{};',
-                '    int y{};',
-                '    int z{};',
+                '    int x;',
+                '    int y;',
+                '    int z;',
                 '    Bar(x, y, z);',
                 '}'
             ],
             expected_errors = [
                 {
-                    'msg': "Function 'Foo' has variables declared far from point of use ('x')",
+                    'msg': "Function 'Foo' seems to be written in legacy C style: " +
+                            "it has uninitialized POD type variables declared far from their point of use ('x')",
                     'line': '2'
                 }
             ])
@@ -69,7 +70,8 @@ class OldStyleFunctionRuleTest(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'msg': "Function 'Foo' has variables declared far from point of use ('x', 'y', 'z', 'a'... and 3 more)",
+                    'msg': "Function 'Foo' seems to be written in legacy C style: " +
+                            "it has uninitialized POD type variables declared far from their point of use ('x', 'y', 'z', 'a'... and 2 more)",
                     'line': '3'
                 }
             ])
@@ -86,6 +88,49 @@ class OldStyleFunctionRuleTest(test_support.TestBase):
                 '}'
             ],
             expected_errors = [])
+
+    def test_ignore_initialized_declarations(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                '#include <string>',
+                'void Bar(int &x, int &y, int& z);',
+                'void Foo()',
+                '{',
+                '    int x = 0, y = 0, z = 0;',
+                '    float a{}, b{}, c{}',
+                '    std::string str;',
+                '',
+                '    Bar(x, y, z);',
+                '    a = b = c = 10.0f;',
+                '    str = "123";',
+                '}'
+            ],
+            expected_errors = [])
+
+    def test_ignore_non_pod_type_declarations(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                '#include <string>',
+                'struct Pod { int x; };',
+                'struct NonPod { int x = 0; };',
+                'void Foo()',
+                '{',
+                '    Pod pod;',
+                '    NonPod nonPod;',
+                '    std::string str;',
+                '',
+                '    pod = Pod{10};',
+                '    nonPod = NonPod{20};',
+                '    str = "123";',
+                '}'
+            ],
+            expected_errors = [
+                {
+                    'msg': "Function 'Foo' seems to be written in legacy C style: " +
+                            "it has uninitialized POD type variables declared far from their point of use ('pod')",
+                    'line': '4'
+                }
+            ])
 
 
 if __name__ == '__main__':
