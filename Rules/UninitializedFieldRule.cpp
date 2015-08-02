@@ -127,7 +127,6 @@ void UninitializedFieldRule::HandleConstructors(const RecordDecl* recordDeclarat
     {
         const CXXConstructorDecl* constructorDeclaration = classof_cast<const CXXConstructorDecl>(decl);
 
-        if (constructorDeclaration != nullptr) constructorDeclaration->dump();
 
         if (constructorDeclaration == nullptr ||
             constructorDeclaration->isImplicit())
