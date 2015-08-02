@@ -48,7 +48,7 @@ public:
         IncludeDirective directive;
         directive.location = hashLoc;
         directive.includeFileName = fileName.str();
-        directive.fullFileName = file->getName();
+        directive.fullFileName = CleanFilename(StringRef(file->getName()));
         directive.isAngled = isAngled;
 
         m_includeDirectives.push_back(std::move(directive));

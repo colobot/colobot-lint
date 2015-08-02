@@ -1,6 +1,7 @@
 #include "Rules/WhitespaceRule.h"
 
 #include "Common/Context.h"
+#include "Common/FilenameHelper.h"
 #include "Common/OutputPrinter.h"
 
 #include <clang/AST/ASTContext.h>
@@ -18,7 +19,7 @@ void WhitespaceRule::HandleTranslationUnit(ASTContext& context)
 
     FileID mainFileID = GetMainFileID(sourceManager);
 
-    std::string fileName = sourceManager.getFileEntryForID(mainFileID)->getName();
+    std::string fileName = CleanFilename(StringRef(sourceManager.getFileEntryForID(mainFileID)->getName()));
 
     MemoryBuffer* buffer = sourceManager.getBuffer(mainFileID);
     const char* bufferChars = buffer->getBufferStart();

@@ -5,12 +5,11 @@
 
 #include <vector>
 
+using namespace llvm;
 using namespace clang;
 
-std::string GetCleanFilename(SourceLocation location, SourceManager& sourceManager)
+std::string CleanFilename(StringRef filename)
 {
-    StringRef filename = sourceManager.getFilename(location);
-
     std::vector<StringRef> pathComponents;
 
     for (auto it = llvm::sys::path::begin(filename);
@@ -39,4 +38,9 @@ std::string GetCleanFilename(SourceLocation location, SourceManager& sourceManag
     }
 
     return cleanFilename;
+}
+
+std::string GetCleanFilename(SourceLocation location, SourceManager& sourceManager)
+{
+    return CleanFilename(sourceManager.getFilename(location));
 }
