@@ -1,6 +1,7 @@
 #include "Rules/IncludeStyleRule.h"
 
 #include "Common/Context.h"
+#include "Common/FilenameHelper.h"
 #include "Common/OutputPrinter.h"
 #include "Common/SourceLocationHelper.h"
 
@@ -111,7 +112,7 @@ void IncludeStyleRule::run(const MatchFinder::MatchResult& result)
     const CXXRecordDecl& baseDecl = *typeSourceInfo->getType()->getAsCXXRecordDecl();
     SourceLocation baseLocation = baseDecl.getLocStart();
 
-    auto baseFileName = sourceManager.getFilename(baseLocation).str();
+    auto baseFileName = GetCleanFilename(baseLocation, sourceManager);
     if (! IsLocalInclude(baseFileName))
         return;
 

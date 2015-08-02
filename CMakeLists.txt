@@ -49,6 +49,7 @@ message(STATUS "Version set from git commit hash: ${COLOBOT_LINT_GIT_COMMIT_HASH
 set(COLOBOT_LINT_SRCS
     ColobotLint.cpp
     ActionFactories.cpp
+    Common/FilenameHelper.cpp
     Common/OutputPrinter.cpp
     Common/SourceLocationHelper.cpp
     Common/UninitializedPodVariableHelper.cpp

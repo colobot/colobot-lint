@@ -2,6 +2,8 @@
 
 #include "ColobotLintConfig.h"
 
+#include "Common/FilenameHelper.h"
+
 #include <clang/Basic/SourceLocation.h>
 #include <clang/AST/ASTContext.h>
 #include <llvm/ADT/STLExtras.h>
@@ -48,7 +50,7 @@ void OutputPrinter::PrintRuleViolation(const std::string& ruleName,
                                        SourceManager& sourceManager,
                                        int lineOffset)
 {
-    std::string fileName = sourceManager.getFilename(location).str();
+    std::string fileName = GetCleanFilename(location, sourceManager);
     int lineNumber = sourceManager.getPresumedLineNumber(location) + lineOffset;
 
     PrintRuleViolation(ruleName, severity, description, fileName, lineNumber);

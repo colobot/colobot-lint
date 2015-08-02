@@ -1,6 +1,7 @@
 #include "Common/SourceLocationHelper.h"
 
 #include "Common/Context.h"
+#include "Common/FilenameHelper.h"
 
 #include <clang/Basic/SourceManager.h>
 
@@ -17,7 +18,9 @@ bool SourceLocationHelper::IsLocationOfInterestIgnoringExclusionZone(SourceLocat
 {
     if (m_context->areWeInFakeHeaderSourceFile)
     {
-        if (! sourceManager.getFilename(location).endswith(m_context->actualHeaderFileSuffix))
+        std::string fileName = GetCleanFilename(location, sourceManager);
+
+        if (! StringRef(fileName).endswith(m_context->actualHeaderFileSuffix))
             return false;
     }
     else
