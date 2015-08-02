@@ -85,6 +85,7 @@ class IncludeStyleRuleTest(test_support.TestBase):
             source_file_lines = [
                 '#include "abc.h"',
                 '#include "def.h"',
+                '',
                 '#include "def/abc.h"',
                 '#include "def/def.h"',
             ],
@@ -102,6 +103,7 @@ class IncludeStyleRuleTest(test_support.TestBase):
             source_file_lines = [
                 '#include "abc.h"',
                 '#include "def.h"',
+                '',
                 '#include "def/def.h"',
                 '#include "def/abc.h"',
             ],
@@ -114,7 +116,29 @@ class IncludeStyleRuleTest(test_support.TestBase):
             ],
             expected_errors = [
                 {
-                    'msg': "Include 'def/def.h' breaks alphabetical ordering",
+                    'msg': "Broken alphabetical ordering, expected 'def/abc.h', not 'def/def.h'",
+                    'line': '4'
+                }
+            ])
+
+    def test_local_includes_from_different_subpaths_in_one_block(self):
+        self.assert_colobot_lint_result_with_project_headers(
+            source_file_lines = [
+                '#include "abc.h"',
+                '#include "def.h"',
+                '#include "def/abc.h"',
+                '#include "def/def.h"',
+            ],
+            cpp_file_path = 'src.cpp',
+            project_header_paths = [
+                'abc.h',
+                'def.h',
+                'def/abc.h',
+                'def/def.h'
+            ],
+            expected_errors = [
+                {
+                    'msg': "Expected empty line between include directives",
                     'line': '3'
                 }
             ])
@@ -132,6 +156,7 @@ class IncludeStyleRuleTest(test_support.TestBase):
             source_file_lines = [
                 '#include "abc.h"',
                 '#include "def.h"',
+                '',
                 '#include <def/abc.h>',
                 '#include "def/def.h"',
             ],
@@ -145,7 +170,7 @@ class IncludeStyleRuleTest(test_support.TestBase):
             expected_errors = [
                 {
                     'msg': "Local include 'def/abc.h' should be included with quotes, not angled brackets",
-                    'line': '3'
+                    'line': '4'
                 }
             ])
 
@@ -168,8 +193,9 @@ class IncludeStyleRuleTest(test_support.TestBase):
             source_file_lines = [
                 '#include "abc.h"',
                 '#include "def.h"',
-                '#include "def/ghi.h"',
                 '#include "jkl.h"',
+                '',
+                '#include "def/ghi.h"',
             ],
             cpp_file_path = 'def/mno.cpp',
             project_header_paths = [
@@ -181,7 +207,7 @@ class IncludeStyleRuleTest(test_support.TestBase):
             expected_errors = [
                 {
                     'msg': "Expected local include to be full relative path from project local include search path: 'def/jkl.h', not 'jkl.h'",
-                    'line': '4'
+                    'line': '3'
                 }
             ])
 
@@ -249,6 +275,7 @@ class IncludeStyleRuleTest(test_support.TestBase):
                 '',
                 '#include "abc.h"',
                 '#include "def.h"',
+                '',
                 '#include "def/abc.h"',
                 '#include "def/def.h"',
             ],
@@ -268,6 +295,7 @@ class IncludeStyleRuleTest(test_support.TestBase):
                 '#include "config/config.h"',
                 '#include "abc.h"',
                 '#include "def.h"',
+                '',
                 '#include "def/abc.h"',
                 '#include "def/def.h"',
             ],
@@ -290,8 +318,10 @@ class IncludeStyleRuleTest(test_support.TestBase):
         self.assert_colobot_lint_result_with_project_headers(
             source_file_lines = [
                 '#include "abc.h"',
-                '#include "config/config.h"',
                 '#include "def.h"',
+                '',
+                '#include "config/config.h"',
+                '',
                 '#include "def/abc.h"',
                 '#include "def/def.h"',
             ],
@@ -321,6 +351,7 @@ class IncludeStyleRuleTest(test_support.TestBase):
                 '',
                 '#include "abc.h"',
                 '#include "def.h"',
+                '',
                 '#include "def/abc.h"',
                 '#include "def/def.h"',
             ],
@@ -340,6 +371,7 @@ class IncludeStyleRuleTest(test_support.TestBase):
                 '#include "src.h"',
                 '#include "abc.h"',
                 '#include "def.h"',
+                '',
                 '#include "def/abc.h"',
                 '#include "def/def.h"',
             ],
@@ -367,6 +399,7 @@ class IncludeStyleRuleTest(test_support.TestBase):
                 '',
                 '#include "abc.h"',
                 '#include "def.h"',
+                '',
                 '#include "def/abc.h"',
                 '#include "def/def.h"',
             ],
@@ -387,6 +420,7 @@ class IncludeStyleRuleTest(test_support.TestBase):
                 '#include "abc.h"',
                 '#include "src.h"',
                 '#include "def.h"',
+                '',
                 '#include "def/abc.h"',
                 '#include "def/def.h"',
             ],
@@ -408,7 +442,7 @@ class IncludeStyleRuleTest(test_support.TestBase):
                     'line': '2'
                 },
                 {
-                    'msg': "Include 'src.h' breaks alphabetical ordering",
+                    'msg': "Broken alphabetical ordering, expected 'def.h', not 'src.h'",
                     'line': '2'
                 }
             ])
@@ -420,6 +454,7 @@ class IncludeStyleRuleTest(test_support.TestBase):
                 '',
                 '#include "abc/abc.h"',
                 '#include "abc/def.h"',
+                '',
                 '#include "def/abc.h"',
                 '#include "def/def.h"',
                 '',
@@ -447,6 +482,7 @@ class IncludeStyleRuleTest(test_support.TestBase):
                 '#include "def/base.h"',
                 '#include "abc/abc.h"',
                 '#include "abc/def.h"',
+                '',
                 '#include "def/abc.h"',
                 '#include "def/def.h"',
                 '',
@@ -484,6 +520,7 @@ class IncludeStyleRuleTest(test_support.TestBase):
                 '',
                 '#include "abc/abc.h"',
                 '#include "abc/def.h"',
+                '',
                 '#include "def/abc.h"',
                 '#include "def/def.h"',
                 '',

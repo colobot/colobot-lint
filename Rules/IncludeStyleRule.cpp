@@ -326,11 +326,40 @@ void IncludeStyleRule::CheckNewBlock(IncludeDirectiveIt currentIt,
     }
 }
 
+std::pair<StringRef, StringRef> SplitBySlash(const std::string& path)
+{
+    auto split = StringRef(path).rsplit('/');
+    if (split.second.empty())
+        return {StringRef(), split.first};
+
+    return split;
+}
+
 void IncludeStyleRule::CheckIncludeRangeIsSorted(IncludeDirectiveIt startIt,
                                                  IncludeDirectiveIt endIt,
                                                  SourceManager& sourceManager)
 {
-    std::multiset<std::string> sortedIncludes;
+    struct IncludePathComparator
+    {
+        bool operator()(const std::string& left, const std::string& right) const
+        {
+            auto leftSplit = SplitBySlash(left);
+            auto rightSplit = SplitBySlash(right);
+
+            if (leftSplit.first.empty() && rightSplit.first.empty())
+                return leftSplit.second < rightSplit.second;
+
+            if (leftSplit.first.empty() != rightSplit.first.empty())
+                return leftSplit.first.empty();
+
+            if (leftSplit.first != rightSplit.first)
+                return leftSplit.first < rightSplit.first;
+
+            return leftSplit.second < rightSplit.second;
+        }
+    };
+
+    std::multiset<std::string, IncludePathComparator> sortedIncludes;
     for (auto it = startIt; it != endIt; ++it)
         sortedIncludes.insert(it->includeFileName);
 
@@ -338,17 +367,31 @@ void IncludeStyleRule::CheckIncludeRangeIsSorted(IncludeDirectiveIt startIt,
     auto it = startIt;
     while (it != endIt)
     {
+        if (it != startIt)
+        {
+            auto prevSortedIt = sortedIt;
+            --prevSortedIt;
+            auto prevSortedItSplit = SplitBySlash(*prevSortedIt);
+            auto sortedItSplit = SplitBySlash(*sortedIt);
+            if (prevSortedItSplit.first != sortedItSplit.first)
+            {
+                CheckNewBlock(it, endIt, sourceManager);
+            }
+        }
+
         if (it->includeFileName != *sortedIt)
         {
             m_context.printer.PrintRuleViolation(
                 "include style",
                 Severity::Style,
-                boost::str(boost::format("Include '%s' breaks alphabetical ordering")
+                boost::str(boost::format("Broken alphabetical ordering, expected '%s', not '%s'")
+                    % *sortedIt
                     % it->includeFileName),
                 it->location,
                 sourceManager);
             break;
         }
+
         ++it;
         ++sortedIt;
     }

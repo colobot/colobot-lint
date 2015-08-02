@@ -307,10 +307,15 @@ This rule checks correct style of #include directives. The allowed ordering and 
 
 #include "common/config.h" // if applicable
 
-#include "local_include_1_alphabetical_ordering.h"
-#include "local_include_2_alphabetical_ordering.h"
+#include "abc_dir/local_include_1_alphabetical_ordering.h"
+#include "abc_dir/local_include_2_alphabetical_ordering.h"
 // ...
-#include "local_include_N_alphabetical_ordering.h"
+#include "abc_dir/local_include_N_alphabetical_ordering.h"
+
+#include "def_dir/local_include_1_alphabetical_ordering.h"
+#include "def_dir/local_include_2_alphabetical_ordering.h"
+// ...
+#include "def_dir/local_include_N_alphabetical_ordering.h"
 
 #include <global_include.h>
 #include <global_include_order_doesnt_matter.h>
