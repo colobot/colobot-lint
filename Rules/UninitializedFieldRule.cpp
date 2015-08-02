@@ -134,6 +134,26 @@ void UninitializedFieldRule::HandleConstructors(const RecordDecl* recordDeclarat
             continue;
         }
 
+        if (!constructorDeclaration->isThisDeclarationADefinition())
+        {
+            bool definitionFound = false;
+
+            for (const FunctionDecl* redecl : constructorDeclaration->redecls())
+            {
+                const CXXConstructorDecl* constructorRedeclaration = classof_cast<const CXXConstructorDecl>(redecl);
+                if (constructorRedeclaration != nullptr &&
+                    redecl->isThisDeclarationADefinition())
+                {
+                    constructorDeclaration = constructorRedeclaration;
+                    definitionFound = true;
+                    break;
+                }
+            }
+
+            if (!definitionFound)
+                continue;
+        }
+
         auto constructorCandidateFieldList = candidateFieldList;
         HandleConstructorInitializationList(constructorDeclaration, constructorCandidateFieldList);
         HandleConstructorBody(constructorDeclaration, constructorCandidateFieldList);

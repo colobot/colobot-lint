@@ -183,7 +183,7 @@ class UninitializedFieldRuleTest(test_support.TestBase):
             expected_errors = [
                 {
                     'msg': "Struct 'Foo' field 'z' remains uninitialized in constructor",
-                    'line': '3'
+                    'line': '9'
                 }
             ])
 
