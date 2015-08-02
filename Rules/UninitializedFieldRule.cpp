@@ -15,21 +15,32 @@ using namespace clang::ast_matchers;
 
 UninitializedFieldRule::UninitializedFieldRule(Context& context)
     : ASTCallbackRule(context),
-      m_matcher(recordDecl().bind("recordDecl"))
+      m_recordDeclarationMatcher(recordDecl().bind("recordDecl")),
+      m_constructorDeclarationMatcher(constructorDecl().bind("constructorDecl"))
 {}
 
 void UninitializedFieldRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
-    finder.addMatcher(m_matcher, this);
+    finder.addMatcher(m_recordDeclarationMatcher, this);
+    finder.addMatcher(m_constructorDeclarationMatcher, this);
 }
 
 void UninitializedFieldRule::run(const MatchFinder::MatchResult& result)
 {
     const RecordDecl* recordDeclaration = result.Nodes.getNodeAs<RecordDecl>("recordDecl");
-    if (recordDeclaration == nullptr)
-        return;
+    if (recordDeclaration != nullptr)
+        return HandleRecordDeclaration(recordDeclaration, result.Context, nullptr);
 
-    SourceManager& sourceManager = result.Context->getSourceManager();
+    const CXXConstructorDecl* constructorDeclaration = result.Nodes.getNodeAs<CXXConstructorDecl>("constructorDecl");
+    if (constructorDeclaration != nullptr)
+        return HandleConstructorDeclaration(constructorDeclaration, result.Context);
+}
+
+void UninitializedFieldRule::HandleRecordDeclaration(const RecordDecl* recordDeclaration,
+                                                     ASTContext* context,
+                                                     const CXXConstructorDecl* constructorDeclarationToCheck)
+{
+    SourceManager& sourceManager = context->getSourceManager();
 
     SourceLocation location = recordDeclaration->getLocation();
     if (! m_context.sourceLocationHelper.IsLocationOfInterest(GetName(), location, sourceManager))
@@ -38,44 +49,76 @@ void UninitializedFieldRule::run(const MatchFinder::MatchResult& result)
     if (recordDeclaration->isUnion())
         return;
 
-    ConstructorStatus constructorStatus = CheckConstructorStatus(recordDeclaration);
+    if (AreThereInterestingConstructorDeclarations(recordDeclaration))
+        return; // will be handled through HandleConstructorDeclaration()
 
-    // Special case when can't see definition of constructors in header file
-    if (m_context.areWeInFakeHeaderSourceFile &&
-        constructorStatus == ConstructorStatus::SomeConstructorsNotDefined)
+    // Since no constructors are defined, all candidates are treated as uninitialized
+    StringRefSet candidateFieldList = GetCandidateFieldsList(recordDeclaration, context);
+    for (const auto& field : candidateFieldList)
+    {
+        std::string which = recordDeclaration->isClass() ? "Class" : "Struct";
+
+        m_context.printer.PrintRuleViolation(
+            "uninitialized field",
+            Severity::Error,
+            boost::str(boost::format("%s '%s' field '%s' remains uninitialized")
+                % which
+                % recordDeclaration->getName().str()
+                % field.str()),
+            location,
+            sourceManager);
+    }
+}
+
+void UninitializedFieldRule::HandleConstructorDeclaration(const CXXConstructorDecl* constructorDeclaration,
+                                                          ASTContext* context)
+{
+    SourceManager& sourceManager = context->getSourceManager();
+
+    SourceLocation location = constructorDeclaration->getLocation();
+    if (! m_context.sourceLocationHelper.IsLocationOfInterest(GetName(), location, sourceManager))
+        return;
+
+    if (constructorDeclaration->isImplicit() ||
+        ! constructorDeclaration->isThisDeclarationADefinition())
     {
         return;
     }
 
-    StringRefSet candidateFieldList = GetCandidateFieldsList(recordDeclaration, result.Context);
-
-    if (constructorStatus == ConstructorStatus::NoConstructors)
+    const DeclContext* declContext = constructorDeclaration->getDeclContext();
+    if (declContext == nullptr &&
+        !declContext->isRecord())
     {
-        for (const auto& field : candidateFieldList)
-        {
-            std::string which = recordDeclaration->isClass() ? "Class" : "Struct";
-
-            m_context.printer.PrintRuleViolation(
-                "uninitialized field",
-                Severity::Error,
-                boost::str(boost::format("%s '%s' field '%s' remains uninitialized")
-                    % which
-                    % recordDeclaration->getName().str()
-                    % field.str()),
-                location,
-                sourceManager);
-        }
+        return;
     }
-    else
+
+    const RecordDecl* recordDeclaration = static_cast<const RecordDecl*>(declContext);
+
+    if (recordDeclaration->isUnion())
+        return;
+
+    StringRefSet candidateFieldList = GetCandidateFieldsList(recordDeclaration, context);
+    CheckInitializationsInInitializationList(constructorDeclaration, candidateFieldList);
+    CheckInitializationsInConstructorBody(constructorDeclaration, candidateFieldList);
+
+    for (const auto& field : candidateFieldList)
     {
-        HandleConstructors(recordDeclaration, candidateFieldList, sourceManager);
+        std::string which = recordDeclaration->isClass() ? "Class" : "Struct";
+
+        m_context.printer.PrintRuleViolation(
+            "uninitialized field",
+            Severity::Error,
+            boost::str(boost::format("%s '%s' field '%s' remains uninitialized in constructor")
+                % which
+                % recordDeclaration->getName().str()
+                % field.str()),
+            constructorDeclaration->getLocation(),
+            sourceManager);
     }
 }
 
-UninitializedFieldRule::ConstructorStatus UninitializedFieldRule::CheckConstructorStatus(const RecordDecl* recordDeclaration)
+bool UninitializedFieldRule::AreThereInterestingConstructorDeclarations(const RecordDecl* recordDeclaration)
 {
-    bool haveConstructorsWithBody = false;
-
     for (const Decl* decl : recordDeclaration->decls())
     {
         const CXXConstructorDecl* constructorDeclaration = classof_cast<const CXXConstructorDecl>(decl);
@@ -85,13 +128,10 @@ UninitializedFieldRule::ConstructorStatus UninitializedFieldRule::CheckConstruct
             continue;
         }
 
-        if (! constructorDeclaration->hasBody())
-            return ConstructorStatus::SomeConstructorsNotDefined;
-
-        haveConstructorsWithBody = true;
+        return true;
     }
 
-    return haveConstructorsWithBody ? ConstructorStatus::DefinedConstructors : ConstructorStatus::NoConstructors;
+    return false;
 }
 
 UninitializedFieldRule::StringRefSet UninitializedFieldRule::GetCandidateFieldsList(const RecordDecl* recordDeclaration,
@@ -119,64 +159,8 @@ UninitializedFieldRule::StringRefSet UninitializedFieldRule::GetCandidateFieldsL
     return candidates;
 }
 
-void UninitializedFieldRule::HandleConstructors(const RecordDecl* recordDeclaration,
-                                                const UninitializedFieldRule::StringRefSet& candidateFieldList,
-                                                SourceManager& sourceManager)
-{
-    for (const Decl* decl : recordDeclaration->decls())
-    {
-        const CXXConstructorDecl* constructorDeclaration = classof_cast<const CXXConstructorDecl>(decl);
-
-
-        if (constructorDeclaration == nullptr ||
-            constructorDeclaration->isImplicit())
-        {
-            continue;
-        }
-
-        if (!constructorDeclaration->isThisDeclarationADefinition())
-        {
-            bool definitionFound = false;
-
-            for (const FunctionDecl* redecl : constructorDeclaration->redecls())
-            {
-                const CXXConstructorDecl* constructorRedeclaration = classof_cast<const CXXConstructorDecl>(redecl);
-                if (constructorRedeclaration != nullptr &&
-                    redecl->isThisDeclarationADefinition())
-                {
-                    constructorDeclaration = constructorRedeclaration;
-                    definitionFound = true;
-                    break;
-                }
-            }
-
-            if (!definitionFound)
-                continue;
-        }
-
-        auto constructorCandidateFieldList = candidateFieldList;
-        HandleConstructorInitializationList(constructorDeclaration, constructorCandidateFieldList);
-        HandleConstructorBody(constructorDeclaration, constructorCandidateFieldList);
-
-        for (const auto& field : constructorCandidateFieldList)
-        {
-            std::string which = recordDeclaration->isClass() ? "Class" : "Struct";
-
-            m_context.printer.PrintRuleViolation(
-                "uninitialized field",
-                Severity::Error,
-                boost::str(boost::format("%s '%s' field '%s' remains uninitialized in constructor")
-                    % which
-                    % recordDeclaration->getName().str()
-                    % field.str()),
-                constructorDeclaration->getLocation(),
-                sourceManager);
-        }
-    }
-}
-
-void UninitializedFieldRule::HandleConstructorInitializationList(const CXXConstructorDecl* constructorDeclaration,
-                                                                 UninitializedFieldRule::StringRefSet& candidateFieldList)
+void UninitializedFieldRule::CheckInitializationsInInitializationList(const CXXConstructorDecl* constructorDeclaration,
+                                                                      UninitializedFieldRule::StringRefSet& candidateFieldList)
 {
     for (CXXCtorInitializer* init : constructorDeclaration->inits())
     {
@@ -188,8 +172,8 @@ void UninitializedFieldRule::HandleConstructorInitializationList(const CXXConstr
     }
 }
 
-void UninitializedFieldRule::HandleConstructorBody(const CXXConstructorDecl* constructorDeclaration,
-                                                   UninitializedFieldRule::StringRefSet& candidateFieldList)
+void UninitializedFieldRule::CheckInitializationsInConstructorBody(const CXXConstructorDecl* constructorDeclaration,
+                                                                   UninitializedFieldRule::StringRefSet& candidateFieldList)
 {
     const CompoundStmt* compountStatement = classof_cast<const CompoundStmt>(constructorDeclaration->getBody());
     if (compountStatement == nullptr)
@@ -201,13 +185,13 @@ void UninitializedFieldRule::HandleConstructorBody(const CXXConstructorDecl* con
         if (binaryOperator != nullptr &&
             binaryOperator->isAssignmentOp())
         {
-            HandleAssignStatement(binaryOperator, candidateFieldList);
+            CheckInitializationsInAssignStatement(binaryOperator, candidateFieldList);
         }
     }
 }
 
-void UninitializedFieldRule::HandleAssignStatement(const BinaryOperator* assignStatement,
-                                                   UninitializedFieldRule::StringRefSet& candidateFieldList)
+void UninitializedFieldRule::CheckInitializationsInAssignStatement(const BinaryOperator* assignStatement,
+                                                                   UninitializedFieldRule::StringRefSet& candidateFieldList)
 {
     const MemberExpr* memberExpr = classof_cast<const MemberExpr>(assignStatement->getLHS());
     if (memberExpr == nullptr)

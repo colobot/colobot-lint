@@ -275,5 +275,49 @@ class UninitializedFieldRuleTest(test_support.TestBase):
                 ]
             )
 
+    def test_struct_declaration_in_header_constructor_definition_in_cpp_module(self):
+        with TempBuildDir() as temp_dir:
+            hpp_file_name = temp_dir + '/src.h'
+            write_file_lines(hpp_file_name, [
+                    'struct Foo',
+                    '{',
+                    '    Foo();',
+                    '    int x;',
+                    '    float y;',
+                    '    bool z;',
+                    '};',
+                ]
+            )
+
+            cpp_file_name = temp_dir + '/src.cpp'
+            write_file_lines(cpp_file_name, [
+                    '#include "src.h"',
+                    '',
+                    'Foo::Foo()',
+                    '{',
+                    '    x = 0;',
+                    '    y = 0;',
+                    '}'
+                ]
+            )
+
+            write_compilation_database(
+                build_directory = temp_dir,
+                source_file_names = [cpp_file_name])
+
+            xml_output = run_colobot_lint(build_directory = temp_dir,
+                                          source_dir = temp_dir,
+                                          source_paths = [cpp_file_name],
+                                          rules_selection = ['UninitializedFieldRule'])
+            self.assert_xml_output_match(
+                xml_output = xml_output,
+                expected_errors = [
+                    {
+                        'msg': "Struct 'Foo' field 'z' remains uninitialized in constructor",
+                        'line': '3'
+                    }
+                ]
+            )
+
 if __name__ == '__main__':
     test_support.main()

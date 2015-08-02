@@ -21,32 +21,31 @@ public:
     static const char* GetName() { return "UninitializedFieldRule"; }
 
 private:
+    void HandleRecordDeclaration(const clang::RecordDecl* recordDeclaration,
+                                 clang::ASTContext* context,
+                                 const clang::CXXConstructorDecl* constructorDeclarationToCheck);
+
+    void HandleConstructorDeclaration(const clang::CXXConstructorDecl* constructorDeclaration,
+                                      clang::ASTContext* context);
+
+    bool AreThereInterestingConstructorDeclarations(const clang::RecordDecl* recordDeclaration);
+
     using StringRefSet = std::unordered_set<llvm::StringRef>;
 
     StringRefSet GetCandidateFieldsList(const clang::RecordDecl* recordDeclaration,
                                         clang::ASTContext* context);
 
-    enum class ConstructorStatus
-    {
-        NoConstructors,
-        SomeConstructorsNotDefined,
-        DefinedConstructors
-    };
+    void CheckInitializationsInInitializationList(const clang::CXXConstructorDecl* constructorDeclaration,
+                                                  StringRefSet& candidateFieldList);
 
-    ConstructorStatus CheckConstructorStatus(const clang::RecordDecl* recordDeclaration);
-    void HandleConstructors(const clang::RecordDecl* recordDeclaration,
-                            const StringRefSet& candidateFieldList,
-                            clang::SourceManager& sourceManager);
+    void CheckInitializationsInConstructorBody(const clang::CXXConstructorDecl* constructorDeclaration,
+                                               StringRefSet& candidateFieldList);
 
-    void HandleConstructorInitializationList(const clang::CXXConstructorDecl* constructorDeclaration,
-                                             StringRefSet& candidateFieldList);
-
-    void HandleConstructorBody(const clang::CXXConstructorDecl* constructorDeclaration,
-                               StringRefSet& candidateFieldList);
-
-    void HandleAssignStatement(const clang::BinaryOperator* assignStatement,
-                               StringRefSet& candidateFieldList);
+    void CheckInitializationsInAssignStatement(const clang::BinaryOperator* assignStatement,
+                                               StringRefSet& candidateFieldList);
 
 private:
-    clang::ast_matchers::DeclarationMatcher m_matcher;
+    clang::ast_matchers::DeclarationMatcher m_recordDeclarationMatcher;
+    clang::ast_matchers::DeclarationMatcher m_constructorDeclarationMatcher;
+    std::unordered_set<const clang::CXXConstructorDecl*> m_alreadyHandledConstructorDeclarations;
 };
