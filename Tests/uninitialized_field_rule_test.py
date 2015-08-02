@@ -3,7 +3,7 @@ import test_support
 from test_support import TempBuildDir, write_file_lines, write_compilation_database, run_colobot_lint
 import os
 
-class UnintializedFieldRuleTest(test_support.TestBase):
+class UninitializedFieldRuleTest(test_support.TestBase):
     def setUp(self):
         self.set_default_rules_selection(['UninitializedFieldRule'])
         self.set_default_error_id('uninitialized field')
@@ -162,6 +162,30 @@ class UnintializedFieldRuleTest(test_support.TestBase):
                 'Foo::Foo() : z(true) {}'
             ],
             expected_errors = [])
+
+    def test_class_with_constructor_declared_and_defined_elsewhere_one_field_uninitialized(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                'struct Foo',
+                '{',
+                '    Foo();',
+                '    int x;',
+                '    float y;',
+                '    bool z;',
+                '};',
+                '',
+                'Foo::Foo()',
+                '{',
+                '    x = 0;',
+                '    y = 0;',
+                '}'
+            ],
+            expected_errors = [
+                {
+                    'msg': "Struct 'Foo' field 'z' remains uninitialized in constructor",
+                    'line': '3'
+                }
+            ])
 
     def test_ignore_union(self):
         self.assert_colobot_lint_result(
