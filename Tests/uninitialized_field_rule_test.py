@@ -221,6 +221,20 @@ class UninitializedFieldRuleTest(test_support.TestBase):
                 }
             ])
 
+    def test_ignore_deleted_constructors(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                'struct Foo',
+                '{',
+                '    Foo() : x(0), y(0.0f), z(false) {}',
+                '    Foo(const Foo&) = delete;',
+                '    int x;',
+                '    float y;',
+                '    bool z;',
+                '};'
+            ],
+            expected_errors = [])
+
     def test_constructor_declared_but_not_defined_in_fake_header_source(self):
         with TempBuildDir() as temp_dir:
             os.mkdir(temp_dir + '/foo')

@@ -80,6 +80,7 @@ void UninitializedFieldRule::HandleConstructorDeclaration(const CXXConstructorDe
         return;
 
     if (constructorDeclaration->isImplicit() ||
+        constructorDeclaration->isDeleted() ||
         ! constructorDeclaration->isThisDeclarationADefinition())
     {
         return;
@@ -123,7 +124,8 @@ bool UninitializedFieldRule::AreThereInterestingConstructorDeclarations(const Re
     {
         const CXXConstructorDecl* constructorDeclaration = classof_cast<const CXXConstructorDecl>(decl);
         if (constructorDeclaration == nullptr ||
-            constructorDeclaration->isImplicit())
+            constructorDeclaration->isImplicit() ||
+            constructorDeclaration->isDeleted())
         {
             continue;
         }
