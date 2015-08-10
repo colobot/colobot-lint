@@ -60,6 +60,7 @@ set(COLOBOT_LINT_SRCS
     Rules/ClassNamingRule.cpp
     Rules/EnumNamingRule.cpp
     Rules/FunctionNamingRule.cpp
+    Rules/ImplicitCastToBoolRule.cpp
     Rules/InconsistentDeclarationParameterNameRule.cpp
     Rules/IncludeStyleRule.cpp
     Rules/NakedDeleteRule.cpp
@@ -188,19 +189,20 @@ macro(add_colobot_lint_test test_name test_target)
     add_test(${test_name} ${CMAKE_CURRENT_SOURCE_DIR}/${test_target} --colobot-lint-exec ${COLOBOT_LINT_OUTPUT_BINARY})
 endmacro()
 
-add_colobot_lint_test(BlockPlacementRuleTest Tests/block_placement_rule_test.py)
-add_colobot_lint_test(ClassNamingRule Tests/class_naming_rule_test.py)
-add_colobot_lint_test(DiagnosticHandlerTest Tests/diagnostic_handler_test.py)
-add_colobot_lint_test(EnumNamingRule Tests/enum_naming_rule_test.py)
-add_colobot_lint_test(FunctionNamingRule Tests/function_naming_rule_test.py)
-add_colobot_lint_test(InconsistentDeclarationParameterNameRule Tests/inconsistent_declaration_parameter_name_rule_test.py)
-add_colobot_lint_test(IncludeStyleRule Tests/include_style_rule_test.py)
-add_colobot_lint_test(NakedDeleteRuleTest Tests/naked_delete_rule_test.py)
-add_colobot_lint_test(NakedNewRuleTest Tests/naked_new_rule_test.py)
-add_colobot_lint_test(OldStyleFunctionTest Tests/old_style_function_rule_test.py)
-add_colobot_lint_test(SourceLocationHelperTest Tests/source_location_helper_test.py)
-add_colobot_lint_test(TodoRuleTest Tests/todo_rule_test.py)
-add_colobot_lint_test(UninitializedFieldRule Tests/uninitialized_field_rule_test.py)
-add_colobot_lint_test(UninitializedLocalVariableRule Tests/uninitialized_local_variable_rule_test.py)
-add_colobot_lint_test(VariableNamingRule Tests/variable_naming_rule_test.py)
-add_colobot_lint_test(WhitespaceRule Tests/whitespace_rule_test.py)
+add_colobot_lint_test(BlockPlacementRuleTest                       Tests/block_placement_rule_test.py)
+add_colobot_lint_test(ClassNamingRuleTest                          Tests/class_naming_rule_test.py)
+add_colobot_lint_test(DiagnosticHandlerTest                        Tests/diagnostic_handler_test.py)
+add_colobot_lint_test(EnumNamingRuleTest                           Tests/enum_naming_rule_test.py)
+add_colobot_lint_test(FunctionNamingRuleTest                       Tests/function_naming_rule_test.py)
+add_colobot_lint_test(ImplicitCastToBoolRuleTest                   Tests/implicit_cast_to_bool_rule_test.py)
+add_colobot_lint_test(InconsistentDeclarationParameterNameRuleTest Tests/inconsistent_declaration_parameter_name_rule_test.py)
+add_colobot_lint_test(IncludeStyleRule                             Tests/include_style_rule_test.py)
+add_colobot_lint_test(NakedDeleteRuleTest                          Tests/naked_delete_rule_test.py)
+add_colobot_lint_test(NakedNewRuleTest                             Tests/naked_new_rule_test.py)
+add_colobot_lint_test(OldStyleFunctionTest                         Tests/old_style_function_rule_test.py)
+add_colobot_lint_test(SourceLocationHelperTest                     Tests/source_location_helper_test.py)
+add_colobot_lint_test(TodoRuleTest                                 Tests/todo_rule_test.py)
+add_colobot_lint_test(UninitializedFieldRule                       Tests/uninitialized_field_rule_test.py)
+add_colobot_lint_test(UninitializedLocalVariableRule               Tests/uninitialized_local_variable_rule_test.py)
+add_colobot_lint_test(VariableNamingRule                           Tests/variable_naming_rule_test.py)
+add_colobot_lint_test(WhitespaceRule                               Tests/whitespace_rule_test.py)
