@@ -17,5 +17,12 @@ public:
     static const char* GetName() { return "ImplicitBoolCastRule"; }
 
 private:
+    bool IsImplicitCastToBool(const clang::ImplicitCastExpr* implicitCastExpr);
+    bool IsImplicitCastFromBool(const clang::ImplicitCastExpr* implicitCastExpr,
+                                clang::ASTContext* astContext,
+                                bool checkBoolComparison = true);
+    bool IsComparisonOfBools(const clang::ImplicitCastExpr* implicitCastExpr, clang::ASTContext* astContext);
+
+private:
     clang::ast_matchers::StatementMatcher m_matcher;
 };

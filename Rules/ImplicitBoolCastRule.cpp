@@ -1,5 +1,6 @@
 #include "Rules/ImplicitBoolCastRule.h"
 
+#include "Common/ClassofCast.h"
 #include "Common/Context.h"
 #include "Common/OutputPrinter.h"
 #include "Common/SourceLocationHelper.h"
@@ -35,18 +36,9 @@ void ImplicitBoolCastRule::run(const MatchFinder::MatchResult& result)
     if (! m_context.sourceLocationHelper.IsLocationOfInterest(GetName(), location, sourceManager))
         return;
 
-    auto kind = implicitCastExpr->getCastKind();
-    if (kind == CK_IntegralToBoolean ||
-        kind == CK_FloatingToBoolean ||
-        kind == CK_PointerToBoolean ||
-        kind == CK_MemberPointerToBoolean)
+    if (IsImplicitCastToBool(implicitCastExpr))
     {
-        std::string subExprTypeStr;
-        const Expr* subExpr = implicitCastExpr->getSubExpr();
-        if (subExpr != nullptr)
-        {
-            subExprTypeStr = subExpr->getType().getAsString();
-        }
+        std::string subExprTypeStr = implicitCastExpr->getSubExpr()->getType().getAsString();
 
         m_context.printer.PrintRuleViolation(
             "implicit bool cast",
@@ -55,26 +47,81 @@ void ImplicitBoolCastRule::run(const MatchFinder::MatchResult& result)
             location,
             sourceManager);
     }
-    else if (kind == CK_IntegralCast || kind == CK_IntegralToFloating)
+    else if (IsImplicitCastFromBool(implicitCastExpr, result.Context))
     {
-        std::string subExprTypeStr;
-        const Expr* subExpr = implicitCastExpr->getSubExpr();
-        if (subExpr != nullptr)
-        {
-            subExprTypeStr = subExpr->getType().getAsString();
-        }
-
         std::string castTypeStr = implicitCastExpr->getType().getAsString();
 
-        if (CXXBoolLiteralExpr::classof(subExpr) ||
-            subExprTypeStr == "_Bool")
-        {
-            m_context.printer.PrintRuleViolation(
+        m_context.printer.PrintRuleViolation(
                 "implicit bool cast",
                 Severity::Warning,
                 boost::str(boost::format("Implicit cast bool -> '%s'") % castTypeStr),
                 location,
                 sourceManager);
-        }
     }
+}
+
+bool ImplicitBoolCastRule::IsImplicitCastToBool(const ImplicitCastExpr* implicitCastExpr)
+{
+    auto kind = implicitCastExpr->getCastKind();
+
+    return kind == CK_IntegralToBoolean ||
+           kind == CK_FloatingToBoolean ||
+           kind == CK_PointerToBoolean ||
+           kind == CK_MemberPointerToBoolean;
+}
+
+bool ImplicitBoolCastRule::IsImplicitCastFromBool(const ImplicitCastExpr* implicitCastExpr,
+                                                  ASTContext* astContext,
+                                                  bool checkBoolComparison)
+{
+    if (implicitCastExpr == nullptr)
+        return false;
+
+    auto kind = implicitCastExpr->getCastKind();
+
+    // we're only interested in casts to integer and floating types
+    // (well, actually, other types don't make much sense here)
+    if (kind != CK_IntegralCast &&
+        kind != CK_IntegralToFloating)
+    {
+        return false;
+    }
+
+    // comparison of bools with == and != operators is allowed
+    if (checkBoolComparison &&
+        kind == CK_IntegralCast &&
+        IsComparisonOfBools(implicitCastExpr, astContext))
+    {
+        return false;
+    }
+
+    const Expr* subExpr = implicitCastExpr->getSubExpr();
+    if (subExpr == nullptr)
+        return false;
+
+    return CXXBoolLiteralExpr::classof(subExpr) ||
+           subExpr->getType().getAsString() == "_Bool";
+}
+
+bool ImplicitBoolCastRule::IsComparisonOfBools(const ImplicitCastExpr* implicitCastExpr, ASTContext* astContext)
+{
+    auto parents = astContext->getParents(*implicitCastExpr);
+    if (parents.size() == 0)
+        return false;
+
+    const BinaryOperator* binaryOperator = classof_cast<const BinaryOperator>(parents.front().get<Stmt>());
+    if (binaryOperator == nullptr)
+        return false;
+
+    auto opcode = binaryOperator->getOpcode();
+    if (opcode != BO_EQ &&
+        opcode != BO_NE)
+    {
+        return false;
+    }
+
+    const ImplicitCastExpr* lhsImplicitCast = classof_cast<const ImplicitCastExpr>(binaryOperator->getLHS());
+    const ImplicitCastExpr* rhsImplicitCast = classof_cast<const ImplicitCastExpr>(binaryOperator->getRHS());
+    return IsImplicitCastFromBool(lhsImplicitCast, astContext, false) &&
+           IsImplicitCastFromBool(rhsImplicitCast, astContext, false);
 }

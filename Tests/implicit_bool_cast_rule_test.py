@@ -96,5 +96,19 @@ class ImplicitBoolCastRuleTest(test_support.TestBase):
                 }
             ])
 
+    def test_ignore_comparison_of_bools(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                'bool BoolsEqual(bool a, bool b)',
+                '{',
+                '   return a == b;',
+                '}',
+                'bool BoolsNotEqual(bool a, bool b)',
+                '{',
+                '   return a != b;',
+                '}'
+            ],
+            expected_errors = [])
+
 if __name__ == '__main__':
     test_support.main()
