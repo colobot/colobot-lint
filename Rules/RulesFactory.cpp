@@ -6,7 +6,7 @@
 #include "Rules/ClassNamingRule.h"
 #include "Rules/EnumNamingRule.h"
 #include "Rules/FunctionNamingRule.h"
-#include "Rules/ImplicitCastToBoolRule.h"
+#include "Rules/ImplicitBoolCastRule.h"
 #include "Rules/IncludeStyleRule.h"
 #include "Rules/InconsistentDeclarationParameterNameRule.h"
 #include "Rules/NakedDeleteRule.h"
@@ -62,7 +62,7 @@ std::vector<std::unique_ptr<ASTCallbackRule>> CreateASTRules(Context& context)
     AddRule<UninitializedLocalVariableRule>(rules, context); // must be second
     AddRule<InconsistentDeclarationParameterNameRule>(rules, context);
     AddRule<IncludeStyleRule>(rules, context);
-    AddRule<ImplicitCastToBoolRule>(rules, context);
+    AddRule<ImplicitBoolCastRule>(rules, context);
     return rules;
 }
 

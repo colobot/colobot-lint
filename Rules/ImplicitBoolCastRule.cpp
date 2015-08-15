@@ -1,4 +1,4 @@
-#include "Rules/ImplicitCastToBoolRule.h"
+#include "Rules/ImplicitBoolCastRule.h"
 
 #include "Common/Context.h"
 #include "Common/OutputPrinter.h"
@@ -13,17 +13,17 @@
 using namespace clang;
 using namespace clang::ast_matchers;
 
-ImplicitCastToBoolRule::ImplicitCastToBoolRule(Context& context)
+ImplicitBoolCastRule::ImplicitBoolCastRule(Context& context)
     : ASTCallbackRule(context),
       m_matcher(implicitCastExpr().bind("implicitCastExpr"))
 {}
 
-void ImplicitCastToBoolRule::RegisterASTMatcherCallback(MatchFinder& finder)
+void ImplicitBoolCastRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
     finder.addMatcher(m_matcher, this);
 }
 
-void ImplicitCastToBoolRule::run(const MatchFinder::MatchResult& result)
+void ImplicitBoolCastRule::run(const MatchFinder::MatchResult& result)
 {
     const ImplicitCastExpr* implicitCastExpr = result.Nodes.getNodeAs<ImplicitCastExpr>("implicitCastExpr");
     if (implicitCastExpr == nullptr)
@@ -41,18 +41,40 @@ void ImplicitCastToBoolRule::run(const MatchFinder::MatchResult& result)
         kind == CK_PointerToBoolean ||
         kind == CK_MemberPointerToBoolean)
     {
-        std::string typeStr;
+        std::string subExprTypeStr;
         const Expr* subExpr = implicitCastExpr->getSubExpr();
         if (subExpr != nullptr)
         {
-            typeStr = subExpr->getType().getAsString();
+            subExprTypeStr = subExpr->getType().getAsString();
         }
 
         m_context.printer.PrintRuleViolation(
-            "implicit cast to bool",
+            "implicit bool cast",
             Severity::Warning,
-            boost::str(boost::format("Implicit cast '%s' -> bool") % typeStr),
+            boost::str(boost::format("Implicit cast '%s' -> bool") % subExprTypeStr),
             location,
             sourceManager);
+    }
+    else if (kind == CK_IntegralCast || kind == CK_IntegralToFloating)
+    {
+        std::string subExprTypeStr;
+        const Expr* subExpr = implicitCastExpr->getSubExpr();
+        if (subExpr != nullptr)
+        {
+            subExprTypeStr = subExpr->getType().getAsString();
+        }
+
+        std::string castTypeStr = implicitCastExpr->getType().getAsString();
+
+        if (CXXBoolLiteralExpr::classof(subExpr) ||
+            subExprTypeStr == "_Bool")
+        {
+            m_context.printer.PrintRuleViolation(
+                "implicit bool cast",
+                Severity::Warning,
+                boost::str(boost::format("Implicit cast bool -> '%s'") % castTypeStr),
+                location,
+                sourceManager);
+        }
     }
 }

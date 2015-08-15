@@ -135,6 +135,37 @@ This rule matches any call of delete expression.
 
 
 
+## Other warning rules
+
+### Implicit bool cast
+
+**Class:** `ImplicitBoolCast`
+
+**Errors:**
+ - [warning] *Implicit cast '`type`' -> bool*
+ - [warning] *Implicit cast bool -> '`type`'*
+
+**Description:**
+
+This rule matches implicit casts to and from bool type. Such conversions can often hide subtle bugs. For example:
+```cpp
+class CFoo
+{
+public:
+    float GetFoo();
+private:
+    bool m_foo;
+};
+
+float CFoo::GetFoo()
+{
+    return m_foo; // ouch, compiles without even a warning
+}
+```
+
+
+
+
 ## Information rules
 
 This class of rules checks for things which are not exactly errors, but which need to be taken care of in due course.

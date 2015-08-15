@@ -60,7 +60,7 @@ set(COLOBOT_LINT_SRCS
     Rules/ClassNamingRule.cpp
     Rules/EnumNamingRule.cpp
     Rules/FunctionNamingRule.cpp
-    Rules/ImplicitCastToBoolRule.cpp
+    Rules/ImplicitBoolCastRule.cpp
     Rules/InconsistentDeclarationParameterNameRule.cpp
     Rules/IncludeStyleRule.cpp
     Rules/NakedDeleteRule.cpp
@@ -194,7 +194,7 @@ add_colobot_lint_test(ClassNamingRuleTest                          Tests/class_n
 add_colobot_lint_test(DiagnosticHandlerTest                        Tests/diagnostic_handler_test.py)
 add_colobot_lint_test(EnumNamingRuleTest                           Tests/enum_naming_rule_test.py)
 add_colobot_lint_test(FunctionNamingRuleTest                       Tests/function_naming_rule_test.py)
-add_colobot_lint_test(ImplicitCastToBoolRuleTest                   Tests/implicit_cast_to_bool_rule_test.py)
+add_colobot_lint_test(ImplicitBoolCastRuleTest                     Tests/implicit_bool_cast_rule_test.py)
 add_colobot_lint_test(InconsistentDeclarationParameterNameRuleTest Tests/inconsistent_declaration_parameter_name_rule_test.py)
 add_colobot_lint_test(IncludeStyleRule                             Tests/include_style_rule_test.py)
 add_colobot_lint_test(NakedDeleteRuleTest                          Tests/naked_delete_rule_test.py)
