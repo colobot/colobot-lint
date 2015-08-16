@@ -12,6 +12,7 @@
 #include "Rules/NakedDeleteRule.h"
 #include "Rules/NakedNewRule.h"
 #include "Rules/OldStyleFunctionRule.h"
+#include "Rules/OldStyleNullPointerRule.h"
 #include "Rules/TodoRule.h"
 #include "Rules/UninitializedFieldRule.h"
 #include "Rules/UninitializedLocalVariableRule.h"
@@ -63,6 +64,7 @@ std::vector<std::unique_ptr<ASTCallbackRule>> CreateASTRules(Context& context)
     AddRule<InconsistentDeclarationParameterNameRule>(rules, context);
     AddRule<IncludeStyleRule>(rules, context);
     AddRule<ImplicitBoolCastRule>(rules, context);
+    AddRule<OldStyleNullPointerRule>(rules, context);
     return rules;
 }
 

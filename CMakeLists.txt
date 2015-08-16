@@ -66,6 +66,7 @@ set(COLOBOT_LINT_SRCS
     Rules/NakedDeleteRule.cpp
     Rules/NakedNewRule.cpp
     Rules/OldStyleFunctionRule.cpp
+    Rules/OldStyleNullPointerRule.cpp
     Rules/RulesFactory.cpp
     Rules/TodoRule.cpp
     Rules/UninitializedFieldRule.cpp
@@ -196,13 +197,14 @@ add_colobot_lint_test(EnumNamingRuleTest                           Tests/enum_na
 add_colobot_lint_test(FunctionNamingRuleTest                       Tests/function_naming_rule_test.py)
 add_colobot_lint_test(ImplicitBoolCastRuleTest                     Tests/implicit_bool_cast_rule_test.py)
 add_colobot_lint_test(InconsistentDeclarationParameterNameRuleTest Tests/inconsistent_declaration_parameter_name_rule_test.py)
-add_colobot_lint_test(IncludeStyleRule                             Tests/include_style_rule_test.py)
+add_colobot_lint_test(IncludeStyleRuleTest                         Tests/include_style_rule_test.py)
 add_colobot_lint_test(NakedDeleteRuleTest                          Tests/naked_delete_rule_test.py)
 add_colobot_lint_test(NakedNewRuleTest                             Tests/naked_new_rule_test.py)
-add_colobot_lint_test(OldStyleFunctionTest                         Tests/old_style_function_rule_test.py)
+add_colobot_lint_test(OldStyleFunctionRuleTest                     Tests/old_style_function_rule_test.py)
+add_colobot_lint_test(OldStyleNullPointerRuleTest                  Tests/old_style_null_pointer_rule_test.py)
 add_colobot_lint_test(SourceLocationHelperTest                     Tests/source_location_helper_test.py)
 add_colobot_lint_test(TodoRuleTest                                 Tests/todo_rule_test.py)
-add_colobot_lint_test(UninitializedFieldRule                       Tests/uninitialized_field_rule_test.py)
-add_colobot_lint_test(UninitializedLocalVariableRule               Tests/uninitialized_local_variable_rule_test.py)
-add_colobot_lint_test(VariableNamingRule                           Tests/variable_naming_rule_test.py)
-add_colobot_lint_test(WhitespaceRule                               Tests/whitespace_rule_test.py)
+add_colobot_lint_test(UninitializedFieldRuleTest                   Tests/uninitialized_field_rule_test.py)
+add_colobot_lint_test(UninitializedLocalVariableRuleTest           Tests/uninitialized_local_variable_rule_test.py)
+add_colobot_lint_test(VariableNamingRuleTest                       Tests/variable_naming_rule_test.py)
+add_colobot_lint_test(WhitespaceRuleTest                           Tests/whitespace_rule_test.py)

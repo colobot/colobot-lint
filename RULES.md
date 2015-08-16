@@ -315,6 +315,16 @@ Notes:
  - empty parameter names are skipped
  - each function is only reported once
 
+### Old-style null pointer
+
+**Class:** `OldStyleNullPointerRule`
+
+**Errors:**
+ - [style] *Use of old-style zero integer literal as null pointer*
+
+This rule finds all occurences of using integer zero literal as null pointer constant.
+
+
 ### Include style
 
 **Class:** `IncludeStyleRule`
