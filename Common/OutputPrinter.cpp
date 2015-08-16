@@ -8,12 +8,24 @@
 #include <clang/AST/ASTContext.h>
 #include <llvm/ADT/STLExtras.h>
 
+#include <cassert>
+#include <fstream>
+
 using namespace clang;
 using namespace llvm;
 
 
-OutputPrinter::OutputPrinter(const std::string& outputFileName)
-    : m_outputFileName(outputFileName)
+OutputPrinter::OutputPrinter(const std::string& outputFileName, OutputType type)
+    : m_type(type),
+      m_outputFileName(outputFileName)
+{
+    if (m_type == OutputType::CppcheckReport)
+    {
+        InitCppcheckReport();
+    }
+}
+
+void OutputPrinter::InitCppcheckReport()
 {
     auto decl = make_unique<TiXmlDeclaration>("1.0", "", "");
     m_document.LinkEndChild(decl.release());
@@ -28,21 +40,6 @@ OutputPrinter::OutputPrinter(const std::string& outputFileName)
     m_errorsElement = make_unique<TiXmlElement>("errors");
 }
 
-void OutputPrinter::Save()
-{
-    m_resultsElement->LinkEndChild(m_errorsElement.release());
-    m_document.LinkEndChild(m_resultsElement.release());
-
-    if (m_outputFileName.empty())
-    {
-        m_document.Print();
-    }
-    else
-    {
-        m_document.SaveFile(m_outputFileName);
-    }
-}
-
 void OutputPrinter::PrintRuleViolation(const std::string& ruleName,
                                        Severity severity,
                                        const std::string& description,
@@ -50,6 +47,8 @@ void OutputPrinter::PrintRuleViolation(const std::string& ruleName,
                                        SourceManager& sourceManager,
                                        int lineOffset)
 {
+    assert(m_type == OutputType::CppcheckReport);
+
     std::string fileName = GetCleanFilename(location, sourceManager);
     int lineNumber = sourceManager.getPresumedLineNumber(location) + lineOffset;
 
@@ -62,6 +61,8 @@ void OutputPrinter::PrintRuleViolation(const std::string& ruleName,
                                        const std::string& fileName,
                                        int lineNumber)
 {
+    assert(m_type == OutputType::CppcheckReport);
+
     auto errorElement = make_unique<TiXmlElement>("error");
 
     errorElement->SetAttribute("id", ruleName);
@@ -103,3 +104,57 @@ std::string OutputPrinter::GetSeverityString(Severity severity)
     return str;
 }
 
+void OutputPrinter::SaveCppcheckReport()
+{
+    m_resultsElement->LinkEndChild(m_errorsElement.release());
+    m_document.LinkEndChild(m_resultsElement.release());
+
+    if (m_outputFileName.empty())
+    {
+        m_document.Print();
+    }
+    else
+    {
+        m_document.SaveFile(m_outputFileName);
+    }
+}
+
+void OutputPrinter::PrintGraphEdge(const std::string& source,
+                                   const std::string& destination,
+                                   const std::string& options)
+{
+    assert(m_type == OutputType::DotGraph);
+
+    m_graphEdges.insert(DotGraphEdge{source, destination, options});
+}
+
+void OutputPrinter::SaveDotGraph()
+{
+    if (m_outputFileName.empty())
+    {
+        SaveDotGraph(std::cout);
+    }
+    else
+    {
+        std::ofstream str(m_outputFileName.c_str());
+        SaveDotGraph(str);
+    }
+}
+
+void OutputPrinter::SaveDotGraph(std::ostream& str)
+{
+    str << "digraph G {\n";
+    for (const auto& edge : m_graphEdges)
+    {
+        str << "  \"" << edge.source << "\" -> \"" << edge.target << "\" " << edge.options << "\n";
+    }
+    str << "}\n";
+}
+
+void OutputPrinter::Save()
+{
+    if (m_type == OutputType::CppcheckReport)
+        SaveCppcheckReport();
+    else
+        SaveDotGraph();
+}

@@ -10,6 +10,7 @@
 #include <vector>
 
 class ASTCallbackRule;
+class Generator;
 
 namespace clang
 {
@@ -58,10 +59,12 @@ class ColobotLintASTConsumer : public clang::MultiplexConsumer
 public:
     ColobotLintASTConsumer(std::vector<std::unique_ptr<ASTConsumer>>&& consumers,
                            std::unique_ptr<clang::ast_matchers::MatchFinder>&& finder,
-                           std::vector<std::unique_ptr<ASTCallbackRule>>&& rules);
+                           std::vector<std::unique_ptr<ASTCallbackRule>>&& rules,
+                           std::unique_ptr<Generator>&& generator);
     ~ColobotLintASTConsumer();
 
 private:
     std::unique_ptr<clang::ast_matchers::MatchFinder> m_finder;
     std::vector<std::unique_ptr<ASTCallbackRule>> m_rules;
+    std::unique_ptr<Generator> m_generator;
 };

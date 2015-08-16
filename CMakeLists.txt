@@ -53,6 +53,9 @@ set(COLOBOT_LINT_SRCS
     Common/OutputPrinter.cpp
     Common/SourceLocationHelper.cpp
     Common/UninitializedPodVariableHelper.cpp
+    Generators/DependencyGraphGenerator.cpp
+    Generators/DeploymentGraphGenerator.cpp
+    Generators/GeneratorsFactory.cpp
     Handlers/BeginSourceFileHandler.cpp
     Handlers/DiagnosticHandler.cpp
     Handlers/ExclusionZoneCommentHandler.cpp

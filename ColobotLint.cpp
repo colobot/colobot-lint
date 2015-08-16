@@ -26,7 +26,7 @@ namespace
 
 OptionCategory g_colobotLintOptionCategory("colobot-lint options");
 
-static cl::list<std::string> g_projectLocalIncludePaths(
+static cl::list<std::string> g_projectLocalIncludePathsOpt(
     "project-local-include-path",
     desc("Search path(s) to project local include files"),
     value_desc("path"), cat(g_colobotLintOptionCategory));
@@ -46,11 +46,16 @@ static cl::opt<bool> g_debugOpt(
     desc("Whether to print even more verbose output"),
     init(false), cat(g_colobotLintOptionCategory));
 
-static cl::list<std::string> g_onlyRule(
+static cl::list<std::string> g_ruleSelectionOpt(
     "only-rule",
     desc("Run only these rule(s)"),
-    cat(g_colobotLintOptionCategory)
+    value_desc("rule-class"), cat(g_colobotLintOptionCategory)
 );
+
+static cl::opt<std::string> g_generatorSelectionOpt(
+    "generate-graph",
+    desc("If used, don't run rule checks, but instead generate given graph"),
+    value_desc("graph-type"), cat(g_colobotLintOptionCategory));
 
 extrahelp g_moreHelp(
     "Colobot-lint runs just like any other tool based on Clang's libtooling.\n"
@@ -97,21 +102,25 @@ int main(int argc, const char **argv)
                    optionsParser.getSourcePathList());
 
     std::set<std::string> rulesSelection;
-    for (const auto& rule : g_onlyRule)
+    for (const auto& rule : g_ruleSelectionOpt)
         rulesSelection.insert(rule);
 
+    std::string generatorSelection = g_generatorSelectionOpt;
+
     std::set<std::string> projectLocalIncludePaths;
-    for (const auto& path : g_projectLocalIncludePaths)
+    for (const auto& path : g_projectLocalIncludePathsOpt)
         projectLocalIncludePaths.insert(path);
 
     SourceLocationHelper sourceLocationHelper;
 
-    OutputPrinter outputPrinter(g_outputFileOpt);
+    OutputPrinter outputPrinter(g_outputFileOpt,
+                                generatorSelection.empty() ? OutputType::CppcheckReport : OutputType::DotGraph);
 
     Context context(sourceLocationHelper,
                     outputPrinter,
                     std::move(projectLocalIncludePaths),
                     std::move(rulesSelection),
+                    generatorSelection,
                     g_verboseOpt,
                     g_debugOpt);
     sourceLocationHelper.SetContext(&context);

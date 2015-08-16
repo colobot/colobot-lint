@@ -59,3 +59,15 @@ bool SourceLocationHelper::IsLocationOfInterest(StringRef ruleName,
 
     return true;
 }
+
+bool SourceLocationHelper::IsLocationInProjectSourceFile(SourceLocation location, SourceManager& sourceManager)
+{
+    std::string fileName = GetCleanFilename(location, sourceManager);
+    for (const auto& path : m_context->projectLocalIncludePaths)
+    {
+        if (StringRef(fileName).startswith(path))
+            return true;
+    }
+
+    return false;
+}

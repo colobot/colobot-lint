@@ -15,9 +15,11 @@ struct Context
             OutputPrinter& printer,
             std::set<std::string>&& projectLocalIncludePaths,
             std::set<std::string>&& rulesSelection,
+            const std::string& generatorSelection,
             bool verbose,
             bool debug)
         : rulesSelection(rulesSelection),
+          generatorSelection(generatorSelection),
           projectLocalIncludePaths(projectLocalIncludePaths),
           verbose(verbose),
           debug(debug),
@@ -27,6 +29,7 @@ struct Context
     {}
 
     const std::set<std::string> rulesSelection;
+    const std::string generatorSelection;
     const std::set<std::string> projectLocalIncludePaths;
     const bool verbose;
     const bool debug;

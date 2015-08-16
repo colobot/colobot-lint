@@ -22,6 +22,9 @@ public:
     bool IsLocationOfInterestIgnoringExclusionZone(clang::SourceLocation location,
                                                    clang::SourceManager& sourceManager);
 
+    bool IsLocationInProjectSourceFile(clang::SourceLocation location,
+                                       clang::SourceManager& sourceManager);
+
 private:
     Context* m_context = nullptr;
 };
