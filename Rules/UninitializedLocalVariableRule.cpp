@@ -1,6 +1,5 @@
 #include "Rules/UninitializedLocalVariableRule.h"
 
-#include "Common/ClassofCast.h"
 #include "Common/Context.h"
 #include "Common/OutputPrinter.h"
 #include "Common/SourceLocationHelper.h"

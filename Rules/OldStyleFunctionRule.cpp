@@ -1,6 +1,5 @@
 #include "Rules/OldStyleFunctionRule.h"
 
-#include "Common/ClassofCast.h"
 #include "Common/Context.h"
 #include "Common/OutputPrinter.h"
 #include "Common/SourceLocationHelper.h"
@@ -146,11 +145,11 @@ bool OldStyleDeclarationFinder::IsInteresting(const VarDecl* variableDeclaration
 
 bool OldStyleDeclarationFinder::VisitStmt(Stmt* statement)
 {
-    const DeclRefExpr* declarationRef = classof_cast<const DeclRefExpr>(statement);
+    const DeclRefExpr* declarationRef = dyn_cast_or_null<const DeclRefExpr>(statement);
     if (declarationRef == nullptr)
         return true; // recurse further
 
-    const VarDecl* variableDeclaration = classof_cast<const VarDecl>(declarationRef->getDecl());
+    const VarDecl* variableDeclaration = dyn_cast_or_null<const VarDecl>(declarationRef->getDecl());
     if (! IsInteresting(variableDeclaration))
         return true; // recurse further
 

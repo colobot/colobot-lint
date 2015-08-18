@@ -1,6 +1,5 @@
 #include "Rules/BlockPlacementRule.h"
 
-#include "Common/ClassofCast.h"
 #include "Common/Context.h"
 #include "Common/OutputPrinter.h"
 #include "Common/SourceLocationHelper.h"
@@ -94,7 +93,7 @@ bool BlockPlacementRule::VisitStmt(Stmt* statement)
 
     // compound statement is name for a group of brace-enclosed statement(s)
     //  for example: if (x) { foo(); }
-    CompoundStmt* compoundStatement = classof_cast<CompoundStmt>(statement);
+    CompoundStmt* compoundStatement = dyn_cast_or_null<CompoundStmt>(statement);
     if (compoundStatement == nullptr)
         return true; // recurse further
 

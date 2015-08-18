@@ -1,6 +1,5 @@
 #include "Rules/UninitializedFieldRule.h"
 
-#include "Common/ClassofCast.h"
 #include "Common/Context.h"
 #include "Common/OutputPrinter.h"
 #include "Common/SourceLocationHelper.h"
@@ -122,7 +121,7 @@ bool UninitializedFieldRule::AreThereInterestingConstructorDeclarations(const Re
 {
     for (const Decl* decl : recordDeclaration->decls())
     {
-        const CXXConstructorDecl* constructorDeclaration = classof_cast<const CXXConstructorDecl>(decl);
+        const CXXConstructorDecl* constructorDeclaration = dyn_cast_or_null<const CXXConstructorDecl>(decl);
         if (constructorDeclaration == nullptr ||
             constructorDeclaration->isImplicit() ||
             constructorDeclaration->isDeleted())
@@ -143,7 +142,7 @@ UninitializedFieldRule::StringRefSet UninitializedFieldRule::GetCandidateFieldsL
 
     for (const Decl* decl : recordDeclaration->decls())
     {
-        const FieldDecl* fieldDeclaration = classof_cast<const FieldDecl>(decl);
+        const FieldDecl* fieldDeclaration = dyn_cast_or_null<const FieldDecl>(decl);
         if (fieldDeclaration == nullptr ||
             fieldDeclaration->hasInClassInitializer())
             continue;
@@ -177,13 +176,13 @@ void UninitializedFieldRule::CheckInitializationsInInitializationList(const CXXC
 void UninitializedFieldRule::CheckInitializationsInConstructorBody(const CXXConstructorDecl* constructorDeclaration,
                                                                    UninitializedFieldRule::StringRefSet& candidateFieldList)
 {
-    const CompoundStmt* compountStatement = classof_cast<const CompoundStmt>(constructorDeclaration->getBody());
+    const CompoundStmt* compountStatement = dyn_cast_or_null<const CompoundStmt>(constructorDeclaration->getBody());
     if (compountStatement == nullptr)
         return;
 
     for (Stmt* statement : compountStatement->body())
     {
-        const BinaryOperator* binaryOperator = classof_cast<const BinaryOperator>(statement);
+        const BinaryOperator* binaryOperator = dyn_cast_or_null<const BinaryOperator>(statement);
         if (binaryOperator != nullptr &&
             binaryOperator->isAssignmentOp())
         {
@@ -195,11 +194,11 @@ void UninitializedFieldRule::CheckInitializationsInConstructorBody(const CXXCons
 void UninitializedFieldRule::CheckInitializationsInAssignStatement(const BinaryOperator* assignStatement,
                                                                    UninitializedFieldRule::StringRefSet& candidateFieldList)
 {
-    const MemberExpr* memberExpr = classof_cast<const MemberExpr>(assignStatement->getLHS());
+    const MemberExpr* memberExpr = dyn_cast_or_null<const MemberExpr>(assignStatement->getLHS());
     if (memberExpr == nullptr)
         return;
 
-    const CXXThisExpr* thisExpr = classof_cast<const CXXThisExpr>(memberExpr->getBase());
+    const CXXThisExpr* thisExpr = dyn_cast_or_null<const CXXThisExpr>(memberExpr->getBase());
     if (thisExpr == nullptr)
         return;
 

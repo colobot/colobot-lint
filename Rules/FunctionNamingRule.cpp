@@ -1,6 +1,5 @@
 #include "Rules/FunctionNamingRule.h"
 
-#include "Common/ClassofCast.h"
 #include "Common/Context.h"
 #include "Common/OutputPrinter.h"
 #include "Common/RegexHelper.h"
@@ -40,7 +39,7 @@ void FunctionNamingRule::run(const MatchFinder::MatchResult& result)
     if (functionDeclaration->isOverloadedOperator())
         return;
 
-    const CXXMethodDecl* methodDeclaration = classof_cast<const CXXMethodDecl>(functionDeclaration);
+    const CXXMethodDecl* methodDeclaration = dyn_cast_or_null<const CXXMethodDecl>(functionDeclaration);
     if (methodDeclaration != nullptr)
         return HandleMethodDeclaration(methodDeclaration, location, sourceManager);
 

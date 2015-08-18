@@ -1,6 +1,5 @@
 #include "Common/UninitializedPodVariableHelper.h"
 
-#include "Common/ClassofCast.h"
 
 #include <clang/AST/Decl.h>
 #include <clang/AST/DeclCXX.h>
@@ -14,7 +13,7 @@ namespace
 
 bool HasImplicitInitialization(const VarDecl* variableDeclaration)
 {
-    const CXXConstructExpr* constructExpr = classof_cast<const CXXConstructExpr>(variableDeclaration->getInit());
+    const CXXConstructExpr* constructExpr = dyn_cast_or_null<const CXXConstructExpr>(variableDeclaration->getInit());
     if (constructExpr == nullptr ||
         constructExpr->getConstructor() == nullptr)
     {

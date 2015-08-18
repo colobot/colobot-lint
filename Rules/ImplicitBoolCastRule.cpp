@@ -1,6 +1,5 @@
 #include "Rules/ImplicitBoolCastRule.h"
 
-#include "Common/ClassofCast.h"
 #include "Common/Context.h"
 #include "Common/OutputPrinter.h"
 #include "Common/SourceLocationHelper.h"
@@ -109,7 +108,7 @@ bool ImplicitBoolCastRule::IsComparisonOfBools(const ImplicitCastExpr* implicitC
     if (parents.size() == 0)
         return false;
 
-    const BinaryOperator* binaryOperator = classof_cast<const BinaryOperator>(parents.front().get<Stmt>());
+    const BinaryOperator* binaryOperator = dyn_cast_or_null<const BinaryOperator>(parents.front().get<Stmt>());
     if (binaryOperator == nullptr)
         return false;
 
@@ -120,8 +119,8 @@ bool ImplicitBoolCastRule::IsComparisonOfBools(const ImplicitCastExpr* implicitC
         return false;
     }
 
-    const ImplicitCastExpr* lhsImplicitCast = classof_cast<const ImplicitCastExpr>(binaryOperator->getLHS());
-    const ImplicitCastExpr* rhsImplicitCast = classof_cast<const ImplicitCastExpr>(binaryOperator->getRHS());
+    const ImplicitCastExpr* lhsImplicitCast = dyn_cast_or_null<const ImplicitCastExpr>(binaryOperator->getLHS());
+    const ImplicitCastExpr* rhsImplicitCast = dyn_cast_or_null<const ImplicitCastExpr>(binaryOperator->getRHS());
     return IsImplicitCastFromBool(lhsImplicitCast, astContext, false) &&
            IsImplicitCastFromBool(rhsImplicitCast, astContext, false);
 }

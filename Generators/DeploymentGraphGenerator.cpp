@@ -4,7 +4,6 @@
 #include "Common/OutputPrinter.h"
 #include "Common/SourceLocationHelper.h"
 
-#include "Common/ClassofCast.h"
 
 using namespace clang;
 using namespace clang::ast_matchers;
@@ -84,7 +83,7 @@ void DeploymentGraphGenerator::HandleUniquePtrFieldDeclaration(const FieldDecl* 
     if (uniquePtrRecordType == nullptr)
         return;
 
-    const ClassTemplateSpecializationDecl* uniquePtrSpecialization = classof_cast<const ClassTemplateSpecializationDecl>(
+    const ClassTemplateSpecializationDecl* uniquePtrSpecialization = dyn_cast_or_null<const ClassTemplateSpecializationDecl>(
         uniquePtrRecordType->getDecl());
 
     if (uniquePtrSpecialization == nullptr)
