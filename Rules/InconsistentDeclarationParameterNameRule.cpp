@@ -48,7 +48,7 @@ void InconsistentDeclarationParameterNameRule::run(const MatchFinder::MatchResul
                 "inconsistent declaration parameter name",
                 Severity::Style,
                 boost::str(boost::format("Function '%s' has other declaration(s) with inconsistently named parameter(s)")
-                    % functionDeclaration->getNameAsString()),
+                    % fullyQualifiedName),
                 location,
                 sourceManager);
 

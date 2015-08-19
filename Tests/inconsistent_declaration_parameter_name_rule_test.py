@@ -64,5 +64,32 @@ class InconsistentDeclarationParameterNameRuleTest(test_support.TestBase):
                 }
             ])
 
+    def test_class_method_declaration_and_definition(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                'struct Foo',
+                '{',
+                '   void Bar(int a, int b, int c);',
+                '};'
+                'void Foo::Bar(int a, int b, int c) {}',
+            ],
+            expected_errors = [])
+
+    def test_class_method_declaration_and_definition_inconsistent_parameter_names(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                'struct Foo',
+                '{',
+                '   void Bar(int a, int b, int c);',
+                '};'
+                'void Foo::Bar(int x, int y, int z) {}',
+            ],
+            expected_errors = [
+                {
+                    'msg': "Function 'Foo::Bar' has other declaration(s) with inconsistently named parameter(s)",
+                    'line': '3'
+                }
+            ])
+
 if __name__ == '__main__':
     test_support.main()
