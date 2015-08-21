@@ -9,6 +9,7 @@
 #include "Rules/ImplicitBoolCastRule.h"
 #include "Rules/IncludeStyleRule.h"
 #include "Rules/InconsistentDeclarationParameterNameRule.h"
+#include "Rules/LicenseInHeaderRule.h"
 #include "Rules/NakedDeleteRule.h"
 #include "Rules/NakedNewRule.h"
 #include "Rules/OldStyleFunctionRule.h"
@@ -73,5 +74,6 @@ std::vector<std::unique_ptr<DirectASTConsumerRule>> CreateDirectASTConsumerRules
     std::vector<std::unique_ptr<DirectASTConsumerRule>> rules;
     AddRule<BlockPlacementRule>(rules, context);
     AddRule<WhitespaceRule>(rules, context);
+    AddRule<LicenseInHeaderRule>(rules, context);
     return rules;
 }

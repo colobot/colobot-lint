@@ -14,6 +14,7 @@ struct Context
     Context(SourceLocationHelper& sourceLocationHelper,
             OutputPrinter& printer,
             std::set<std::string>&& projectLocalIncludePaths,
+            std::vector<std::string>&& licenseTemplateLines,
             std::set<std::string>&& rulesSelection,
             const std::string& generatorSelection,
             bool verbose,
@@ -21,6 +22,7 @@ struct Context
         : rulesSelection(rulesSelection),
           generatorSelection(generatorSelection),
           projectLocalIncludePaths(projectLocalIncludePaths),
+          licenseTemplateLines(licenseTemplateLines),
           verbose(verbose),
           debug(debug),
           areWeInFakeHeaderSourceFile(false),
@@ -31,6 +33,7 @@ struct Context
     const std::set<std::string> rulesSelection;
     const std::string generatorSelection;
     const std::set<std::string> projectLocalIncludePaths;
+    const std::vector<std::string> licenseTemplateLines;
     const bool verbose;
     const bool debug;
 

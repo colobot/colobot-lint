@@ -13,6 +13,7 @@
 #include <clang/Tooling/CommonOptionsParser.h>
 
 #include <iostream>
+#include <fstream>
 #include <exception>
 
 using namespace llvm;
@@ -30,6 +31,11 @@ static cl::list<std::string> g_projectLocalIncludePathsOpt(
     "project-local-include-path",
     desc("Search path(s) to project local include files"),
     value_desc("path"), cat(g_colobotLintOptionCategory));
+
+static cl::opt<std::string> g_licenseTemplateFileOpt(
+    "license-template-file",
+    desc("Template of license that should be present at the beginning of project source files"),
+    value_desc("filename"), cat(g_colobotLintOptionCategory));
 
 static cl::opt<std::string> g_outputFileOpt(
     "output-file",
@@ -93,6 +99,30 @@ namespace boost
     }
 } // namespace boost
 
+std::vector<std::string> ReadLicenseTemplateFile(const std::string& licenseTemplateFileName)
+{
+    if (licenseTemplateFileName.empty())
+        return {};
+
+    std::vector<std::string> licenseFileLines;
+    std::ifstream str;
+    str.open(licenseTemplateFileName.c_str());
+    if (!str.good())
+    {
+        std::cerr << "Warning: could not load license template file" << std::endl;
+        return {};
+    }
+
+    while (!str.eof())
+    {
+        std::string line;
+        std::getline(str, line);
+        licenseFileLines.push_back(std::move(line));
+    }
+
+    return licenseFileLines;
+}
+
 int main(int argc, const char **argv)
 {
     SetVersionPrinter(PrintColobotLintVersion);
@@ -111,6 +141,8 @@ int main(int argc, const char **argv)
     for (const auto& path : g_projectLocalIncludePathsOpt)
         projectLocalIncludePaths.insert(path);
 
+    auto licenseTemplateLines = ReadLicenseTemplateFile(g_licenseTemplateFileOpt);
+
     SourceLocationHelper sourceLocationHelper;
 
     OutputPrinter outputPrinter(g_outputFileOpt,
@@ -119,6 +151,7 @@ int main(int argc, const char **argv)
     Context context(sourceLocationHelper,
                     outputPrinter,
                     std::move(projectLocalIncludePaths),
+                    std::move(licenseTemplateLines),
                     std::move(rulesSelection),
                     generatorSelection,
                     g_verboseOpt,

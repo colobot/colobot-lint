@@ -8,6 +8,7 @@ namespace clang
 {
 class SourceLocation;
 class SourceManager;
+class FileID;
 }
 
 class SourceLocationHelper
@@ -24,6 +25,8 @@ public:
 
     bool IsLocationInProjectSourceFile(clang::SourceLocation location,
                                        clang::SourceManager& sourceManager);
+
+    clang::FileID GetMainFileID(clang::SourceManager& sourceManager);
 
 private:
     Context* m_context = nullptr;

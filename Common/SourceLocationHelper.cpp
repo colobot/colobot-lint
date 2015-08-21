@@ -71,3 +71,28 @@ bool SourceLocationHelper::IsLocationInProjectSourceFile(SourceLocation location
 
     return false;
 }
+
+FileID SourceLocationHelper::GetMainFileID(SourceManager& sourceManager)
+{
+    FileID mainFileID{};
+
+    if (m_context->areWeInFakeHeaderSourceFile)
+    {
+        for (auto it = sourceManager.fileinfo_begin();
+             it != sourceManager.fileinfo_end();
+             ++it)
+        {
+            if (StringRef(it->first->getName()).endswith(m_context->actualHeaderFileSuffix))
+            {
+                mainFileID = sourceManager.translateFile(it->first);
+                break;
+            }
+        }
+    }
+    else
+    {
+        mainFileID = sourceManager.getMainFileID();
+    }
+
+    return mainFileID;
+}

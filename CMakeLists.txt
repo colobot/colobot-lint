@@ -66,6 +66,7 @@ set(COLOBOT_LINT_SRCS
     Rules/ImplicitBoolCastRule.cpp
     Rules/InconsistentDeclarationParameterNameRule.cpp
     Rules/IncludeStyleRule.cpp
+    Rules/LicenseInHeaderRule.cpp
     Rules/NakedDeleteRule.cpp
     Rules/NakedNewRule.cpp
     Rules/OldStyleFunctionRule.cpp
@@ -201,6 +202,7 @@ add_colobot_lint_test(FunctionNamingRuleTest                       Tests/functio
 add_colobot_lint_test(ImplicitBoolCastRuleTest                     Tests/implicit_bool_cast_rule_test.py)
 add_colobot_lint_test(InconsistentDeclarationParameterNameRuleTest Tests/inconsistent_declaration_parameter_name_rule_test.py)
 add_colobot_lint_test(IncludeStyleRuleTest                         Tests/include_style_rule_test.py)
+add_colobot_lint_test(LicenseInHeaderRuleTest                      Tests/license_in_header_rule_test.py)
 add_colobot_lint_test(NakedDeleteRuleTest                          Tests/naked_delete_rule_test.py)
 add_colobot_lint_test(NakedNewRuleTest                             Tests/naked_new_rule_test.py)
 add_colobot_lint_test(OldStyleFunctionRuleTest                     Tests/old_style_function_rule_test.py)

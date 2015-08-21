@@ -71,13 +71,15 @@ def run_colobot_lint_with_single_file(source_file_lines,
 def run_colobot_lint(build_directory,
                      source_dir,
                      source_paths,
-                     rules_selection = []):
+                     rules_selection = [],
+                     additional_options = []):
     rules_selection_options = []
     for rule in rules_selection:
         rules_selection_options += ['-only-rule', rule]
 
     whole_command = ([colobot_lint_exectuable] +
                      rules_selection_options +
+                     additional_options +
                      ['-p', build_directory] +
                      ['-project-local-include-path', source_dir] +
                      source_paths)
