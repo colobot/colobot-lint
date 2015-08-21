@@ -28,7 +28,7 @@ void UninitializedFieldRule::run(const MatchFinder::MatchResult& result)
 {
     const RecordDecl* recordDeclaration = result.Nodes.getNodeAs<RecordDecl>("recordDecl");
     if (recordDeclaration != nullptr)
-        return HandleRecordDeclaration(recordDeclaration, result.Context, nullptr);
+        return HandleRecordDeclaration(recordDeclaration, result.Context);
 
     const CXXConstructorDecl* constructorDeclaration = result.Nodes.getNodeAs<CXXConstructorDecl>("constructorDecl");
     if (constructorDeclaration != nullptr)
@@ -36,8 +36,7 @@ void UninitializedFieldRule::run(const MatchFinder::MatchResult& result)
 }
 
 void UninitializedFieldRule::HandleRecordDeclaration(const RecordDecl* recordDeclaration,
-                                                     ASTContext* context,
-                                                     const CXXConstructorDecl* constructorDeclarationToCheck)
+                                                     ASTContext* context)
 {
     SourceManager& sourceManager = context->getSourceManager();
 

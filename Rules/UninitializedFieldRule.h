@@ -22,8 +22,7 @@ public:
 
 private:
     void HandleRecordDeclaration(const clang::RecordDecl* recordDeclaration,
-                                 clang::ASTContext* context,
-                                 const clang::CXXConstructorDecl* constructorDeclarationToCheck);
+                                 clang::ASTContext* context);
 
     void HandleConstructorDeclaration(const clang::CXXConstructorDecl* constructorDeclaration,
                                       clang::ASTContext* context);
