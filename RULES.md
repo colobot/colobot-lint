@@ -382,3 +382,14 @@ Note: local vs global includes are distinguished based on compiler include paths
 **Description:**
 
 These should be evident from messages of reported errors.
+
+### License in header rule
+
+**Class:** `LicenseInHeaderRule`
+
+**Errors:**
+ - [style] *File doesn't have proper license header; expected line was '{license line}'*
+
+**Description:**
+
+This rule checks the first lines of each source file and matches them against given template. The template is read from file specified by commandline option `-license-template-file /path/to/file`. If this option is not given, no checking is done.
