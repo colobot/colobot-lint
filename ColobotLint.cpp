@@ -200,7 +200,7 @@ boost::optional<std::vector<OutputFilter>> ParseOutputFilters(cl::list<std::stri
     for (const auto& outputFilterOpt : outputFiltersOpt)
     {
         auto outputFilter = ParseOutputFilter(outputFilterOpt);
-        if (outputFilter == boost::none)
+        if (!outputFilter)
             return boost::none;
 
         outputFilters.push_back(std::move(*outputFilter));
@@ -240,21 +240,21 @@ boost::optional<ParsedOptions> ParseOptions()
     parsedOptions.outputFile = g_outputFileOpt;
 
     auto outputFormat = ParseOutputFormat(g_outputFormat, parsedOptions.generatorSelection);
-    if (outputFormat == boost::none)
+    if (!outputFormat)
     {
         return boost::none;
     }
     parsedOptions.outputFormat = std::move(*outputFormat);
 
     auto licenseTemplateLines = ReadLicenseTemplateFile(g_licenseTemplateFileOpt);
-    if (licenseTemplateLines == boost::none)
+    if (!licenseTemplateLines)
     {
         return boost::none;
     }
     parsedOptions.licenseTemplateLines = std::move(*licenseTemplateLines);
 
     auto outputFilters = ParseOutputFilters(g_outputFilterOpt);
-    if (outputFilters == boost::none)
+    if (!outputFilters)
     {
         return boost::none;
     }
@@ -284,7 +284,7 @@ int main(int argc, const char **argv)
                    optionsParser.getSourcePathList());
 
     auto parsedOptions = ParseOptions();
-    if (parsedOptions == boost::none)
+    if (!parsedOptions)
         return 1;
 
     SourceLocationHelper sourceLocationHelper;
