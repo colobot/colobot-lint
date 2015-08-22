@@ -7,6 +7,8 @@
 
 #include <boost/regex.hpp>
 
+#include <iostream>
+
 BeginSourceFileHandler::BeginSourceFileHandler(Context& context)
     : m_context(context)
 {}

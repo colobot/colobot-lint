@@ -250,7 +250,7 @@ void BlockPlacementRule::ReportViolation(const SourceLocation& location, Violati
     const char* what = (type == ViolationType::OpeningBrace) ? "begins" : "ends";
     if (m_reportedLineNumbers.count(lineNumber) == 0)
     {
-        m_context.printer.PrintRuleViolation(
+        m_context.outputPrinter->PrintRuleViolation(
             "code block placement",
             Severity::Style,
             boost::str(boost::format("Body of declaration or statement %s in a style that is not allowed")

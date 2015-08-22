@@ -17,7 +17,7 @@ void DiagnosticHandler::HandleDiagnostic(DiagnosticsEngine::Level level, const D
     {
         if (m_context.areWeInFakeHeaderSourceFile)
         {
-            m_context.printer.PrintRuleViolation(
+            m_context.outputPrinter->PrintRuleViolation(
                 "header file not self-contained",
                 Severity::Error,
                 boost::str(boost::format("Including single header file should not result in compile error: %s")
@@ -27,7 +27,7 @@ void DiagnosticHandler::HandleDiagnostic(DiagnosticsEngine::Level level, const D
         }
         else
         {
-            m_context.printer.PrintRuleViolation(
+            m_context.outputPrinter->PrintRuleViolation(
                 "compile error",
                 Severity::Error,
                 GetDiagnosticString(info),
@@ -37,7 +37,7 @@ void DiagnosticHandler::HandleDiagnostic(DiagnosticsEngine::Level level, const D
     }
     else if (level == DiagnosticsEngine::Level::Warning)
     {
-        m_context.printer.PrintRuleViolation(
+        m_context.outputPrinter->PrintRuleViolation(
             "compile warning",
             Severity::Warning,
             GetDiagnosticString(info),

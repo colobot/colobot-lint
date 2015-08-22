@@ -46,7 +46,7 @@ void EnumNamingRule::HandleEnumDeclaration(const clang::EnumDecl* enumDeclaratio
     StringRef name = enumDeclaration->getName();
     if (name.empty())
     {
-        m_context.printer.PrintRuleViolation(
+        m_context.outputPrinter->PrintRuleViolation(
             "enum naming",
             Severity::Information,
             "Anonymous enum",
@@ -57,7 +57,7 @@ void EnumNamingRule::HandleEnumDeclaration(const clang::EnumDecl* enumDeclaratio
 
     if (! enumDeclaration->isScopedUsingClassTag())
     {
-        m_context.printer.PrintRuleViolation(
+        m_context.outputPrinter->PrintRuleViolation(
             "enum naming",
             Severity::Information,
             boost::str(boost::format("Old-style enum '%s'") % name.str()),
@@ -68,7 +68,7 @@ void EnumNamingRule::HandleEnumDeclaration(const clang::EnumDecl* enumDeclaratio
 
     if (! boost::regex_match(name.begin(), name.end(), m_enumNamePattern))
     {
-        m_context.printer.PrintRuleViolation(
+        m_context.outputPrinter->PrintRuleViolation(
             "enum naming",
             Severity::Style,
             boost::str(boost::format("Enum class '%s' should be named in a style like UpperCamelCase") % name.str()),
@@ -95,7 +95,7 @@ void EnumNamingRule::HandleEnumConstantDeclaration(const clang::EnumConstantDecl
 
             if (! boost::regex_match(name.begin(), name.end(), m_enumConstantPattern))
             {
-                m_context.printer.PrintRuleViolation(
+                m_context.outputPrinter->PrintRuleViolation(
                     "enum naming",
                     Severity::Style,
                     boost::str(boost::format("Enum class constant '%s' should be named in a style like UpperCamelCase")

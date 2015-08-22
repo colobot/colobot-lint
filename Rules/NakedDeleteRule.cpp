@@ -37,7 +37,7 @@ void NakedDeleteRule::run(const MatchFinder::MatchResult& result)
 
     std::string typeStr = deleteExpr->getDestroyedType().getAsString();
 
-    m_context.printer.PrintRuleViolation(
+    m_context.outputPrinter->PrintRuleViolation(
         "naked delete",
         Severity::Warning,
         boost::str(boost::format("Naked delete called on type '%s'") % typeStr),

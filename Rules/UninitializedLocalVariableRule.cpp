@@ -54,7 +54,7 @@ void UninitializedLocalVariableRule::run(const MatchFinder::MatchResult& result)
 
     if (IsUninitializedPodVariable(variableDeclaration, result.Context))
     {
-        m_context.printer.PrintRuleViolation(
+        m_context.outputPrinter->PrintRuleViolation(
                 "uninitialized local variable",
                 Severity::Error,
                 boost::str(boost::format("Local variable '%s' is uninitialized")

@@ -56,7 +56,7 @@ void UninitializedFieldRule::HandleRecordDeclaration(const RecordDecl* recordDec
     {
         std::string which = recordDeclaration->isClass() ? "Class" : "Struct";
 
-        m_context.printer.PrintRuleViolation(
+        m_context.outputPrinter->PrintRuleViolation(
             "uninitialized field",
             Severity::Error,
             boost::str(boost::format("%s '%s' field '%s' remains uninitialized")
@@ -104,7 +104,7 @@ void UninitializedFieldRule::HandleConstructorDeclaration(const CXXConstructorDe
     {
         std::string which = recordDeclaration->isClass() ? "Class" : "Struct";
 
-        m_context.printer.PrintRuleViolation(
+        m_context.outputPrinter->PrintRuleViolation(
             "uninitialized field",
             Severity::Error,
             boost::str(boost::format("%s '%s' field '%s' remains uninitialized in constructor")

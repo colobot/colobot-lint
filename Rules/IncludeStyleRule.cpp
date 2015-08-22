@@ -141,7 +141,7 @@ void IncludeStyleRule::CheckAngledBrackets(const IncludeDirectives& includeDirec
         {
             if (include.isAngled)
             {
-                m_context.printer.PrintRuleViolation(
+                m_context.outputPrinter->PrintRuleViolation(
                     "include style",
                     Severity::Style,
                     boost::str(boost::format("Local include '%s' should be included with quotes, not angled brackets")
@@ -154,7 +154,7 @@ void IncludeStyleRule::CheckAngledBrackets(const IncludeDirectives& includeDirec
         {
             if (! include.isAngled)
             {
-                m_context.printer.PrintRuleViolation(
+                m_context.outputPrinter->PrintRuleViolation(
                     "include style",
                     Severity::Style,
                     boost::str(boost::format("Global include '%s' should be included with angled brackets, not quotes")
@@ -184,7 +184,7 @@ IncludeDirectiveIt IncludeStyleRule::CheckFirstInclude(IncludeDirectiveIt startI
     if (!matchingHeaderInclude.empty() &&
         startIt->includeFileName != matchingHeaderInclude)
     {
-        m_context.printer.PrintRuleViolation(
+        m_context.outputPrinter->PrintRuleViolation(
             "include style",
             Severity::Style,
             boost::str(boost::format("Expected first include directive to be"
@@ -223,7 +223,7 @@ IncludeDirectiveIt IncludeStyleRule::CheckConfigInclude(IncludeDirectiveIt start
 
     if (configIncludeIt != startIt)
     {
-        m_context.printer.PrintRuleViolation(
+        m_context.outputPrinter->PrintRuleViolation(
             "include style",
             Severity::Style,
             boost::str(boost::format("Expected config include directive: '%s', not '%s'")
@@ -261,7 +261,7 @@ IncludeDirectiveIt IncludeStyleRule::CheckLocalIncludes(IncludeDirectiveIt start
         std::string projectIncludeSubpath = GetProjectIncludeSubpath(it->fullFileName);
         if (it->includeFileName != projectIncludeSubpath)
         {
-            m_context.printer.PrintRuleViolation(
+            m_context.outputPrinter->PrintRuleViolation(
                 "include style",
                 Severity::Style,
                 boost::str(boost::format("Expected local include to be full relative path"
@@ -291,7 +291,7 @@ void IncludeStyleRule::CheckGlobalIncludes(IncludeDirectiveIt startIt,
     {
         if (IsLocalInclude(it->fullFileName))
         {
-            m_context.printer.PrintRuleViolation(
+            m_context.outputPrinter->PrintRuleViolation(
                 "include style",
                 Severity::Style,
                 boost::str(boost::format("Local include '%s' should not be placed after global includes")
@@ -317,7 +317,7 @@ void IncludeStyleRule::CheckNewBlock(IncludeDirectiveIt currentIt,
 
     if (currentIncludeLineNumber <= previousIncludeLineNumber + 1)
     {
-        m_context.printer.PrintRuleViolation(
+        m_context.outputPrinter->PrintRuleViolation(
             "include style",
             Severity::Style,
             std::string("Expected empty line between include directives"),
@@ -381,7 +381,7 @@ void IncludeStyleRule::CheckIncludeRangeIsSorted(IncludeDirectiveIt startIt,
 
         if (it->includeFileName != *sortedIt)
         {
-            m_context.printer.PrintRuleViolation(
+            m_context.outputPrinter->PrintRuleViolation(
                 "include style",
                 Severity::Style,
                 boost::str(boost::format("Broken alphabetical ordering, expected '%s', not '%s'")

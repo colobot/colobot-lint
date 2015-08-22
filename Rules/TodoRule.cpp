@@ -43,7 +43,7 @@ bool TodoRule::HandleComment(Preprocessor& pp, SourceRange range)
         StringRefMatchResults todoText;
         if (boost::regex_search(commentLine.begin(), commentLine.end(), todoText, m_todoPattern))
         {
-            m_context.printer.PrintRuleViolation("TODO comment",
+            m_context.outputPrinter->PrintRuleViolation("TODO comment",
                                                 Severity::Information,
                                                 GetStringRefResult(todoText, 1, commentLine).str(),
                                                 location,

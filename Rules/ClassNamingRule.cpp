@@ -43,7 +43,7 @@ void ClassNamingRule::run(const MatchFinder::MatchResult& result)
     StringRef name = recordDeclaration->getName();
     if (name.empty())
     {
-        m_context.printer.PrintRuleViolation(
+        m_context.outputPrinter->PrintRuleViolation(
                 "class naming",
                 Severity::Information,
                 boost::str(boost::format("Anonymous %s") % GetLowercaseRecordTypeString(recordDeclaration)),
@@ -60,7 +60,7 @@ void ClassNamingRule::run(const MatchFinder::MatchResult& result)
     {
         if (! boost::regex_match(name.begin(), name.end(), m_classNamePattern))
         {
-            m_context.printer.PrintRuleViolation(
+            m_context.outputPrinter->PrintRuleViolation(
                 "class naming",
                 Severity::Style,
                 boost::str(boost::format("%s '%s' should be named in a style like CUpperCamelCase")
@@ -76,7 +76,7 @@ void ClassNamingRule::run(const MatchFinder::MatchResult& result)
     {
         if (! boost::regex_match(name.begin(), name.end(), m_structOrUnionNamePattern))
         {
-            m_context.printer.PrintRuleViolation(
+            m_context.outputPrinter->PrintRuleViolation(
                 "class naming",
                 Severity::Style,
                 boost::str(boost::format("%s '%s' should be named in a style like UpperCamelCase")
@@ -88,7 +88,7 @@ void ClassNamingRule::run(const MatchFinder::MatchResult& result)
         }
         else if (boost::regex_match(name.begin(), name.end(), m_classNamePattern))
         {
-            m_context.printer.PrintRuleViolation(
+            m_context.outputPrinter->PrintRuleViolation(
                 "class naming",
                 Severity::Style,
                 boost::str(boost::format("%s '%s' follows class naming style CUpperCamelCase but is not a class")

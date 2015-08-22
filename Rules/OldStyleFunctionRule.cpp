@@ -70,7 +70,7 @@ void OldStyleFunctionRule::run(const MatchFinder::MatchResult& result)
     int oldStyleDeclarationCount = finder.GetOldStyleDeclarationsCount();
     if (oldStyleDeclarationCount > 0)
     {
-        m_context.printer.PrintRuleViolation(
+        m_context.outputPrinter->PrintRuleViolation(
             "old style function",
             Severity::Warning,
             boost::str(boost::format("Function '%s' seems to be written in legacy C style: "

@@ -39,7 +39,7 @@ void ImplicitBoolCastRule::run(const MatchFinder::MatchResult& result)
     {
         std::string subExprTypeStr = implicitCastExpr->getSubExpr()->getType().getAsString();
 
-        m_context.printer.PrintRuleViolation(
+        m_context.outputPrinter->PrintRuleViolation(
             "implicit bool cast",
             Severity::Warning,
             boost::str(boost::format("Implicit cast '%s' -> bool") % subExprTypeStr),
@@ -50,7 +50,7 @@ void ImplicitBoolCastRule::run(const MatchFinder::MatchResult& result)
     {
         std::string castTypeStr = implicitCastExpr->getType().getAsString();
 
-        m_context.printer.PrintRuleViolation(
+        m_context.outputPrinter->PrintRuleViolation(
                 "implicit bool cast",
                 Severity::Warning,
                 boost::str(boost::format("Implicit cast bool -> '%s'") % castTypeStr),

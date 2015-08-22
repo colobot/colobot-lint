@@ -58,7 +58,7 @@ void DeploymentGraphGenerator::HandleRecordDeclaration(const CXXRecordDecl* reco
     for (const CXXBaseSpecifier& base : recordDecl->bases())
     {
         std::string baseType = base.getType().getAsString(printingPolicy);
-        m_context.printer.PrintGraphEdge(recordType, baseType, "[color=\"red\"]");
+        m_context.outputPrinter->PrintGraphEdge(recordType, baseType, "[color=\"red\"]");
     }
 }
 
@@ -100,5 +100,5 @@ void DeploymentGraphGenerator::HandleUniquePtrFieldDeclaration(const FieldDecl* 
     printingPolicy.SuppressTagKeyword = true;
     std::string actualPtrTypeString = actualPtrType.getAsString(printingPolicy);
 
-    m_context.printer.PrintGraphEdge(recordTypeString, actualPtrTypeString);
+    m_context.outputPrinter->PrintGraphEdge(recordTypeString, actualPtrTypeString);
 }

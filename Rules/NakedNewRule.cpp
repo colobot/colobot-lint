@@ -37,7 +37,7 @@ void NakedNewRule::run(const MatchFinder::MatchResult& result)
 
     std::string typeStr = newExpr->getAllocatedType().getAsString();
 
-    m_context.printer.PrintRuleViolation(
+    m_context.outputPrinter->PrintRuleViolation(
         "naked new",
         Severity::Warning,
         boost::str(boost::format("Naked new called with type '%s'") % typeStr),

@@ -41,7 +41,7 @@ void OldStyleNullPointerRule::run(const MatchFinder::MatchResult& result)
     const Stmt* subExpr = implicitCastExpr->getSubExpr();
     if (IntegerLiteral::classof(subExpr))
     {
-        m_context.printer.PrintRuleViolation(
+        m_context.outputPrinter->PrintRuleViolation(
             "old-style null pointer",
             Severity::Style,
             "Use of old-style zero integer literal as null pointer",

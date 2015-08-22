@@ -96,7 +96,7 @@ void FunctionNamingRule::ValidateName(const char* type,
 
     if (! boost::regex_match(name.begin(), name.end(), m_functionOrMethodNamePattern))
     {
-        m_context.printer.PrintRuleViolation(
+        m_context.outputPrinter->PrintRuleViolation(
                 "function naming",
                 Severity::Style,
                 boost::str(boost::format("%s '%s' should be named in UpperCamelCase style")

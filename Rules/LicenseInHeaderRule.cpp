@@ -44,7 +44,7 @@ void LicenseInHeaderRule::HandleTranslationUnit(clang::ASTContext& context)
         bufferPos += 1; // newline character
         if (line != licenseLine)
         {
-            m_context.printer.PrintRuleViolation(
+            m_context.outputPrinter->PrintRuleViolation(
                 "license header",
                 Severity::Style,
                 boost::str(boost::format("File doesn't have proper license header; expected line was '%s'")

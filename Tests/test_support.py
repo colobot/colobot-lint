@@ -78,6 +78,7 @@ def run_colobot_lint(build_directory,
         rules_selection_options += ['-only-rule', rule]
 
     whole_command = ([colobot_lint_exectuable] +
+                     ['-output-format', 'xml'] +
                      rules_selection_options +
                      additional_options +
                      ['-p', build_directory] +

@@ -1,33 +1,33 @@
 #pragma once
 
 #include "Common/ExclusionZone.h"
+#include "Common/OutputPrinter.h"
 
 #include <set>
 #include <string>
 #include <unordered_set>
 
 class SourceLocationHelper;
-class OutputPrinter;
 
 struct Context
 {
     Context(SourceLocationHelper& sourceLocationHelper,
-            OutputPrinter& printer,
-            std::set<std::string>&& projectLocalIncludePaths,
-            std::vector<std::string>&& licenseTemplateLines,
-            std::set<std::string>&& rulesSelection,
-            const std::string& generatorSelection,
+            std::unique_ptr<OutputPrinter> printer,
+            std::set<std::string> projectLocalIncludePaths,
+            std::vector<std::string> licenseTemplateLines,
+            std::set<std::string> rulesSelection,
+            std::string generatorSelection,
             bool verbose,
             bool debug)
-        : rulesSelection(rulesSelection),
-          generatorSelection(generatorSelection),
-          projectLocalIncludePaths(projectLocalIncludePaths),
-          licenseTemplateLines(licenseTemplateLines),
+        : rulesSelection(std::move(rulesSelection)),
+          generatorSelection(std::move(generatorSelection)),
+          projectLocalIncludePaths(std::move(projectLocalIncludePaths)),
+          licenseTemplateLines(std::move(licenseTemplateLines)),
           verbose(verbose),
           debug(debug),
           areWeInFakeHeaderSourceFile(false),
           sourceLocationHelper(sourceLocationHelper),
-          printer(printer)
+          outputPrinter(std::move(printer))
     {}
 
     const std::set<std::string> rulesSelection;
@@ -46,5 +46,5 @@ struct Context
 
     SourceLocationHelper& sourceLocationHelper;
 
-    OutputPrinter& printer;
+    const std::unique_ptr<OutputPrinter> outputPrinter;
 };

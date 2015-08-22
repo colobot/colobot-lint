@@ -71,7 +71,7 @@ void VariableNamingRule::HandleVariableDeclaration(const VarDecl* variableDeclar
     {
         if (! boost::regex_match(name.begin(), name.end(), m_localVariableNamePattern))
         {
-              m_context.printer.PrintRuleViolation(
+              m_context.outputPrinter->PrintRuleViolation(
                 "variable naming",
                 Severity::Style,
                 boost::str(boost::format("Local variable '%s' should be named in camelCase style")
@@ -81,7 +81,7 @@ void VariableNamingRule::HandleVariableDeclaration(const VarDecl* variableDeclar
         }
         else if (boost::regex_match(name.begin(), name.end(), m_deprecatedVariableNamePattern))
         {
-            m_context.printer.PrintRuleViolation(
+            m_context.outputPrinter->PrintRuleViolation(
                 "variable naming",
                 Severity::Style,
                 boost::str(boost::format("Local variable '%s' is named in a style that is deprecated")
@@ -97,7 +97,7 @@ void VariableNamingRule::HandleVariableDeclaration(const VarDecl* variableDeclar
         {
             if (! boost::regex_match(name.begin(), name.end(), m_constGlobalVariableNamePattern))
             {
-                m_context.printer.PrintRuleViolation(
+                m_context.outputPrinter->PrintRuleViolation(
                     "variable naming",
                     Severity::Style,
                     boost::str(boost::format("Const global variable '%s' should be named in ALL_CAPS style")
@@ -110,7 +110,7 @@ void VariableNamingRule::HandleVariableDeclaration(const VarDecl* variableDeclar
         {
             if (! boost::regex_match(name.begin(), name.end(), m_nonConstGlobalVariableNamePattern))
             {
-                m_context.printer.PrintRuleViolation(
+                m_context.outputPrinter->PrintRuleViolation(
                     "variable naming",
                     Severity::Style,
                     boost::str(boost::format("Non-const global variable '%s' should be named in g_camelCase style")
@@ -143,7 +143,7 @@ void VariableNamingRule::ValidateFieldDeclaration(StringRef name,
     {
         if (! boost::regex_match(name.begin(), name.end(), m_publicFieldNamePattern))
         {
-            m_context.printer.PrintRuleViolation(
+            m_context.outputPrinter->PrintRuleViolation(
                 "variable naming",
                 Severity::Style,
                 boost::str(boost::format("Public field '%s' should be named in camelCase style")
@@ -157,7 +157,7 @@ void VariableNamingRule::ValidateFieldDeclaration(StringRef name,
         if (! boost::regex_match(name.begin(), name.end(), m_privateOrProtectedFieldNamePattern))
         {
             std::string which = (access == AS_protected) ? "Protected" : "Private";
-            m_context.printer.PrintRuleViolation(
+            m_context.outputPrinter->PrintRuleViolation(
                 "variable naming",
                 Severity::Style,
                 boost::str(boost::format("%s field '%s' should be named in m_camelCase style")
@@ -169,7 +169,7 @@ void VariableNamingRule::ValidateFieldDeclaration(StringRef name,
         else if (boost::regex_match(name.begin(), name.end(), m_deprecatedFieldNamePattern))
         {
             std::string which = (access == AS_protected) ? "Protected" : "Private";
-            m_context.printer.PrintRuleViolation(
+            m_context.outputPrinter->PrintRuleViolation(
                 "variable naming",
                 Severity::Style,
                 boost::str(boost::format("%s field '%s' is named in a style that is deprecated")

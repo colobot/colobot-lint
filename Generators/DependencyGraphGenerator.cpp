@@ -52,7 +52,7 @@ void DependencyGraphGenerator::HandleRecordDeclaration(const CXXRecordDecl* reco
     for (const CXXBaseSpecifier& base : recordDecl->bases())
     {
         std::string baseType = base.getType().getAsString(printingPolicy);
-        m_context.printer.PrintGraphEdge(recordType, baseType, "[color=\"red\"]");
+        m_context.outputPrinter->PrintGraphEdge(recordType, baseType, "[color=\"red\"]");
     }
 }
 
@@ -75,6 +75,6 @@ void DependencyGraphGenerator::HandleMemberCallExpression(const CXXMemberCallExp
     std::string calleeRecordType = calleeRecordDecl->getQualifiedNameAsString();
     if (callerRecordType != calleeRecordType)
     {
-        m_context.printer.PrintGraphEdge(callerRecordType, calleeRecordType);
+        m_context.outputPrinter->PrintGraphEdge(callerRecordType, calleeRecordType);
     }
 }

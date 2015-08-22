@@ -16,6 +16,8 @@
 #include <fstream>
 #include <exception>
 
+#include <boost/optional.hpp>
+
 using namespace llvm;
 using namespace llvm::cl;
 using namespace clang;
@@ -30,38 +32,51 @@ OptionCategory g_colobotLintOptionCategory("colobot-lint options");
 static cl::list<std::string> g_projectLocalIncludePathsOpt(
     "project-local-include-path",
     desc("Search path(s) to project local include files"),
-    value_desc("path"), cat(g_colobotLintOptionCategory));
+    value_desc("path"),
+    cat(g_colobotLintOptionCategory));
 
 static cl::opt<std::string> g_licenseTemplateFileOpt(
     "license-template-file",
     desc("Template of license that should be present at the beginning of project source files"),
-    value_desc("filename"), cat(g_colobotLintOptionCategory));
+    value_desc("filename"),
+    cat(g_colobotLintOptionCategory));
+
+static cl::opt<std::string> g_outputFormat(
+    "output-format",
+    desc("Format of output: plain text or XML"),
+    value_desc("plain|xml"),
+    init("plain"),
+    cat(g_colobotLintOptionCategory));
 
 static cl::opt<std::string> g_outputFileOpt(
     "output-file",
     desc("Where to save the XML output; if not given, write to stderr"),
-    value_desc("filename"), cat(g_colobotLintOptionCategory));
+    value_desc("filename"),
+    cat(g_colobotLintOptionCategory));
 
 static cl::opt<bool> g_verboseOpt(
     "verbose",
     desc("Whether to print verbose output"),
-    init(false), cat(g_colobotLintOptionCategory));
+    init(false),
+    cat(g_colobotLintOptionCategory));
 
 static cl::opt<bool> g_debugOpt(
     "debug",
     desc("Whether to print even more verbose output"),
-    init(false), cat(g_colobotLintOptionCategory));
+    init(false),
+    cat(g_colobotLintOptionCategory));
 
 static cl::list<std::string> g_ruleSelectionOpt(
     "only-rule",
     desc("Run only these rule(s)"),
-    value_desc("rule-class"), cat(g_colobotLintOptionCategory)
-);
+    value_desc("rule-class"),
+    cat(g_colobotLintOptionCategory));
 
 static cl::opt<std::string> g_generatorSelectionOpt(
     "generate-graph",
-    desc("If used, don't run rule checks, but instead generate given graph"),
-    value_desc("graph-type"), cat(g_colobotLintOptionCategory));
+    desc("If used, don't run rule checks, but instead generate given graph in dot format"),
+    value_desc("graph-type"),
+    cat(g_colobotLintOptionCategory));
 
 extrahelp g_moreHelp(
     "Colobot-lint runs just like any other tool based on Clang's libtooling.\n"
@@ -88,29 +103,18 @@ void PrintColobotLintVersion()
     std::cout << "http://colobot.info http://github.com/colobot/colobot" << std::endl;
 }
 
-} // anonymous namespace
-
-namespace boost
-{
-    void throw_exception(std::exception const& e)
-    {
-        std::cerr << "exception from boost: " << e.what() << std::endl;
-        std::terminate();
-    }
-} // namespace boost
-
-std::vector<std::string> ReadLicenseTemplateFile(const std::string& licenseTemplateFileName)
+boost::optional<std::vector<std::string>> ReadLicenseTemplateFile(const std::string& licenseTemplateFileName)
 {
     if (licenseTemplateFileName.empty())
-        return {};
+        return std::vector<std::string>({});
 
     std::vector<std::string> licenseFileLines;
     std::ifstream str;
     str.open(licenseTemplateFileName.c_str());
     if (!str.good())
     {
-        std::cerr << "Warning: could not load license template file" << std::endl;
-        return {};
+        std::cerr << "Could not load license template file!" << std::endl;
+        return boost::none;
     }
 
     while (!str.eof())
@@ -123,6 +127,78 @@ std::vector<std::string> ReadLicenseTemplateFile(const std::string& licenseTempl
     return licenseFileLines;
 }
 
+boost::optional<OutputFormat> ParseOutputFormat(const std::string& outputFormat,
+                                                const std::string& generatorSelection)
+{
+    if (!generatorSelection.empty())
+        return OutputFormat::DotGraph;
+
+
+    if (outputFormat == "xml")
+        return OutputFormat::XmlReport;
+    else if (outputFormat == "plain")
+        return OutputFormat::PlainTextReport;
+
+    std::cerr << "Invalid output format!" << std::endl;
+    return boost::none;
+}
+
+struct ParsedOptions
+{
+    bool debug = {};
+    bool verbose = {};
+    std::set<std::string> rulesSelection = {};
+    std::string generatorSelection = {};
+    std::set<std::string> projectLocalIncludePaths = {};
+    std::string outputFile = {};
+    OutputFormat outputFormat = {};
+    std::vector<std::string> licenseTemplateLines = {};
+};
+
+boost::optional<ParsedOptions> ParseOptions()
+{
+    ParsedOptions parsedOptions;
+
+    parsedOptions.debug = g_debugOpt;
+    parsedOptions.verbose = g_verboseOpt;
+
+    for (const auto& rule : g_ruleSelectionOpt)
+        parsedOptions.rulesSelection.insert(rule);
+
+    for (const auto& path : g_projectLocalIncludePathsOpt)
+        parsedOptions.projectLocalIncludePaths.insert(path);
+
+    parsedOptions.generatorSelection = g_generatorSelectionOpt;
+
+    parsedOptions.outputFile = g_outputFileOpt;
+
+    auto outputFormat = ParseOutputFormat(g_outputFormat, parsedOptions.generatorSelection);
+    if (outputFormat == boost::none)
+        return boost::none;
+
+    parsedOptions.outputFormat = *outputFormat;
+
+    auto licenseTemplateLines = ReadLicenseTemplateFile(g_licenseTemplateFileOpt);
+    if (licenseTemplateLines == boost::none)
+        return boost::none;
+
+    parsedOptions.licenseTemplateLines = std::move(*licenseTemplateLines);
+
+    return parsedOptions;
+}
+
+} // anonymous namespace
+
+namespace boost
+{
+    void throw_exception(std::exception const& e)
+    {
+        std::cerr << "exception from boost: " << e.what() << std::endl;
+        std::terminate();
+    }
+} // namespace boost
+
+
 int main(int argc, const char **argv)
 {
     SetVersionPrinter(PrintColobotLintVersion);
@@ -131,31 +207,21 @@ int main(int argc, const char **argv)
     ClangTool tool(optionsParser.getCompilations(),
                    optionsParser.getSourcePathList());
 
-    std::set<std::string> rulesSelection;
-    for (const auto& rule : g_ruleSelectionOpt)
-        rulesSelection.insert(rule);
-
-    std::string generatorSelection = g_generatorSelectionOpt;
-
-    std::set<std::string> projectLocalIncludePaths;
-    for (const auto& path : g_projectLocalIncludePathsOpt)
-        projectLocalIncludePaths.insert(path);
-
-    auto licenseTemplateLines = ReadLicenseTemplateFile(g_licenseTemplateFileOpt);
+    auto parsedOptions = ParseOptions();
+    if (parsedOptions == boost::none)
+        return 1;
 
     SourceLocationHelper sourceLocationHelper;
 
-    OutputPrinter outputPrinter(g_outputFileOpt,
-                                generatorSelection.empty() ? OutputType::CppcheckReport : OutputType::DotGraph);
-
     Context context(sourceLocationHelper,
-                    outputPrinter,
-                    std::move(projectLocalIncludePaths),
-                    std::move(licenseTemplateLines),
-                    std::move(rulesSelection),
-                    generatorSelection,
-                    g_verboseOpt,
-                    g_debugOpt);
+                    OutputPrinter::Create(parsedOptions->outputFormat,
+                                          parsedOptions->outputFile),
+                    std::move(parsedOptions->projectLocalIncludePaths),
+                    std::move(parsedOptions->licenseTemplateLines),
+                    std::move(parsedOptions->rulesSelection),
+                    parsedOptions->generatorSelection,
+                    parsedOptions->verbose,
+                    parsedOptions->debug);
     sourceLocationHelper.SetContext(&context);
 
     DiagnosticHandler diagnosticHandler(context);
@@ -164,7 +230,7 @@ int main(int argc, const char **argv)
     ColobotLintASTFrontendActionFactory factory(context);
     int retCode = tool.run(&factory);
 
-    outputPrinter.Save();
+    context.outputPrinter->Save();
 
     return retCode;
 }

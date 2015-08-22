@@ -44,7 +44,7 @@ void InconsistentDeclarationParameterNameRule::run(const MatchFinder::MatchResul
 
     if (HasInconsitentDeclarationParameters(functionDeclaration))
     {
-        m_context.printer.PrintRuleViolation(
+        m_context.outputPrinter->PrintRuleViolation(
                 "inconsistent declaration parameter name",
                 Severity::Style,
                 boost::str(boost::format("Function '%s' has other declaration(s) with inconsistently named parameter(s)")

@@ -37,7 +37,7 @@ void WhitespaceRule::HandleTranslationUnit(ASTContext& context)
 
         if (ch == '\r')
         {
-            m_context.printer.PrintRuleViolation(
+            m_context.outputPrinter->PrintRuleViolation(
                 "whitespace",
                 Severity::Style,
                 "File seems to have DOS style line endings",
@@ -51,7 +51,7 @@ void WhitespaceRule::HandleTranslationUnit(ASTContext& context)
         {
             if (haveWhitespace)
             {
-                m_context.printer.PrintRuleViolation(
+                m_context.outputPrinter->PrintRuleViolation(
                     "whitespace",
                     Severity::Style,
                     "Whitespace at end of line",
@@ -60,7 +60,7 @@ void WhitespaceRule::HandleTranslationUnit(ASTContext& context)
             }
             if (numberOfTabs > 0)
             {
-                m_context.printer.PrintRuleViolation(
+                m_context.outputPrinter->PrintRuleViolation(
                     "whitespace",
                     Severity::Style,
                     "Tab character is not allowed as whitespace",
@@ -92,7 +92,7 @@ void WhitespaceRule::HandleTranslationUnit(ASTContext& context)
 
     if (bufferChars[bufferSize - 1] != '\n')
     {
-        m_context.printer.PrintRuleViolation(
+        m_context.outputPrinter->PrintRuleViolation(
             "whitespace",
             Severity::Style,
             "File should end with newline",
