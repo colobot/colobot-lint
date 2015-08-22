@@ -2,12 +2,17 @@ import subprocess
 import tempfile
 import shutil
 import sys
-import argparse
+import os
 import unittest
 import xml.etree.ElementTree as ET
 
-colobot_lint_exectuable = './colobot-lint' # default
+colobot_lint_exectuable = 'colobot-lint' # default
+if 'COLOBOT_LINT' in os.environ:
+    colobot_lint_exectuable = os.environ['COLOBOT_LINT']
+
 debug_flag = False # default
+if 'DEBUG' in os.environ:
+    debug = os.environ['DEBUG'] == '1'
 
 class TempBuildDir:
     def __init__(self):
@@ -150,17 +155,3 @@ class TestBase(unittest.TestCase):
 
             location = error.find('location')
             self.assertEqual(location.get('line'), expected_error['line'])
-
-def main():
-    parser = argparse.ArgumentParser(add_help = False)
-    parser.add_argument('--colobot-lint-exec', dest='colobot_lint_executable', required=True)
-    parser.add_argument('--debug', dest='debug_flag', action='store_true')
-    options, args = parser.parse_known_args()
-
-    global colobot_lint_exectuable
-    colobot_lint_exectuable = options.colobot_lint_executable
-
-    global debug_flag
-    debug_flag = options.debug_flag
-
-    unittest.main(argv = sys.argv[:1] + args)

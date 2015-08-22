@@ -21,6 +21,7 @@ find_package(Boost COMPONENTS regex REQUIRED)
 
 option(TESTS "Enable tests" OFF)
 if(TESTS)
+    find_package(PythonInterp 3.0 REQUIRED)
     enable_testing()
 endif()
 
@@ -189,28 +190,18 @@ endif()
 
 
 # Test targets
+if(TESTS)
+    execute_process(COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/Tests/list_tests.py"
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Tests
+                    OUTPUT_VARIABLE STR_TEST_LIST
+                    OUTPUT_STRIP_TRAILING_WHITESPACE
+                    ERROR_STRIP_TRAILING_WHITESPACE)
 
-macro(add_colobot_lint_test test_name test_target)
-    add_test(${test_name} ${CMAKE_CURRENT_SOURCE_DIR}/${test_target} --colobot-lint-exec ${COLOBOT_LINT_OUTPUT_BINARY})
-endmacro()
+    separate_arguments(TEST_LIST UNIX_COMMAND ${STR_TEST_LIST})
 
-add_colobot_lint_test(BlockPlacementRuleTest                       Tests/block_placement_rule_test.py)
-add_colobot_lint_test(ClassNamingRuleTest                          Tests/class_naming_rule_test.py)
-add_colobot_lint_test(DiagnosticHandlerTest                        Tests/diagnostic_handler_test.py)
-add_colobot_lint_test(EnumNamingRuleTest                           Tests/enum_naming_rule_test.py)
-add_colobot_lint_test(FunctionNamingRuleTest                       Tests/function_naming_rule_test.py)
-add_colobot_lint_test(ImplicitBoolCastRuleTest                     Tests/implicit_bool_cast_rule_test.py)
-add_colobot_lint_test(InconsistentDeclarationParameterNameRuleTest Tests/inconsistent_declaration_parameter_name_rule_test.py)
-add_colobot_lint_test(IncludeStyleRuleTest                         Tests/include_style_rule_test.py)
-add_colobot_lint_test(LicenseInHeaderRuleTest                      Tests/license_in_header_rule_test.py)
-add_colobot_lint_test(NakedDeleteRuleTest                          Tests/naked_delete_rule_test.py)
-add_colobot_lint_test(NakedNewRuleTest                             Tests/naked_new_rule_test.py)
-add_colobot_lint_test(OldStyleFunctionRuleTest                     Tests/old_style_function_rule_test.py)
-add_colobot_lint_test(OldStyleNullPointerRuleTest                  Tests/old_style_null_pointer_rule_test.py)
-add_colobot_lint_test(OutputPrinterTest                            Tests/output_printer_test.py)
-add_colobot_lint_test(SourceLocationHelperTest                     Tests/source_location_helper_test.py)
-add_colobot_lint_test(TodoRuleTest                                 Tests/todo_rule_test.py)
-add_colobot_lint_test(UninitializedFieldRuleTest                   Tests/uninitialized_field_rule_test.py)
-add_colobot_lint_test(UninitializedLocalVariableRuleTest           Tests/uninitialized_local_variable_rule_test.py)
-add_colobot_lint_test(VariableNamingRuleTest                       Tests/variable_naming_rule_test.py)
-add_colobot_lint_test(WhitespaceRuleTest                           Tests/whitespace_rule_test.py)
+    foreach(TEST_ ${TEST_LIST})
+        add_test(NAME ${TEST_}
+                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Tests
+                 COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/Tests/run_tests.py" "-v" ${TEST} --colobot-lint-exec ${COLOBOT_LINT_OUTPUT_BINARY})
+    endforeach()
+endif()

@@ -44,6 +44,3 @@ class NakedNewRuleTest(test_support.TestBase):
                     'line': '1'
                 }
             ])
-
-if __name__ == '__main__':
-    test_support.main()

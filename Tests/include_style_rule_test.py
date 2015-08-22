@@ -544,6 +544,3 @@ class IncludeStyleRuleTest(test_support.TestBase):
                 },
             ],
             expected_errors = [])
-
-if __name__ == '__main__':
-    test_support.main()

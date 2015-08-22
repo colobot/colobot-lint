@@ -79,6 +79,3 @@ class DiagnosticHandlerTest(test_support.TestBase):
                     }
                 ]
             )
-
-if __name__ == '__main__':
-    test_support.main()

@@ -121,6 +121,3 @@ class EnumNamingRuleTest(test_support.TestBase):
                     'line': '3'
                 }
             ])
-
-if __name__ == '__main__':
-    test_support.main()

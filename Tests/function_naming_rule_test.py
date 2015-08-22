@@ -277,6 +277,3 @@ class FunctionNamingRuleTest(test_support.TestBase):
                 'void LaterRRepeatingUpperCaseLetterName();'
             ],
             expected_errors = [])
-
-if __name__ == '__main__':
-    test_support.main()

@@ -98,6 +98,3 @@ class UnintializedLocalVariableRuleTest(test_support.TestBase):
                 }
             ],
             rules_selection = ['OldStyleFunctionRule', 'UninitializedLocalVariableRule'])
-
-if __name__ == '__main__':
-    test_support.main()

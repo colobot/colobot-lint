@@ -131,7 +131,3 @@ class OldStyleFunctionRuleTest(test_support.TestBase):
                     'line': '4'
                 }
             ])
-
-
-if __name__ == '__main__':
-    test_support.main()
