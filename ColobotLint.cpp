@@ -17,6 +17,7 @@
 #include <exception>
 
 #include <boost/optional.hpp>
+#include <boost/algorithm/string.hpp>
 
 using namespace llvm;
 using namespace llvm::cl;
@@ -39,6 +40,12 @@ static cl::opt<std::string> g_licenseTemplateFileOpt(
     "license-template-file",
     desc("Template of license that should be present at the beginning of project source files"),
     value_desc("filename"),
+    cat(g_colobotLintOptionCategory));
+
+static cl::list<std::string> g_outputFilterOpt(
+    "output-filter",
+    desc("Filter output by the given files and line number range"),
+    value_desc("file1@start:end"),
     cat(g_colobotLintOptionCategory));
 
 static cl::opt<std::string> g_outputFormat(
@@ -143,6 +150,65 @@ boost::optional<OutputFormat> ParseOutputFormat(const std::string& outputFormat,
     return boost::none;
 }
 
+boost::optional<OutputFilter> ParseOutputFilter(const std::string& outputFilter)
+{
+    auto printError = [&outputFilter]() -> void
+    {
+        std::cerr << "Invalid output filter: \"" << outputFilter << "\"!" << std::endl;
+    };
+
+    std::vector<std::string> components;
+    boost::split(components, outputFilter, boost::is_any_of(":"));
+    if (components.size() != 3)
+    {
+        printError();
+        return boost::none;
+    }
+
+    OutputFilter filterRange;
+    filterRange.fileName = components[0];
+
+    {
+        std::stringstream str;
+        str.str(components[1]);
+        str >> filterRange.startLineNumber;
+        if (str.fail())
+        {
+            printError();
+            return boost::none;
+        }
+    }
+
+    {
+        std::stringstream str;
+        str.str(components[2]);
+        str >> filterRange.endLineNumber;
+        if (str.fail())
+        {
+            printError();
+            return boost::none;
+        }
+    }
+
+    return filterRange;
+}
+
+boost::optional<std::vector<OutputFilter>> ParseOutputFilters(cl::list<std::string>& outputFiltersOpt)
+{
+    std::vector<OutputFilter> outputFilters;
+
+    for (const auto& outputFilterOpt : outputFiltersOpt)
+    {
+        auto outputFilter = ParseOutputFilter(outputFilterOpt);
+        if (outputFilter == boost::none)
+            return boost::none;
+
+        outputFilters.push_back(std::move(*outputFilter));
+    }
+
+    return outputFilters;
+}
+
 struct ParsedOptions
 {
     bool debug = {};
@@ -153,6 +219,7 @@ struct ParsedOptions
     std::string outputFile = {};
     OutputFormat outputFormat = {};
     std::vector<std::string> licenseTemplateLines = {};
+    std::vector<OutputFilter> outputFilters = {};
 };
 
 boost::optional<ParsedOptions> ParseOptions()
@@ -174,15 +241,24 @@ boost::optional<ParsedOptions> ParseOptions()
 
     auto outputFormat = ParseOutputFormat(g_outputFormat, parsedOptions.generatorSelection);
     if (outputFormat == boost::none)
+    {
         return boost::none;
-
-    parsedOptions.outputFormat = *outputFormat;
+    }
+    parsedOptions.outputFormat = std::move(*outputFormat);
 
     auto licenseTemplateLines = ReadLicenseTemplateFile(g_licenseTemplateFileOpt);
     if (licenseTemplateLines == boost::none)
+    {
         return boost::none;
-
+    }
     parsedOptions.licenseTemplateLines = std::move(*licenseTemplateLines);
+
+    auto outputFilters = ParseOutputFilters(g_outputFilterOpt);
+    if (outputFilters == boost::none)
+    {
+        return boost::none;
+    }
+    parsedOptions.outputFilters = std::move(*outputFilters);
 
     return parsedOptions;
 }
@@ -215,7 +291,8 @@ int main(int argc, const char **argv)
 
     Context context(sourceLocationHelper,
                     OutputPrinter::Create(parsedOptions->outputFormat,
-                                          parsedOptions->outputFile),
+                                          parsedOptions->outputFile,
+                                          std::move(parsedOptions->outputFilters)),
                     std::move(parsedOptions->projectLocalIncludePaths),
                     std::move(parsedOptions->licenseTemplateLines),
                     std::move(parsedOptions->rulesSelection),

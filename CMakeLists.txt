@@ -207,6 +207,7 @@ add_colobot_lint_test(NakedDeleteRuleTest                          Tests/naked_d
 add_colobot_lint_test(NakedNewRuleTest                             Tests/naked_new_rule_test.py)
 add_colobot_lint_test(OldStyleFunctionRuleTest                     Tests/old_style_function_rule_test.py)
 add_colobot_lint_test(OldStyleNullPointerRuleTest                  Tests/old_style_null_pointer_rule_test.py)
+add_colobot_lint_test(OutputPrinterTest                            Tests/output_printer_test.py)
 add_colobot_lint_test(SourceLocationHelperTest                     Tests/source_location_helper_test.py)
 add_colobot_lint_test(TodoRuleTest                                 Tests/todo_rule_test.py)
 add_colobot_lint_test(UninitializedFieldRuleTest                   Tests/uninitialized_field_rule_test.py)

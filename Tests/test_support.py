@@ -58,6 +58,7 @@ def write_compilation_database(build_directory,
 
 def run_colobot_lint_with_single_file(source_file_lines,
                                       rules_selection,
+                                      additional_options = [],
                                       additional_compile_flags = ''):
     with TempBuildDir() as temp_dir:
         source_file_name = temp_dir + '/src.cpp'
@@ -66,7 +67,8 @@ def run_colobot_lint_with_single_file(source_file_lines,
         return run_colobot_lint(build_directory = temp_dir,
                                 source_dir = temp_dir,
                                 source_paths = [source_file_name],
-                                rules_selection = rules_selection)
+                                rules_selection = rules_selection,
+                                additional_options = additional_options)
 
 def run_colobot_lint(build_directory,
                      source_dir,
@@ -118,15 +120,18 @@ class TestBase(unittest.TestCase):
                                    source_file_lines,
                                    expected_errors,
                                    rules_selection = None,
+                                   additional_options = [],
                                    additional_compile_flags = ''):
         rules_sel = []
         if rules_selection is not None:
             rules_sel = rules_selection
         else:
             rules_sel = self.default_rules_selection
-        xml_output = run_colobot_lint_with_single_file(source_file_lines,
-                                                       rules_sel,
-                                                       additional_compile_flags)
+        xml_output = run_colobot_lint_with_single_file(
+            source_file_lines = source_file_lines,
+            rules_selection = rules_sel,
+            additional_options = additional_options,
+            additional_compile_flags = additional_compile_flags)
 
         self.assert_xml_output_match(xml_output, expected_errors)
 
