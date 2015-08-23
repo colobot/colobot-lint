@@ -12,7 +12,7 @@ if 'COLOBOT_LINT' in os.environ:
 
 debug_flag = False # default
 if 'DEBUG' in os.environ:
-    debug = os.environ['DEBUG'] == '1'
+    debug_flag = os.environ['DEBUG'] == '1'
 
 class TempBuildDir:
     def __init__(self):
