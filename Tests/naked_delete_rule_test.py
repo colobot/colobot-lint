@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import test_support
 
 class NakedDeleteRuleTest(test_support.TestBase):

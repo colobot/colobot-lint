@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import test_support
 
 class EnumNamingRuleTest(test_support.TestBase):

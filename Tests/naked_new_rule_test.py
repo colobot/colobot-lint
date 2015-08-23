@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import test_support
 
 class NakedNewRuleTest(test_support.TestBase):
