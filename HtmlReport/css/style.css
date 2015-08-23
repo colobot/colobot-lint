@@ -1,0 +1,189 @@
+/* Generated using CSS Table Generator */
+
+.styled-table
+{
+    margin:0px;
+    padding:0px;
+    width:100%;
+    box-shadow: 10px 10px 5px #888888;
+    border:1px solid #000000;
+
+    -moz-border-radius-bottomleft:0px;
+    -webkit-border-bottom-left-radius:0px;
+    border-bottom-left-radius:0px;
+
+    -moz-border-radius-bottomright:0px;
+    -webkit-border-bottom-right-radius:0px;
+    border-bottom-right-radius:0px;
+
+    -moz-border-radius-topright:0px;
+    -webkit-border-top-right-radius:0px;
+    border-top-right-radius:0px;
+
+    -moz-border-radius-topleft:0px;
+    -webkit-border-top-left-radius:0px;
+    border-top-left-radius:0px;
+}
+
+.styled-table table
+{
+    border-collapse: collapse;
+    border-spacing: 0;
+    width:100%;
+    height:100%;
+    margin:0px;
+    padding:0px;
+}
+
+.styled-table tbody tr:last-child td:last-child
+{
+    -moz-border-radius-bottomright:0px;
+    -webkit-border-bottom-right-radius:0px;
+    border-bottom-right-radius:0px;
+}
+
+.styled-table table tbody tr:first-child td:first-child
+{
+    -moz-border-radius-topleft:0px;
+    -webkit-border-top-left-radius:0px;
+    border-top-left-radius:0px;
+}
+
+.styled-table table tbody tr:first-child td:last-child
+{
+    -moz-border-radius-topright:0px;
+    -webkit-border-top-right-radius:0px;
+    border-top-right-radius:0px;
+}
+.styled-table tbody tr:last-child td:first-child
+{
+    -moz-border-radius-bottomleft:0px;
+    -webkit-border-bottom-left-radius:0px;
+    border-bottom-left-radius:0px;
+}
+.styled-table tbody tr:hover td
+{
+
+}
+.styled-table tbody tr:nth-child(even)
+{
+    background-color:#aad4ff;
+}
+.styled-table tbody tr:nth-child(odd)
+{
+    background-color:#ffffff;
+}
+
+.styled-table tbody td
+{
+    vertical-align:middle;
+
+    border:1px solid #000000;
+    border-width:0px 1px 1px 0px;
+    text-align:left;
+    padding:5px;
+    font-size:12px;
+    font-family:Arial;
+    font-weight:normal;
+    color:#000000;
+}
+
+.styled-table tbody tr:last-child td
+{
+    border-width:0px 1px 0px 0px;
+}
+
+.styled-table tbody tr td:last-child
+{
+    border-width:0px 0px 1px 0px;
+}
+
+.styled-table tbody tr:last-child td:last-child
+{
+    border-width:0px 0px 0px 0px;
+}
+
+.styled-table thead tr:nth-child(1) th
+{
+    padding:6px;
+    background:-o-linear-gradient(bottom, #005fbf 5%, #003f7f 100%);
+    background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #005fbf), color-stop(1, #003f7f));
+    background:-moz-linear-gradient( center top, #005fbf 5%, #003f7f 100% );
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr="#005fbf", endColorstr="#003f7f");
+    background: -o-linear-gradient(top,#005fbf,003f7f);
+
+    background-color:#005fbf;
+    border:0px solid #000000;
+    text-align:center;
+    border-width:0px 0px 1px 1px;
+    font-size:16px;
+    font-family:Arial;
+    font-weight:bold;
+    color:#ffffff;
+}
+
+.styled-table thead tr:nth-child(1) th .sort-indicator
+{
+    margin-left: 4px;
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+}
+
+.styled-table thead tr:nth-child(1) th .sort-indicator:hover
+{
+    background-color: #0076EE;
+}
+
+.styled-table thead tr:nth-child(1) th .sort-indicator.unsorted
+{
+    background-image: url('../img/sort.png');
+    background-size: 16px;
+}
+
+.styled-table thead tr:nth-child(1) th .sort-indicator.sorted-up
+{
+    background-image: url('../img/sorted-up.png');
+    background-size: 12px 16px;
+    width: 12px;
+}
+
+.styled-table thead tr:nth-child(1) th .sort-indicator.sorted-down
+{
+    background-image: url('../img/sorted-down.png');
+    background-size: 12px 16px;
+    width: 12px;
+}
+
+.styled-table thead tr:nth-child(2) th
+{
+    padding:7px;
+    background-color:#0056AE;
+    border:0px solid #000000;
+    text-align:left;
+    border-width:0px 0px 1px 1px;
+    font-size:13px;
+    font-family:Arial;
+    font-weight:bold;
+    color:#ffffff;
+}
+
+.styled-table thead tr:nth-child(2) th .filter
+{
+    color:#000000;
+}
+
+.styled-table thead tr:nth-child(2) th input.filter
+{
+    width: 250px;
+}
+
+.styled-table thead tr:first-child th:first-child
+{
+    border-width:0px 0px 1px 0px;
+}
+
+.styled-table thead tr:first-child th:last-child
+{
+    border-width:0px 0px 1px 1px;
+}
