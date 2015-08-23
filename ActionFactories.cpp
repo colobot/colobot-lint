@@ -34,8 +34,7 @@ ColobotLintASTFrontendAction::ColobotLintASTFrontendAction(Context& context)
 
 bool ColobotLintASTFrontendAction::BeginSourceFileAction(CompilerInstance& ci, StringRef filename)
 {
-    m_beginSourceFileHandler.BeginSourceFileAction(ci, filename);
-    return clang::FrontendAction::BeginSourceFileAction(ci, filename);
+    return m_beginSourceFileHandler.BeginSourceFileAction(ci, filename);
 }
 
 std::unique_ptr<ASTConsumer> ColobotLintASTFrontendAction::CreateASTConsumer(CompilerInstance& compiler,

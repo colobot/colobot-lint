@@ -39,6 +39,7 @@ struct Context
 
     bool areWeInFakeHeaderSourceFile;
     std::string actualHeaderFileSuffix;
+    std::unordered_set<std::string> processedFiles;
 
     std::unordered_set<ExclusionZone> exclusionZones;
 

@@ -13,11 +13,22 @@ BeginSourceFileHandler::BeginSourceFileHandler(Context& context)
     : m_context(context)
 {}
 
-void BeginSourceFileHandler::BeginSourceFileAction(clang::CompilerInstance&, llvm::StringRef filename)
+bool BeginSourceFileHandler::BeginSourceFileAction(clang::CompilerInstance&, llvm::StringRef filename)
 {
+    auto filenameStr = filename.str();
+
+    if (m_context.processedFiles.count(filenameStr) > 0)
+    {
+        if (m_context.verbose)
+        {
+            std::cerr << "Skipping " << filenameStr << " [already processed]" << std::endl;
+        }
+        return false;
+    }
+
     if (m_context.verbose)
     {
-        std::cerr << "Processing " << filename.str();
+        std::cerr << "Processing " << filenameStr;
     }
 
     if (IsFakeHeaderSource(filename))
@@ -45,6 +56,9 @@ void BeginSourceFileHandler::BeginSourceFileAction(clang::CompilerInstance&, llv
     {
         std::cerr << std::endl;
     }
+
+    m_context.processedFiles.insert(filenameStr);
+    return true;
 }
 
 namespace

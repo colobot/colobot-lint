@@ -19,11 +19,12 @@ class BeginSourceFileHandler
 public:
     BeginSourceFileHandler(Context& context);
 
-    void BeginSourceFileAction(clang::CompilerInstance& ci, llvm::StringRef filename);
+    bool BeginSourceFileAction(clang::CompilerInstance& ci, llvm::StringRef filename);
 
 private:
     bool IsFakeHeaderSource(llvm::StringRef filename);
     std::string GetActualHeaderFileSuffix(llvm::StringRef filename);
 
+private:
     Context& m_context;
 };
