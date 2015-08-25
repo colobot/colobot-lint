@@ -12,88 +12,102 @@
 using namespace clang;
 using namespace clang::ast_matchers;
 
+namespace clang
+{
+namespace ast_matchers
+{
+
+AST_MATCHER(FunctionDecl, isMethod)
+{
+    return CXXMethodDecl::classof(&Node);
+}
+
+AST_MATCHER(CXXMethodDecl, isConstructor)
+{
+    return CXXConstructorDecl::classof(&Node);
+}
+
+AST_MATCHER(FunctionDecl, isOverloadedOperator)
+{
+    return Node.isOverloadedOperator();
+}
+
+AST_MATCHER(CXXMethodDecl, hasNonSimpleIdentifierName)
+{
+    // functions with names that are not simple identifiers are for example
+    // destructors and conversion operators
+    // besides the fact that we should ignore such functions anyway
+    // we have to check against this to avoid hitting runtime assert inside getName()
+    return !Node.getDeclName().isIdentifier();
+}
+
+AST_MATCHER(CXXMethodDecl, isOverriddenVirtualMethod)
+{
+    // overridden virtual methods in derived classes are not interesting to us
+    // we should report violations only once in base class
+    return Node.isVirtual() && Node.size_overridden_methods() > 0;
+}
+
+AST_MATCHER(CXXMethodDecl, isIteratorAccessMethod)
+{
+    // iterator access functions for range-based for loop are allowed
+    auto name = Node.getName();
+    return name == "begin" || name == "end";
+}
+
+} // namespace ast_matchers
+} // namespace clang
+
 FunctionNamingRule::FunctionNamingRule(Context& context)
     : ASTCallbackRule(context),
-      m_matcher(functionDecl().bind("functionDecl")),
       m_functionOrMethodNamePattern(UPPER_CAMEL_CASE_PATTERN)
 {}
 
 void FunctionNamingRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
-    finder.addMatcher(m_matcher, this);
+    finder.addMatcher(methodDecl(unless(anyOf(isImplicit(),
+                                              isConstructor(),
+                                              isOverloadedOperator(),
+                                              hasNonSimpleIdentifierName(),
+                                              isOverriddenVirtualMethod(),
+                                              isIteratorAccessMethod())))
+                          .bind("methodDecl"),
+                      this);
+
+    finder.addMatcher(functionDecl(unless(anyOf(isImplicit(),
+                                                isOverloadedOperator(),
+                                                isMethod())))
+                          .bind("functionDecl"),
+                      this);
 }
 
 void FunctionNamingRule::run(const MatchFinder::MatchResult& result)
 {
-    const FunctionDecl* functionDeclaration = result.Nodes.getNodeAs<FunctionDecl>("functionDecl");
-    if (functionDeclaration == nullptr)
-        return;
-
     SourceManager& sourceManager = result.Context->getSourceManager();
 
-    SourceLocation location = functionDeclaration->getLocation();
+    const auto* methodDeclaration = result.Nodes.getNodeAs<CXXMethodDecl>("methodDecl");
+    if (methodDeclaration != nullptr)
+        return HandleDeclaration("Method", methodDeclaration, sourceManager);
+
+    const auto* functionDeclaration = result.Nodes.getNodeAs<FunctionDecl>("functionDecl");
+    if (functionDeclaration != nullptr)
+        return HandleDeclaration("Function", functionDeclaration, sourceManager);
+}
+
+void FunctionNamingRule::HandleDeclaration(const char* type,
+                                           const FunctionDecl* declaration,
+                                           SourceManager& sourceManager)
+{
+    SourceLocation location = declaration->getLocation();
     if (! m_context.sourceLocationHelper.IsLocationOfInterest(GetName(), location, sourceManager))
         return;
 
-    // skip operator overloads
-    if (functionDeclaration->isOverloadedOperator())
-        return;
-
-    const CXXMethodDecl* methodDeclaration = dyn_cast_or_null<const CXXMethodDecl>(functionDeclaration);
-    if (methodDeclaration != nullptr)
-        return HandleMethodDeclaration(methodDeclaration, location, sourceManager);
-
-    return HandleFunctionDeclaration(functionDeclaration, location, sourceManager);
-}
-
-void FunctionNamingRule::HandleFunctionDeclaration(const FunctionDecl* functionDeclaration,
-                                                   SourceLocation location,
-                                                   SourceManager& sourceManager)
-{
-    auto name = functionDeclaration->getName();
-    std::string fullyQualifiedName = functionDeclaration->getQualifiedNameAsString();
-    ValidateName("Function", name, fullyQualifiedName, location, sourceManager);
-}
-
-void FunctionNamingRule::HandleMethodDeclaration(const CXXMethodDecl* methodDeclaration,
-                                                 SourceLocation location,
-                                                 SourceManager& sourceManager)
-{
-    // skip constructors, destructors and conversion operators (operator Type() methods)
-    if (CXXDestructorDecl::classof(methodDeclaration) ||
-        CXXConstructorDecl::classof(methodDeclaration) ||
-        CXXConversionDecl::classof(methodDeclaration))
-    {
-        return;
-    }
-
-    // don't check overridden virtual methods
-    if (methodDeclaration->isVirtual() &&
-        methodDeclaration->size_overridden_methods() > 0)
-    {
-        return;
-    }
-
-    auto name = methodDeclaration->getName();
-
-    // iterator access functions are an exception
-    if (name == "begin" || name == "end")
-        return;
-
-    std::string fullyQualifiedName = methodDeclaration->getQualifiedNameAsString();
-    ValidateName("Method", name, fullyQualifiedName, location, sourceManager);
-}
-
-void FunctionNamingRule::ValidateName(const char* type,
-                                      StringRef name,
-                                      const std::string& fullyQualifiedName,
-                                      SourceLocation location,
-                                      SourceManager& sourceManager)
-{
+    std::string fullyQualifiedName = declaration->getQualifiedNameAsString();
     if (m_reportedFunctionNames.count(fullyQualifiedName) > 0)
         return; // already reported
 
 
+    auto name = declaration->getName();
     if (! boost::regex_match(name.begin(), name.end(), m_functionOrMethodNamePattern))
     {
         m_context.outputPrinter->PrintRuleViolation(

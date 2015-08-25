@@ -20,20 +20,11 @@ public:
     static const char* GetName() { return "FunctionNamingRule"; }
 
 private:
-    void HandleFunctionDeclaration(const clang::FunctionDecl* functionDeclaration,
-                                   clang::SourceLocation location,
-                                   clang::SourceManager& sourceManager);
-    void HandleMethodDeclaration(const clang::CXXMethodDecl* methodDeclaration,
-                                 clang::SourceLocation location,
-                                 clang::SourceManager& sourceManager);
-    void ValidateName(const char* type,
-                      llvm::StringRef name,
-                      const std::string& fullyQualifiedName,
-                      clang::SourceLocation location,
-                      clang::SourceManager& sourceManager);
+    void HandleDeclaration(const char* type,
+                           const clang::FunctionDecl* declaration,
+                           clang::SourceManager& sourceManager);
 
 private:
-    clang::ast_matchers::DeclarationMatcher m_matcher;
     boost::regex m_functionOrMethodNamePattern;
     std::unordered_set<std::string> m_reportedFunctionNames;
 };
