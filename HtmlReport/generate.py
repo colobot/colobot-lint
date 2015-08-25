@@ -2,6 +2,7 @@
 import argparse
 import os
 import shutil
+import cgi
 import xml.etree.ElementTree as ET
 
 def parse_args():
@@ -27,7 +28,7 @@ def write_html(errors, output_file_name):
         def out(text):
             output_file.write(text + '\n')
 
-        out('<!doctype html>')
+        out('<!DOCTYPE html>')
         out('<html>')
         write_head(out)
         out('<body>')
@@ -37,13 +38,13 @@ def write_html(errors, output_file_name):
 
 def write_head(out):
     out('<head>')
-    out('  <meta charset="utf-8">')
+    out('  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">')
     out('  <title>Colobot-lint HTML report</title>')
-    out('  <link href="css/normalize.css" rel="stylesheet">')
-    out('  <link href="css/style.css" rel="stylesheet">')
-    out('  <script src="js/jquery.min.js"></script>')
-    out('  <script src="js/jquery-sort-elements.js"></script>')
-    out('  <script src="js/interactions.js"></script>')
+    out('  <link rel="stylesheet" type="text/css" href="css/normalize.css">')
+    out('  <link rel="stylesheet" type="text/css" href="css/style.css">')
+    out('  <script type="text/javascript" src="js/jquery.min.js"></script>')
+    out('  <script type="text/javascript" src="js/jquery-sort-elements.js"></script>')
+    out('  <script type="text/javascript" src="js/interactions.js"></script>')
     out('</head>')
 
 def write_table(errors, out):
@@ -74,10 +75,10 @@ def write_colgroup(out):
 
 def write_thead_headings(out):
     out('<tr class="headings">')
-    out('  <th class="location">Location <span class="sort-indicator"></span></td>')
-    out('  <th class="category">Category <span class="sort-indicator"></span></td>')
-    out('  <th class="severity">Severity <span class="sort-indicator"></span></td>')
-    out('  <th class="message">Message <span class="sort-indicator"></span></td>')
+    out('  <th class="location">Location <span class="sort-indicator"></span></th>')
+    out('  <th class="category">Category <span class="sort-indicator"></span></th>')
+    out('  <th class="severity">Severity <span class="sort-indicator"></span></th>')
+    out('  <th class="message">Message <span class="sort-indicator"></span></th>')
     out('</tr>')
 
 def write_thead_filters(errors, out):
@@ -88,13 +89,13 @@ def write_thead_filters(errors, out):
         unique_severities.add(error.get('severity'))
 
     out('<tr class="filters">')
-    out('  <th class="location"><input class="filter" placeholder="Regex search..."></input></th>')
+    out('  <th class="location"><input class="filter" placeholder="Regex search..."></th>')
 
     out('  <th class="category">')
     out('    <select class="filter">')
     out('      <option>(all)</option>')
     for unique_category in unique_categories:
-        out('      <option>%s</option>' % unique_category)
+        out('      <option>%s</option>' % cgi.escape(unique_category))
     out('    </select>')
     out('  </th>')
 
@@ -102,11 +103,11 @@ def write_thead_filters(errors, out):
     out('    <select class="filter">')
     out('      <option>(all)</option>')
     for unique_severity in unique_severities:
-        out('    <option>%s</option>' % unique_severity)
+        out('    <option>%s</option>' % cgi.escape(unique_severity))
     out('    </select>')
     out('  </th>')
 
-    out('  <th class="message"><input class="filter" placeholder="Regex search..."></input></th>')
+    out('  <th class="message"><input class="filter" placeholder="Regex search..."></th>')
     out('</tr>')
 
 def get_project_prefix(errors):
@@ -129,10 +130,10 @@ def write_tbody_row(error, project_prefix, out):
     file_name = os.path.relpath(location.get('file'), start=project_prefix)
     location_str = file_name + ":" + location.get('line')
 
-    out('  <td class="location">%s</td>' % location_str)
-    out('  <td class="category">%s</td>' % error.get('id'))
-    out('  <td class="severity">%s</td>' % error.get('severity'))
-    out('  <td class="message">%s</td>' % error.get('msg'))
+    out('  <td class="location">%s</td>' % cgi.escape(location_str))
+    out('  <td class="category">%s</td>' % cgi.escape(error.get('id')))
+    out('  <td class="severity">%s</td>' % cgi.escape(error.get('severity')))
+    out('  <td class="message">%s</td>' % cgi.escape(error.get('msg')))
 
     out('</tr>')
 
