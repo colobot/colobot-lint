@@ -39,13 +39,12 @@ private:
 
 
 OldStyleFunctionRule::OldStyleFunctionRule(Context& context)
-    : ASTCallbackRule(context),
-      m_matcher(functionDecl().bind("functionDecl"))
+    : ASTCallbackRule(context)
 {}
 
 void OldStyleFunctionRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
-    finder.addMatcher(m_matcher, this);
+    finder.addMatcher(functionDecl().bind("functionDecl"), this);
 }
 
 void OldStyleFunctionRule::run(const MatchFinder::MatchResult& result)

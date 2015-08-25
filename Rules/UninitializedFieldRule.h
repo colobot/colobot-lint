@@ -44,7 +44,5 @@ private:
                                                StringRefSet& candidateFieldList);
 
 private:
-    clang::ast_matchers::DeclarationMatcher m_recordDeclarationMatcher;
-    clang::ast_matchers::DeclarationMatcher m_constructorDeclarationMatcher;
     std::unordered_set<const clang::CXXConstructorDecl*> m_alreadyHandledConstructorDeclarations;
 };

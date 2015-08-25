@@ -69,8 +69,7 @@ private:
 /////////////////////////
 
 IncludeStyleRule::IncludeStyleRule(Context& context)
-    : ASTCallbackRule(context),
-      m_matcher(recordDecl().bind("recordDecl"))
+    : ASTCallbackRule(context)
 {}
 
 void IncludeStyleRule::RegisterPreProcessorCallbacks(CompilerInstance& compiler)
@@ -82,7 +81,7 @@ void IncludeStyleRule::RegisterPreProcessorCallbacks(CompilerInstance& compiler)
 void IncludeStyleRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
     if (m_context.areWeInFakeHeaderSourceFile)
-        finder.addMatcher(m_matcher, this);
+        finder.addMatcher(recordDecl().bind("recordDecl"), this);
 }
 
 void IncludeStyleRule::run(const MatchFinder::MatchResult& result)

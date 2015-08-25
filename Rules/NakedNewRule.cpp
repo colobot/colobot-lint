@@ -14,13 +14,12 @@ using namespace clang;
 using namespace clang::ast_matchers;
 
 NakedNewRule::NakedNewRule(Context& context)
-    : ASTCallbackRule(context),
-      m_matcher(newExpr().bind("new"))
+    : ASTCallbackRule(context)
 {}
 
 void NakedNewRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
-    finder.addMatcher(m_matcher, this);
+    finder.addMatcher(newExpr().bind("new"), this);
 }
 
 void NakedNewRule::run(const MatchFinder::MatchResult& result)

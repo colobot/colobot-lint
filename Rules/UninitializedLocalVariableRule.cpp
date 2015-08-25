@@ -14,13 +14,12 @@ using namespace clang::ast_matchers;
 
 
 UninitializedLocalVariableRule::UninitializedLocalVariableRule(Context& context)
-    : ASTCallbackRule(context),
-      m_matcher(varDecl().bind("varDecl"))
+    : ASTCallbackRule(context)
 {}
 
 void UninitializedLocalVariableRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
-    finder.addMatcher(m_matcher, this);
+    finder.addMatcher(varDecl().bind("varDecl"), this);
 }
 
 void UninitializedLocalVariableRule::run(const MatchFinder::MatchResult& result)

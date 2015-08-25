@@ -14,13 +14,12 @@ using namespace clang;
 using namespace clang::ast_matchers;
 
 NakedDeleteRule::NakedDeleteRule(Context& context)
-    : ASTCallbackRule(context),
-      m_matcher(deleteExpr().bind("delete"))
+    : ASTCallbackRule(context)
 {}
 
 void NakedDeleteRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
-    finder.addMatcher(m_matcher, this);
+    finder.addMatcher(deleteExpr().bind("delete"), this);
 }
 
 void NakedDeleteRule::run(const MatchFinder::MatchResult& result)

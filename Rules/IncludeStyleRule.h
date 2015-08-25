@@ -49,6 +49,5 @@ private:
     std::string GetMatchingHeaderFileName(clang::SourceManager& sourceManager);
 
 private:
-    clang::ast_matchers::DeclarationMatcher m_matcher;
     std::unordered_set<std::string> m_possibleMainClassBaseIncludes;
 };

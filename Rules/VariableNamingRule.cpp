@@ -16,8 +16,6 @@ using namespace clang::ast_matchers;
 
 VariableNamingRule::VariableNamingRule(Context& context)
     : ASTCallbackRule(context),
-      m_variableDeclarationMatcher(varDecl().bind("varDecl")),
-      m_fieldDeclarationMatcher(fieldDecl().bind("fieldDecl")),
       m_localVariableNamePattern(LOWER_CAMEL_CASE_PATTERN),
       m_nonConstGlobalVariableNamePattern(std::string("g_") + LOWER_CAMEL_CASE_PATTERN),
       m_constGlobalVariableNamePattern(ALL_CAPS_UNDERSCORE_PATTERN),
@@ -29,8 +27,8 @@ VariableNamingRule::VariableNamingRule(Context& context)
 
 void VariableNamingRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
-    finder.addMatcher(m_variableDeclarationMatcher, this);
-    finder.addMatcher(m_fieldDeclarationMatcher, this);
+    finder.addMatcher(varDecl().bind("varDecl"), this);
+    finder.addMatcher(fieldDecl().bind("fieldDecl"), this);
 }
 
 void VariableNamingRule::run(const MatchFinder::MatchResult& result)

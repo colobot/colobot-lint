@@ -13,15 +13,13 @@ using namespace clang;
 using namespace clang::ast_matchers;
 
 UninitializedFieldRule::UninitializedFieldRule(Context& context)
-    : ASTCallbackRule(context),
-      m_recordDeclarationMatcher(recordDecl().bind("recordDecl")),
-      m_constructorDeclarationMatcher(constructorDecl().bind("constructorDecl"))
+    : ASTCallbackRule(context)
 {}
 
 void UninitializedFieldRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
-    finder.addMatcher(m_recordDeclarationMatcher, this);
-    finder.addMatcher(m_constructorDeclarationMatcher, this);
+    finder.addMatcher(recordDecl().bind("recordDecl"), this);
+    finder.addMatcher(constructorDecl().bind("constructorDecl"), this);
 }
 
 void UninitializedFieldRule::run(const MatchFinder::MatchResult& result)

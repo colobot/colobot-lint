@@ -23,8 +23,6 @@ private:
     void HandleEnumConstantDeclaration(const clang::EnumConstantDecl* enumConstantDeclaration, clang::ASTContext* context);
 
 private:
-    clang::ast_matchers::DeclarationMatcher m_enumDeclarationMatcher;
-    clang::ast_matchers::DeclarationMatcher m_enumConstantDeclarationMatcher;
     boost::regex m_enumNamePattern;
     boost::regex m_enumConstantPattern;
 };

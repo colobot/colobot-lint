@@ -20,7 +20,4 @@ public:
 
 private:
     std::string GetShortDeclarationsString(const std::vector<llvm::StringRef>& declarations, int totalCount);
-
-private:
-    clang::ast_matchers::DeclarationMatcher m_matcher;
 };

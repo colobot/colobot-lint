@@ -22,6 +22,5 @@ private:
     bool HasInconsitentDeclarationParameters(const clang::FunctionDecl* functionDeclaration);
 
 private:
-    clang::ast_matchers::DeclarationMatcher m_matcher;
     std::unordered_set<std::string> m_reportedFunctions;
 };

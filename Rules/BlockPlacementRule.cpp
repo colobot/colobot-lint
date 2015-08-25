@@ -13,8 +13,8 @@
 using namespace clang;
 
 BlockPlacementRule::BlockPlacementRule(Context& context)
-    : DirectASTConsumerRule(context)
-    , m_astContext(nullptr)
+    : DirectASTConsumerRule(context),
+      m_astContext(nullptr)
 {}
 
 void BlockPlacementRule::HandleTranslationUnit(ASTContext &context)

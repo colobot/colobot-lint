@@ -12,16 +12,14 @@ using namespace clang::ast_matchers;
 
 EnumNamingRule::EnumNamingRule(Context& context)
     : ASTCallbackRule(context),
-      m_enumDeclarationMatcher(enumDecl().bind("enumDecl")),
-      m_enumConstantDeclarationMatcher(enumConstantDecl().bind("enumConstantDecl")),
       m_enumNamePattern(UPPER_CAMEL_CASE_PATTERN),
       m_enumConstantPattern(UPPER_CAMEL_CASE_PATTERN)
 {}
 
 void EnumNamingRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
-    finder.addMatcher(m_enumDeclarationMatcher, this);
-    finder.addMatcher(m_enumConstantDeclarationMatcher, this);
+    finder.addMatcher(enumDecl().bind("enumDecl"), this);
+    finder.addMatcher(enumConstantDecl().bind("enumConstantDecl"), this);
 }
 
 void EnumNamingRule::run(const MatchFinder::MatchResult& result)

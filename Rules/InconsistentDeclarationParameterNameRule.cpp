@@ -14,13 +14,12 @@ using namespace clang::ast_matchers;
 
 
 InconsistentDeclarationParameterNameRule::InconsistentDeclarationParameterNameRule(Context& context)
-    : ASTCallbackRule(context),
-      m_matcher(functionDecl().bind("functionDecl"))
+    : ASTCallbackRule(context)
 {}
 
 void InconsistentDeclarationParameterNameRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
-    finder.addMatcher(m_matcher, this);
+    finder.addMatcher(functionDecl().bind("functionDecl"), this);
 }
 
 void InconsistentDeclarationParameterNameRule::run(const MatchFinder::MatchResult& result)

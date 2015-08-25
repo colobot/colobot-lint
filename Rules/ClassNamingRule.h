@@ -24,7 +24,6 @@ private:
     std::string GetLowercaseRecordTypeString(const clang::RecordDecl* recordDeclaration);
 
 private:
-    clang::ast_matchers::DeclarationMatcher m_matcher;
     boost::regex m_classNamePattern;
     boost::regex m_structOrUnionNamePattern;
     std::unordered_set<std::string> m_reportedNames;

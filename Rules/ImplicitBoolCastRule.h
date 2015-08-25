@@ -22,7 +22,4 @@ private:
                                 clang::ASTContext* astContext,
                                 bool checkBoolComparison = true);
     bool IsComparisonOfBools(const clang::ImplicitCastExpr* implicitCastExpr, clang::ASTContext* astContext);
-
-private:
-    clang::ast_matchers::StatementMatcher m_matcher;
 };

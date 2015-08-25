@@ -31,8 +31,6 @@ private:
                                   clang::SourceManager& sourceManager);
 
 private:
-    clang::ast_matchers::DeclarationMatcher m_variableDeclarationMatcher;
-    clang::ast_matchers::DeclarationMatcher m_fieldDeclarationMatcher;
     boost::regex m_localVariableNamePattern;
     boost::regex m_nonConstGlobalVariableNamePattern;
     boost::regex m_constGlobalVariableNamePattern;

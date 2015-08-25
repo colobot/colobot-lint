@@ -14,13 +14,12 @@ using namespace clang;
 using namespace clang::ast_matchers;
 
 OldStyleNullPointerRule::OldStyleNullPointerRule(Context& context)
-    : ASTCallbackRule(context),
-      m_matcher(implicitCastExpr().bind("implicitCastExpr"))
+    : ASTCallbackRule(context)
 {}
 
 void OldStyleNullPointerRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
-    finder.addMatcher(m_matcher, this);
+    finder.addMatcher(implicitCastExpr().bind("implicitCastExpr"), this);
 }
 
 void OldStyleNullPointerRule::run(const MatchFinder::MatchResult& result)

@@ -12,14 +12,13 @@ using namespace clang::ast_matchers;
 
 ClassNamingRule::ClassNamingRule(Context& context)
     : ASTCallbackRule(context),
-      m_matcher(recordDecl().bind("recordDecl")),
       m_classNamePattern(std::string("C") + UPPER_CAMEL_CASE_PATTERN),
       m_structOrUnionNamePattern(UPPER_CAMEL_CASE_PATTERN)
 {}
 
 void ClassNamingRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
-    finder.addMatcher(m_matcher, this);
+    finder.addMatcher(recordDecl().bind("recordDecl"), this);
 }
 
 void ClassNamingRule::run(const MatchFinder::MatchResult& result)
