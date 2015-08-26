@@ -2,18 +2,70 @@
 
 This is a complete list of rules that are checked by colobot-lint.
 
-Each rule is (usually) contained in its own class and can be enabled/disabled individually. To run only selected rules, use commandline argument(s) `-only-rule {rule class}`.
+Each rule is (usually) contained in its own class and can be enabled/disabled individually. To run only selected rules, use commandline argument(s) `-only-rule <rule class>`.
 
 Basic working mechanism of every rule is to match selected AST tree elements and perform some checks, and if any violations are found, report them with appropriate error messages.
 
+# Contents
+
+* [Note on header handling](#note-on-header-handling)
+* [General handlers](#general-handlers)
+  - [Compile error/warning](#compile-errorwarning)
+  - [Rule exclusion comments](#rule-exclusion-comments)
+* [Initialization rules](#initialization-rules)
+  - [Uninitialized local variable](#uninitialized-local-variable)
+  - [Uninitialized field](#uninitialized-field)
+* [Memory management rules](#memory-management-rules)
+  - [Naked new](#naked-new)
+  - [Naked delete](#naked-delete)
+* [Other warning rules](#other-warning-rules)
+  - [Implicit bool cast](#implicit-bool-cast)
+* [Information rules](#information-rules)
+  - [Old-style function](#old-style-function)
+  - [TODO](#todo)
+* [Style rules](#style-rules)
+  - [Block placement](#block-placement)
+  - [Class naming](#class-naming)
+  - [Enum naming](#enum-naming)
+  - [Function naming](#function-naming)
+  - [Variable naming](#variable-naming)
+  - [Inconsistent declaration parameter name](#inconsistent-declaration-parameter-name)
+  - [Old-style null pointer](#old-style-null-pointer)
+  - [Include style](#include-style)
+  - [Whitespace rule](#whitespace-rule)
+  - [License in header rule](#license-in-header-rule)
+
+## Note on header handling
+
+colobot-lint generally runs as all LibTooling-based tools, on files that are an input to the compiler. These in practically all cases are code module files (`*.cpp`). Header files (`*.h`) are only checked as a side effect of `#include` directives in given code module (or to be more specific, one translation unit). This creates a number of problems:
+ - header files included by multiple code modules will be checked multiple times,
+ - as a consequence, there will be many duplicated error messages for each header,
+ - it's difficult to tell if a header file should be checked, as it may be part of external library or a system header, in which case checking it makes no sense,
+ - also, let's not forget about header-only libraries, where we simply don't have any `*.cpp` modules to run through our tool.
+
+There is also the interesting case of header inter-dependency. Although it's not a written rule, practical common sense suggests that each header should be an independent unit. That is, if `#include <some_header.h>` appears in a given source module, it should never result in a compile error, because there are references to declarations from `some_other_header.h` and yet `#include <some_other_header.h>` is nowhere to be seen in `some_header.h`. Such subtle dependencies may hide very effectively in a large project, because the affected header is always included in a certain order. However, if ever that order changes, we suddenly start getting compile errors :-((.
+
+Because of all the above issues, colobot-lint simply ignores headers when it checks regular code modules. However, it can be given as input specially generated code modules which cause it to check single header files in isolation. Such source files are generated automatically by Colobot's CMake scripts (given option `-DCOLOBOT_LINT_BUILD=1`) and can then be passed to colobot-lint as additional list of files to check.
 
 
+## General handlers
 
-## General checks
+These are not really checks but rather handlers for special things that are encountered during processing. They are always active and cannot be disabled as they are part of processing code itself.
 
-This is a class of checks that are always turned on and they are handled in other ways than through regular rules.
+### Compile error/warning
 
-### Rule exclusions
+**Errors:**
+ - [error] *`compile error`*
+ - [warning] *`compile warning`*
+ - [error] *Including single header file should not result in compile error: `compile error`*
+
+When Clang API reports a compile diagnostic (error/warning), one of the above errors will be reported.
+
+In regular files, these are simply verbatim reports of compile error/warning.
+
+In case of single header files (checked through fake header source mechanism), any compile error due to (most likely) missing `#include` directives or forward declarations is also treated as an error.
+
+### Rule exclusion comments
 
 This checks for comments in code in form:
 ```cpp
@@ -26,21 +78,6 @@ Between pair of such comments, any violations of the given rule classes are igno
 You can also specify `*` to exclude all rules.
 
 The ending comment must always be present and if it is not encountered before end of file is reached, the exclude directive is ignored.
-
-### Compile error/warning
-
-**Errors:**
- - [error] *`compile error`*
- - [warning] *`compile warning`*
- - [error] *Including single header file should not result in compile error: `compile error`*
-
-On report of a compile diagnostic (error/warning), one of the above errors will be reported.
-
-In regular files, these are simply verbatim reports of compile error/warning.
-
-In case of single header files (checked through fake header source mechanism), any compile error due to (most likely) missing `#include` directives or forward declarations is also treated as an error.
-
-
 
 
 ## Initialization rules
@@ -367,7 +404,7 @@ Besides ordering, it is also checked that:
  - empty lines divide certain include blocks, as in the example
  - local include paths use full relative paths, for example `common/resources/resource_manager.h`, not `resource_manager.h`, even if the included file is in same directory
 
-Note: local vs global includes are distinguished based on compiler include paths given with commandline argument(s) `-project-local-include-path {include path}`. These paths are also used to generate expected local include relative paths.
+Note: local vs global includes are distinguished based on compiler include paths given with commandline argument(s) `-project-local-include-path /path/to/includes`. These paths are also used to generate expected local include relative paths.
 
 ### Whitespace rule
 
