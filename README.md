@@ -51,7 +51,7 @@ Now unpack them as follows:
 
 Clone this repository:
 ```
- $ git clone https://github.com/piotrdz/colobot-lint.git
+ $ git clone https://github.com/colobot/colobot-lint.git
 ```
 
 Create symlinks in clang sources and add it to appropriate CMakeLists.txt:
@@ -74,7 +74,7 @@ The binary should be created in `./bin/colobot-lint`. You can install it whereve
 
 Try this and keep your fingers crossed:
 ```
- $ git clone https://github.com/piotrdz/colobot-lint.git
+ $ git clone https://github.com/colobot/colobot-lint.git
  $ mkdir colobot-lint-build
  $ cd colobot-lint-build
  $ cmake -DCMAKE_BUILD_TYPE=Release ../colobot-lint
