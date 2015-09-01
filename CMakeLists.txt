@@ -207,5 +207,5 @@ if(TESTS)
 
     add_custom_target(check-colobot-lint
                       WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Tests"
-                      COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/Tests/run_tests.py" --colobot-lint-exec ${COLOBOT_LINT_OUTPUT_BINARY} --filter=\"\$\${FILTER-*}\")
+                      COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/Tests/run_tests.py" --colobot-lint-exec ${COLOBOT_LINT_OUTPUT_BINARY} --filter=\"\$\${FILTER-*}\" \$\${DEBUG+--debug})
 endif()

@@ -151,5 +151,10 @@ To run only selected testcases, you can pass additional FILTER option:
  $ make check-colobot-lint FILTER="*.testcase_name"
 ```
 
+There is also a debug flag which allows to see more information about what happens in given testcase:
+```
+ $ make check-colobot-lint FILTER="*.testcase_name" DEBUG=1
+```
+
 ## License
 colobot-lint is licensed under BSD license (see [LICENSE.txt file](LICENSE.txt)).
