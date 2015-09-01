@@ -192,7 +192,7 @@ endif()
 # Test targets
 if(TESTS)
     execute_process(COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/Tests/list_tests.py"
-                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Tests
+                    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Tests"
                     OUTPUT_VARIABLE STR_TEST_LIST
                     OUTPUT_STRIP_TRAILING_WHITESPACE
                     ERROR_STRIP_TRAILING_WHITESPACE)
@@ -201,7 +201,11 @@ if(TESTS)
 
     foreach(TEST_ ${TEST_LIST})
         add_test(NAME ${TEST_}
-                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Tests
-                 COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/Tests/run_tests.py" "-v" ${TEST} --colobot-lint-exec ${COLOBOT_LINT_OUTPUT_BINARY})
+                 WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Tests"
+                 COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/Tests/run_tests.py" -v ${TEST_} --colobot-lint-exec ${COLOBOT_LINT_OUTPUT_BINARY})
     endforeach()
+
+    add_custom_target(check-colobot-lint
+                      WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Tests"
+                      COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/Tests/run_tests.py" --colobot-lint-exec ${COLOBOT_LINT_OUTPUT_BINARY} --filter=\"\$\${FILTER-*}\")
 endif()

@@ -136,19 +136,19 @@ Example:
 
 ## Running unit tests
 
-To run unit tests for colobot-lint, you need to (re-)run CMake with option `-DTESTS=1` in build directory:
+To be able to run unit tests for colobot-lint, you need to (re-)run CMake with option `-DTESTS=1` in build directory like so:
 ```
  $ cmake -DTESTS=1 ../colobot-lint
 ```
 
-Now you can run also in build directory:
+Now to execute all testcases, you can run special make target:
 ```
- $ ctest .
+ $ make check-colobot-lint
 ```
 
-To run only selected testcases, you can directly invoke the script that runs the tests, giving it a testcase filter. Here it is invoked from build directory, but it's not really necessary.
+To run only selected testcases, you can pass additional FILTER option:
 ```
- $ ../tests/run_tests.py --colobot-lint-exec=./colobot-lint --filter="*.testcase_name"
+ $ make check-colobot-lint FILTER="*.testcase_name"
 ```
 
 ## License
