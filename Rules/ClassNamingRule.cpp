@@ -4,6 +4,7 @@
 #include "Common/OutputPrinter.h"
 #include "Common/RegexHelper.h"
 #include "Common/SourceLocationHelper.h"
+#include "Common/TagTypeNameHelper.h"
 
 #include <boost/format.hpp>
 
@@ -45,7 +46,7 @@ void ClassNamingRule::run(const MatchFinder::MatchResult& result)
         m_context.outputPrinter->PrintRuleViolation(
                 "class naming",
                 Severity::Information,
-                boost::str(boost::format("Anonymous %s") % GetLowercaseRecordTypeString(recordDeclaration)),
+                boost::str(boost::format("Anonymous %s") % GetLowercaseTagTypeString(recordDeclaration)),
                 location,
                 sourceManager);
         return;
@@ -63,7 +64,7 @@ void ClassNamingRule::run(const MatchFinder::MatchResult& result)
                 "class naming",
                 Severity::Style,
                 boost::str(boost::format("%s '%s' should be named in a style like CUpperCamelCase")
-                    % GetRecordTypeString(recordDeclaration)
+                    % GetTagTypeString(recordDeclaration)
                     % name.str()),
                 location,
                 sourceManager);
@@ -79,7 +80,7 @@ void ClassNamingRule::run(const MatchFinder::MatchResult& result)
                 "class naming",
                 Severity::Style,
                 boost::str(boost::format("%s '%s' should be named in a style like UpperCamelCase")
-                    % GetRecordTypeString(recordDeclaration)
+                    % GetTagTypeString(recordDeclaration)
                     % name.str()),
                 location,
                 sourceManager);
@@ -91,7 +92,7 @@ void ClassNamingRule::run(const MatchFinder::MatchResult& result)
                 "class naming",
                 Severity::Style,
                 boost::str(boost::format("%s '%s' follows class naming style CUpperCamelCase but is not a class")
-                    % GetRecordTypeString(recordDeclaration)
+                    % GetTagTypeString(recordDeclaration)
                     % name.str()),
                 location,
                 sourceManager);
@@ -99,26 +100,3 @@ void ClassNamingRule::run(const MatchFinder::MatchResult& result)
         }
     }
 }
-
-std::string ClassNamingRule::GetRecordTypeString(const clang::RecordDecl* recordDeclaration)
-{
-    if (recordDeclaration->isClass())
-        return "Class";
-    else if (recordDeclaration->isUnion())
-        return "Union";
-    else if (recordDeclaration->isStruct())
-        return "Struct";
-    return "";
-}
-
-std::string ClassNamingRule::GetLowercaseRecordTypeString(const clang::RecordDecl* recordDeclaration)
-{
-    if (recordDeclaration->isClass())
-        return "class";
-    else if (recordDeclaration->isUnion())
-        return "union";
-    else if (recordDeclaration->isStruct())
-        return "struct";
-    return "";
-}
-

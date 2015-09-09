@@ -76,6 +76,7 @@ set(COLOBOT_LINT_SRCS
     Rules/TodoRule.cpp
     Rules/UninitializedFieldRule.cpp
     Rules/UninitializedLocalVariableRule.cpp
+    Rules/UnusedForwardDeclarationRule.cpp
     Rules/VariableNamingRule.cpp
     Rules/WhitespaceRule.cpp
 )

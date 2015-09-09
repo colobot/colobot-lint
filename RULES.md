@@ -22,6 +22,7 @@ Basic working mechanism of every rule is to match selected AST tree elements and
   - [Implicit bool cast](#implicit-bool-cast)
 * [Information rules](#information-rules)
   - [Old-style function](#old-style-function)
+  - [Unused forward declaration](#unused-forward-declaration)
   - [TODO](#todo)
 * [Style rules](#style-rules)
   - [Block placement](#block-placement)
@@ -228,6 +229,33 @@ void Foo()
     localVar1 = IsUsedManyManyLinesAfterItsDeclaration();
 }
 ```
+
+# Unused forward declaration
+
+**Class:** `UnusedForwardDeclarationRule`
+
+**Errors:**
+ - [information] *Unused forward declaration of class/struct/union/enum class '`name`'*
+ - [information] *Repeated forward declaration of class/struct/union/enum class '`name`'*
+ - [information] *Redundant forward declaration after definition of class/struct/union/enum class '`name`'*
+
+**Description:**
+
+This rule matches unused or redundant forward declarations of classes/structs/unions/enum classes:
+```cpp
+class Foo;
+void FooFunc(Foo&); // ok, used
+
+class Bar; // never used
+
+class Baz;
+class Baz; // needlessly repeated
+
+class Bat {};
+class Bat; // redundant
+```
+
+NOTE: this rule intentionally ignores anything that involves templates.
 
 ### TODO
 

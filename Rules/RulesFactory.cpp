@@ -17,6 +17,7 @@
 #include "Rules/TodoRule.h"
 #include "Rules/UninitializedFieldRule.h"
 #include "Rules/UninitializedLocalVariableRule.h"
+#include "Rules/UnusedForwardDeclarationRule.h"
 #include "Rules/VariableNamingRule.h"
 #include "Rules/WhitespaceRule.h"
 
@@ -66,6 +67,7 @@ std::vector<std::unique_ptr<ASTCallbackRule>> CreateASTRules(Context& context)
     AddRule<IncludeStyleRule>(rules, context);
     AddRule<ImplicitBoolCastRule>(rules, context);
     AddRule<OldStyleNullPointerRule>(rules, context);
+    AddRule<UnusedForwardDeclarationRule>(rules, context);
     return rules;
 }
 
