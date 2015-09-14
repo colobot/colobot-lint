@@ -23,6 +23,7 @@ Basic working mechanism of every rule is to match selected AST tree elements and
 * [Information rules](#information-rules)
   - [Old-style function](#old-style-function)
   - [Unused forward declaration](#unused-forward-declaration)
+  - [Possible forward declaration](#possible-forward-declaration)
   - [TODO](#todo)
 * [Style rules](#style-rules)
   - [Block placement](#block-placement)
@@ -253,6 +254,30 @@ class Baz; // needlessly repeated
 
 class Bat {};
 class Bat; // redundant
+```
+
+NOTE: this rule intentionally ignores anything that involves templates.
+
+# Possible forward declaration
+
+**Class:** `PossibleForwardDeclarationRule`
+
+**Errors:**
+ - [information] *Class/struct/union/enum class '`name`' can be forward declared instead of #included*
+
+**Description:**
+
+This rule matches a certain subset of cases, where we can forward-declare a class/struct/union/enum class:
+```cpp
+// foo.h
+class Foo {};
+
+// foo.cpp
+#include "foo.h"
+
+void FooFunc(Foo&); // possible forward declaration
+void FooFunc(Foo*); // possible forward declaration
+void FooFunc(Foo); // forward declaration not possbile
 ```
 
 NOTE: this rule intentionally ignores anything that involves templates.

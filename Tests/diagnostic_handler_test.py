@@ -53,6 +53,7 @@ class DiagnosticHandlerTest(test_support.TestBase):
                 }
             ])
 
+
     def test_compile_error_in_fake_header_source(self):
         self.assert_colobot_lint_result_with_custom_files(
             source_files_data = {

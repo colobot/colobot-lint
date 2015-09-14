@@ -14,6 +14,7 @@
 #include "Rules/NakedNewRule.h"
 #include "Rules/OldStyleFunctionRule.h"
 #include "Rules/OldStyleNullPointerRule.h"
+#include "Rules/PossibleForwardDeclarationRule.h"
 #include "Rules/TodoRule.h"
 #include "Rules/UninitializedFieldRule.h"
 #include "Rules/UninitializedLocalVariableRule.h"
@@ -68,6 +69,7 @@ std::vector<std::unique_ptr<ASTCallbackRule>> CreateASTRules(Context& context)
     AddRule<ImplicitBoolCastRule>(rules, context);
     AddRule<OldStyleNullPointerRule>(rules, context);
     AddRule<UnusedForwardDeclarationRule>(rules, context);
+    AddRule<PossibleForwardDeclarationRule>(rules, context);
     return rules;
 }
 

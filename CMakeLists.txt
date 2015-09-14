@@ -72,6 +72,7 @@ set(COLOBOT_LINT_SRCS
     Rules/NakedNewRule.cpp
     Rules/OldStyleFunctionRule.cpp
     Rules/OldStyleNullPointerRule.cpp
+    Rules/PossibleForwardDeclarationRule.cpp
     Rules/RulesFactory.cpp
     Rules/TodoRule.cpp
     Rules/UninitializedFieldRule.cpp
