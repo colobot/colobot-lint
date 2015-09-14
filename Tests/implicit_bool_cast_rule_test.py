@@ -1,5 +1,4 @@
 import test_support
-import os
 
 class ImplicitBoolCastRuleTest(test_support.TestBase):
     def setUp(self):

@@ -34,7 +34,7 @@ def write_file_lines(file_name, lines):
 
 def write_compilation_database(build_directory,
                                source_file_names,
-                               additional_compile_flags = ''):
+                               additional_compile_flags = []):
     compilation_database_file_name = build_directory + '/compile_commands.json'
     with open(compilation_database_file_name, 'w') as f:
         f.write("[\n")
@@ -53,31 +53,52 @@ def write_compilation_database(build_directory,
                 }}
                 """.format(
                     build_directory = build_directory,
-                    additional_compile_flags = additional_compile_flags,
-                    source_file_name = source_file_name)
-            )
+                    additional_compile_flags = ' '.join(additional_compile_flags),
+                    source_file_name = source_file_name))
 
             comma = True
 
         f.write("]\n")
 
-def run_colobot_lint_with_single_file(source_file_lines,
-                                      rules_selection,
-                                      additional_options = [],
-                                      additional_compile_flags = ''):
+def run_colobot_lint_with_prepared_files(source_files_data,
+                                         rules_selection = [],
+                                         target_files = [],
+                                         compilation_database_files = [],
+                                         additional_options = [],
+                                         additional_compile_flags = []):
     with TempBuildDir() as temp_dir:
-        source_file_name = temp_dir + '/src.cpp'
-        write_file_lines(source_file_name, source_file_lines)
-        write_compilation_database(temp_dir, [source_file_name], additional_compile_flags)
+        for file_subpath in source_files_data.keys():
+            os.makedirs(os.path.join(temp_dir, os.path.dirname(file_subpath)), exist_ok = True)
+            write_file_lines(os.path.join(temp_dir, file_subpath), source_files_data[file_subpath])
+
+        processed_target_files = []
+        for target_file in target_files:
+            processed_target_files.append(os.path.join(temp_dir, target_file))
+
+        processed_compilation_database_files = []
+        for compilation_database_file in compilation_database_files:
+            processed_compilation_database_files.append(os.path.join(temp_dir, compilation_database_file))
+
+        processed_additional_compile_flags = []
+        for compile_flag in additional_compile_flags:
+            processed_additional_compile_flags.append(compile_flag.replace('$TEMP_DIR', temp_dir))
+
+        processed_additional_options = []
+        for option in additional_options:
+            processed_additional_options.append(option.replace('$TEMP_DIR', temp_dir))
+
+        write_compilation_database(
+            build_directory = temp_dir,
+            source_file_names = processed_compilation_database_files,
+            additional_compile_flags = processed_additional_compile_flags)
+
         return run_colobot_lint(build_directory = temp_dir,
-                                source_dir = temp_dir,
-                                source_paths = [source_file_name],
+                                target_files = processed_target_files,
                                 rules_selection = rules_selection,
-                                additional_options = additional_options)
+                                additional_options = processed_additional_options)
 
 def run_colobot_lint(build_directory,
-                     source_dir,
-                     source_paths,
+                     target_files,
                      rules_selection = [],
                      additional_options = []):
     rules_selection_options = []
@@ -85,16 +106,17 @@ def run_colobot_lint(build_directory,
         rules_selection_options += ['-only-rule', rule]
 
     whole_command = ([colobot_lint_exectuable] +
+                     ['-p', build_directory] +
                      ['-output-format', 'xml'] +
                      rules_selection_options +
                      additional_options +
-                     ['-p', build_directory] +
-                     ['-project-local-include-path', source_dir] +
-                     source_paths)
+                     target_files)
 
     if debug_flag:
         print("Running colobot-lint command:")
         print(whole_command)
+        print('Shell command:')
+        print(' '.join(whole_command))
 
     command_output = subprocess.check_output(whole_command)
 
@@ -126,15 +148,36 @@ class TestBase(unittest.TestCase):
                                    expected_errors,
                                    rules_selection = None,
                                    additional_options = [],
-                                   additional_compile_flags = ''):
-        rules_sel = []
-        if rules_selection is not None:
-            rules_sel = rules_selection
-        else:
-            rules_sel = self.default_rules_selection
-        xml_output = run_colobot_lint_with_single_file(
-            source_file_lines = source_file_lines,
-            rules_selection = rules_sel,
+                                   additional_compile_flags = []):
+        if rules_selection is None:
+            rules_selection = self.default_rules_selection
+
+        xml_output = run_colobot_lint_with_prepared_files(
+            source_files_data = { 'src.cpp': source_file_lines },
+            compilation_database_files = ['src.cpp'],
+            target_files = ['src.cpp'],
+            rules_selection = rules_selection,
+            additional_options = additional_options,
+            additional_compile_flags = additional_compile_flags)
+
+        self.assert_xml_output_match(xml_output, expected_errors)
+
+    def assert_colobot_lint_result_with_custom_files(self,
+                                                     source_files_data,
+                                                     expected_errors,
+                                                     rules_selection = None,
+                                                     target_files = [],
+                                                     compilation_database_files = [],
+                                                     additional_options = [],
+                                                     additional_compile_flags = []):
+        if rules_selection is None:
+            rules_selection = self.default_rules_selection
+
+        xml_output = run_colobot_lint_with_prepared_files(
+            source_files_data = source_files_data,
+            compilation_database_files = compilation_database_files,
+            target_files = target_files,
+            rules_selection = rules_selection,
             additional_options = additional_options,
             additional_compile_flags = additional_compile_flags)
 

@@ -1,35 +1,24 @@
 import test_support
-import os
 
 class BeginSourceFileHandlerTest(test_support.TestBase):
-    def test_skip_multiple_files_in_compilation_database(self):
-        with test_support.TempBuildDir() as temp_dir:
-            cpp_file_name = temp_dir + '/src.cpp'
-            test_support.write_file_lines(cpp_file_name, [
+    def test_process_only_unique_files_from_compilation_database(self):
+        self.assert_colobot_lint_result_with_custom_files(
+            source_files_data = {
+                'src.cpp' : [
                     'void deleteMe(int* x)',
                     '{',
                     '   delete x;',
                     '}'
                 ]
-            )
-
-            test_support.write_compilation_database(
-                build_directory = temp_dir,
-                source_file_names = [cpp_file_name, cpp_file_name],
-                additional_compile_flags = '-I' + temp_dir)
-
-            xml_output = test_support.run_colobot_lint(build_directory = temp_dir,
-                                                       source_dir = temp_dir,
-                                                       source_paths = [cpp_file_name],
-                                                       rules_selection = ['NakedDeleteRule'])
-            self.assert_xml_output_match(
-                xml_output = xml_output,
-                expected_errors = [
-                    {
-                        'id': 'naked delete',
-                        'severity': 'warning',
-                        'msg': "Naked delete called on type 'int'",
-                        'line': '3'
-                    }
-                ]
-            )
+            },
+            compilation_database_files = ['src.cpp', 'src.cpp'],
+            target_files = ['src.cpp'],
+            rules_selection = ['NakedDeleteRule'],
+            expected_errors = [
+                {
+                    'id': 'naked delete',
+                    'severity': 'warning',
+                    'msg': "Naked delete called on type 'int'",
+                    'line': '3'
+                }
+            ])

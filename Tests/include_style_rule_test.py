@@ -8,90 +8,57 @@ class IncludeStyleRuleTest(test_support.TestBase):
         self.set_default_error_severity('style')
 
     def assert_colobot_lint_result_with_project_headers(self,
-                                                        source_file_lines,
-                                                        cpp_file_path,
-                                                        project_header_paths,
-                                                        system_header_paths,
+                                                        main_file_lines,
+                                                        main_file,
+                                                        project_header_files,
+                                                        system_header_files,
                                                         expected_errors):
-        with test_support.TempBuildDir() as temp_dir:
-            project_dir = temp_dir + '/project'
-            os.mkdir(project_dir)
+        main_file = os.path.join('project', main_file)
+        source_files_data = { main_file: main_file_lines }
 
-            system_headers_dir = temp_dir + '/system'
-            os.mkdir(system_headers_dir)
+        for project_header_file in project_header_files:
+            source_files_data[os.path.join('project', project_header_file)] = []
 
-            cpp_file_name = project_dir + '/' + cpp_file_path
-            os.makedirs(os.path.dirname(cpp_file_name), exist_ok = True)
-            test_support.write_file_lines(cpp_file_name, source_file_lines)
+        for system_header_file in system_header_files:
+            source_files_data[os.path.join('system', system_header_file)] = []
 
-            for project_header_path in project_header_paths:
-                project_header_file_name = project_dir + '/' + project_header_path
-                os.makedirs(os.path.dirname(project_header_file_name), exist_ok = True)
-                test_support.write_file_lines(project_header_file_name, [''])
-
-            for system_header_path in system_header_paths:
-                system_header_file_name = system_headers_dir + '/' + system_header_path
-                os.makedirs(os.path.dirname(system_header_file_name), exist_ok = True)
-                test_support.write_file_lines(system_header_file_name, [''])
-
-            test_support.write_compilation_database(
-                build_directory = temp_dir,
-                source_file_names = [cpp_file_name],
-                additional_compile_flags = '-I{0} -I{1}'.format(project_dir, system_headers_dir))
-
-            xml_output = test_support.run_colobot_lint(build_directory = temp_dir,
-                                                       source_dir = project_dir,
-                                                       source_paths = [cpp_file_name],
-                                                       rules_selection = self.default_rules_selection)
-            self.assert_xml_output_match(xml_output, expected_errors)
+        self.assert_colobot_lint_result_with_custom_files(
+            source_files_data = source_files_data,
+            compilation_database_files = [main_file],
+            target_files = [main_file],
+            additional_compile_flags = ['-I$TEMP_DIR/project', '-I$TEMP_DIR/system'],
+            additional_options = ['-project-local-include-path', '$TEMP_DIR/project'],
+            expected_errors = expected_errors)
 
     def assert_colobot_lint_result_with_project_headers_and_fake_header_source(self,
-                                                                               source_file_lines,
-                                                                               header_file_path,
-                                                                               fake_header_source_path,
+                                                                               main_file_lines,
+                                                                               main_file,
                                                                                project_headers,
-                                                                               system_header_paths,
+                                                                               system_header_files,
                                                                                expected_errors):
-        with test_support.TempBuildDir() as temp_dir:
-            project_dir = temp_dir + '/project'
-            os.mkdir(project_dir)
+        fake_header_sources_dir = os.path.join('project', 'fake_header_sources')
 
-            system_headers_dir = temp_dir + '/system'
-            os.mkdir(system_headers_dir)
+        source_files_data = dict()
+        main_file_without_ext, _ = os.path.splitext(main_file)
+        fake_header_source_file = os.path.join(fake_header_sources_dir, main_file_without_ext + '.cpp')
+        source_files_data[fake_header_source_file] = ['#include "{0}"'.format(main_file)]
 
-            src_dir = project_dir + '/src'
-            os.mkdir(src_dir)
+        main_file = os.path.join('project', main_file)
+        source_files_data[main_file] = main_file_lines
 
-            fake_header_source_file_name = project_dir + '/' + fake_header_source_path
-            os.makedirs(os.path.dirname(fake_header_source_file_name), exist_ok = True)
-            test_support.write_file_lines(fake_header_source_file_name, [
-                '#include "{0}"'.format(header_file_path)
-            ])
+        for project_header_file in project_headers.keys():
+            source_files_data[os.path.join('project', project_header_file)] = project_headers[project_header_file]
 
-            header_file_name = src_dir + '/' + header_file_path
-            os.makedirs(os.path.dirname(header_file_name), exist_ok = True)
-            test_support.write_file_lines(header_file_name, source_file_lines)
+        for system_header_file in system_header_files:
+            source_files_data[os.path.join('system', system_header_file)] = []
 
-            for header in project_headers:
-                header_file_name = src_dir + '/' + header['path']
-                os.makedirs(os.path.dirname(header_file_name), exist_ok = True)
-                test_support.write_file_lines(header_file_name, header.get('source_lines', []))
-
-            for system_header_path in system_header_paths:
-                system_header_file_name = system_headers_dir + '/' + system_header_path
-                os.makedirs(os.path.dirname(system_header_file_name), exist_ok = True)
-                test_support.write_file_lines(system_header_file_name, [''])
-
-            test_support.write_compilation_database(
-                build_directory = temp_dir,
-                source_file_names = [fake_header_source_file_name],
-                additional_compile_flags = '-I{0} -I{1}'.format(src_dir, system_headers_dir))
-
-            xml_output = test_support.run_colobot_lint(build_directory = temp_dir,
-                                                       source_dir = src_dir,
-                                                       source_paths = [fake_header_source_file_name],
-                                                       rules_selection = self.default_rules_selection)
-            self.assert_xml_output_match(xml_output, expected_errors)
+        self.assert_colobot_lint_result_with_custom_files(
+            source_files_data = source_files_data,
+            compilation_database_files = [fake_header_source_file],
+            target_files = [fake_header_source_file],
+            additional_compile_flags = ['-I$TEMP_DIR/project', '-I$TEMP_DIR/system', '-I$TEMP_DIR/' + fake_header_sources_dir],
+            additional_options = ['-project-local-include-path', '$TEMP_DIR/project'],
+            expected_errors = expected_errors)
 
     def test_no_includes(self):
         self.assert_colobot_lint_result(
@@ -102,40 +69,40 @@ class IncludeStyleRuleTest(test_support.TestBase):
 
     def test_local_includes_sorted_alphabetically(self):
         self.assert_colobot_lint_result_with_project_headers(
-            source_file_lines = [
+            main_file_lines = [
                 '#include "abc.h"',
                 '#include "def.h"',
                 '',
                 '#include "def/abc.h"',
                 '#include "def/def.h"',
             ],
-            cpp_file_path = 'src.cpp',
-            project_header_paths = [
+            main_file = 'src.cpp',
+            project_header_files = [
                 'abc.h',
                 'def.h',
                 'def/abc.h',
                 'def/def.h'
             ],
-            system_header_paths = [],
+            system_header_files = [],
             expected_errors = [])
 
     def test_local_includes_not_sorted_alphabetically(self):
         self.assert_colobot_lint_result_with_project_headers(
-            source_file_lines = [
+            main_file_lines = [
                 '#include "abc.h"',
                 '#include "def.h"',
                 '',
                 '#include "def/def.h"',
                 '#include "def/abc.h"',
             ],
-            cpp_file_path = 'src.cpp',
-            project_header_paths = [
+            main_file = 'src.cpp',
+            project_header_files = [
                 'abc.h',
                 'def.h',
                 'def/abc.h',
                 'def/def.h'
             ],
-            system_header_paths = [],
+            system_header_files = [],
             expected_errors = [
                 {
                     'msg': "Broken alphabetical ordering, expected 'def/abc.h', not 'def/def.h'",
@@ -145,20 +112,20 @@ class IncludeStyleRuleTest(test_support.TestBase):
 
     def test_local_includes_from_different_subpaths_in_one_block(self):
         self.assert_colobot_lint_result_with_project_headers(
-            source_file_lines = [
+            main_file_lines = [
                 '#include "abc.h"',
                 '#include "def.h"',
                 '#include "def/abc.h"',
                 '#include "def/def.h"',
             ],
-            cpp_file_path = 'src.cpp',
-            project_header_paths = [
+            main_file = 'src.cpp',
+            project_header_files = [
                 'abc.h',
                 'def.h',
                 'def/abc.h',
                 'def/def.h'
             ],
-            system_header_paths = [],
+            system_header_files = [],
             expected_errors = [
                 {
                     'msg': "Expected empty line between include directives",
@@ -168,13 +135,13 @@ class IncludeStyleRuleTest(test_support.TestBase):
 
     def test_system_includes_dont_need_to_be_sorted_alphabetically(self):
         self.assert_colobot_lint_result_with_project_headers(
-            source_file_lines = [
+            main_file_lines = [
                 '#include <system_header2.h>',
                 '#include <system_header1.h>'
             ],
-            cpp_file_path = 'src.cpp',
-            project_header_paths = [],
-            system_header_paths = [
+            main_file = 'src.cpp',
+            project_header_files = [],
+            system_header_files = [
                 'system_header1.h',
                 'system_header2.h'
             ],
@@ -182,21 +149,21 @@ class IncludeStyleRuleTest(test_support.TestBase):
 
     def test_local_include_in_angle_brackets(self):
         self.assert_colobot_lint_result_with_project_headers(
-            source_file_lines = [
+            main_file_lines = [
                 '#include "abc.h"',
                 '#include "def.h"',
                 '',
                 '#include <def/abc.h>',
                 '#include "def/def.h"',
             ],
-            cpp_file_path = 'src.cpp',
-            project_header_paths = [
+            main_file = 'src.cpp',
+            project_header_files = [
                 'abc.h',
                 'def.h',
                 'def/abc.h',
                 'def/def.h'
             ],
-            system_header_paths = [],
+            system_header_files = [],
             expected_errors = [
                 {
                     'msg': "Local include 'def/abc.h' should be included with quotes, not angled brackets",
@@ -206,14 +173,14 @@ class IncludeStyleRuleTest(test_support.TestBase):
 
     def test_global_include_in_quotes(self):
         self.assert_colobot_lint_result_with_project_headers(
-            source_file_lines = [
+            main_file_lines = [
                 '#include <system_header1.h>',
                 '#include "system_header2.h"',
                 '#include <system_header3.h>',
             ],
-            cpp_file_path = 'src.cpp',
-            project_header_paths = [],
-            system_header_paths = [
+            main_file = 'src.cpp',
+            project_header_files = [],
+            system_header_files = [
                 'system_header1.h',
                 'system_header2.h',
                 'system_header3.h',
@@ -227,21 +194,21 @@ class IncludeStyleRuleTest(test_support.TestBase):
 
     def test_local_include_not_full_path_from_project_root(self):
         self.assert_colobot_lint_result_with_project_headers(
-            source_file_lines = [
+            main_file_lines = [
                 '#include "abc.h"',
                 '#include "def.h"',
                 '#include "jkl.h"',
                 '',
                 '#include "def/ghi.h"',
             ],
-            cpp_file_path = 'def/mno.cpp',
-            project_header_paths = [
+            main_file = 'def/mno.cpp',
+            project_header_files = [
                 'abc.h',
                 'def.h',
                 'def/ghi.h',
                 'def/jkl.h'
             ],
-            system_header_paths = [],
+            system_header_files = [],
             expected_errors = [
                 {
                     'msg': "Expected local include to be full relative path from project local include search path: 'def/jkl.h', not 'jkl.h'",
@@ -251,18 +218,18 @@ class IncludeStyleRuleTest(test_support.TestBase):
 
     def test_local_and_global_includes_in_one_block(self):
         self.assert_colobot_lint_result_with_project_headers(
-            source_file_lines = [
+            main_file_lines = [
                 '#include "abc.h"',
                 '#include "def.h"',
                 '#include <system_header1.h>',
                 '#include <system_header2.h>'
             ],
-            cpp_file_path = 'def/ghi.cpp',
-            project_header_paths = [
+            main_file = 'def/ghi.cpp',
+            project_header_files = [
                 'abc.h',
                 'def.h'
             ],
-            system_header_paths = [
+            system_header_files = [
                 'system_header1.h',
                 'system_header2.h',
             ],
@@ -275,19 +242,19 @@ class IncludeStyleRuleTest(test_support.TestBase):
 
     def test_local_and_global_includes_in_separate_blocks(self):
         self.assert_colobot_lint_result_with_project_headers(
-            source_file_lines = [
+            main_file_lines = [
                 '#include "abc.h"',
                 '#include "def.h"',
                 '',
                 '#include <system_header1.h>',
                 '#include <system_header2.h>',
             ],
-            cpp_file_path = 'def/ghi.cpp',
-            project_header_paths = [
+            main_file = 'def/ghi.cpp',
+            project_header_files = [
                 'abc.h',
                 'def.h'
             ],
-            system_header_paths = [
+            system_header_files = [
                 'system_header1.h',
                 'system_header2.h'
             ],
@@ -295,19 +262,19 @@ class IncludeStyleRuleTest(test_support.TestBase):
 
     def test_local_include_after_global_include(self):
         self.assert_colobot_lint_result_with_project_headers(
-            source_file_lines = [
+            main_file_lines = [
                 '#include "abc.h"',
                 '',
                 '#include <system_header1.h>',
                 '#include <system_header2.h>',
                 '#include "def.h"'
             ],
-            cpp_file_path = 'def/ghi.cpp',
-            project_header_paths = [
+            main_file = 'def/ghi.cpp',
+            project_header_files = [
                 'abc.h',
                 'def.h'
             ],
-            system_header_paths = [
+            system_header_files = [
                 'system_header1.h',
                 'system_header2.h'
             ],
@@ -320,7 +287,7 @@ class IncludeStyleRuleTest(test_support.TestBase):
 
     def test_config_header_at_the_top(self):
         self.assert_colobot_lint_result_with_project_headers(
-            source_file_lines = [
+            main_file_lines = [
                 '#include "config/config.h"',
                 '',
                 '#include "abc.h"',
@@ -329,20 +296,20 @@ class IncludeStyleRuleTest(test_support.TestBase):
                 '#include "def/abc.h"',
                 '#include "def/def.h"',
             ],
-            cpp_file_path = 'src.cpp',
-            project_header_paths = [
+            main_file = 'src.cpp',
+            project_header_files = [
                 'config/config.h',
                 'abc.h',
                 'def.h',
                 'def/abc.h',
                 'def/def.h'
             ],
-            system_header_paths = [],
+            system_header_files = [],
             expected_errors = [])
 
     def test_config_header_in_one_block_at_the_top(self):
         self.assert_colobot_lint_result_with_project_headers(
-            source_file_lines = [
+            main_file_lines = [
                 '#include "config/config.h"',
                 '#include "abc.h"',
                 '#include "def.h"',
@@ -350,15 +317,15 @@ class IncludeStyleRuleTest(test_support.TestBase):
                 '#include "def/abc.h"',
                 '#include "def/def.h"',
             ],
-            cpp_file_path = 'src.cpp',
-            project_header_paths = [
+            main_file = 'src.cpp',
+            project_header_files = [
                 'config/config.h',
                 'abc.h',
                 'def.h',
                 'def/abc.h',
                 'def/def.h'
             ],
-            system_header_paths = [],
+            system_header_files = [],
             expected_errors = [
                 {
                     'msg': "Expected empty line between include directives",
@@ -368,7 +335,7 @@ class IncludeStyleRuleTest(test_support.TestBase):
 
     def test_config_header_not_at_the_top(self):
         self.assert_colobot_lint_result_with_project_headers(
-            source_file_lines = [
+            main_file_lines = [
                 '#include "abc.h"',
                 '#include "def.h"',
                 '',
@@ -377,15 +344,15 @@ class IncludeStyleRuleTest(test_support.TestBase):
                 '#include "def/abc.h"',
                 '#include "def/def.h"',
             ],
-            cpp_file_path = 'src.cpp',
-            project_header_paths = [
+            main_file = 'src.cpp',
+            project_header_files = [
                 'config/config.h',
                 'abc.h',
                 'def.h',
                 'def/abc.h',
                 'def/def.h'
             ],
-            system_header_paths = [],
+            system_header_files = [],
             expected_errors = [
                 {
                     'msg': "Expected config include directive: 'config/config.h', not 'abc.h'",
@@ -399,7 +366,7 @@ class IncludeStyleRuleTest(test_support.TestBase):
 
     def test_matching_header_at_the_top(self):
         self.assert_colobot_lint_result_with_project_headers(
-            source_file_lines = [
+            main_file_lines = [
                 '#include "src.h"',
                 '',
                 '#include "abc.h"',
@@ -408,20 +375,20 @@ class IncludeStyleRuleTest(test_support.TestBase):
                 '#include "def/abc.h"',
                 '#include "def/def.h"',
             ],
-            cpp_file_path = 'src.cpp',
-            project_header_paths = [
+            main_file = 'src.cpp',
+            project_header_files = [
                 'src.h',
                 'abc.h',
                 'def.h',
                 'def/abc.h',
                 'def/def.h'
             ],
-            system_header_paths = [],
+            system_header_files = [],
             expected_errors = [])
 
     def test_matching_header_in_one_block(self):
         self.assert_colobot_lint_result_with_project_headers(
-            source_file_lines = [
+            main_file_lines = [
                 '#include "src.h"',
                 '#include "abc.h"',
                 '#include "def.h"',
@@ -429,15 +396,15 @@ class IncludeStyleRuleTest(test_support.TestBase):
                 '#include "def/abc.h"',
                 '#include "def/def.h"',
             ],
-            cpp_file_path = 'src.cpp',
-            project_header_paths = [
+            main_file = 'src.cpp',
+            project_header_files = [
                 'src.h',
                 'abc.h',
                 'def.h',
                 'def/abc.h',
                 'def/def.h'
             ],
-            system_header_paths = [],
+            system_header_files = [],
             expected_errors = [
                 {
                     'msg': "Expected empty line between include directives",
@@ -447,7 +414,7 @@ class IncludeStyleRuleTest(test_support.TestBase):
 
     def test_matching_header_and_config_file(self):
         self.assert_colobot_lint_result_with_project_headers(
-            source_file_lines = [
+            main_file_lines = [
                 '#include "src.h"',
                 '',
                 '#include "config.h"',
@@ -458,8 +425,8 @@ class IncludeStyleRuleTest(test_support.TestBase):
                 '#include "def/abc.h"',
                 '#include "def/def.h"',
             ],
-            cpp_file_path = 'src.cpp',
-            project_header_paths = [
+            main_file = 'src.cpp',
+            project_header_files = [
                 'config.h',
                 'src.h',
                 'abc.h',
@@ -467,12 +434,12 @@ class IncludeStyleRuleTest(test_support.TestBase):
                 'def/abc.h',
                 'def/def.h'
             ],
-            system_header_paths = [],
+            system_header_files = [],
             expected_errors = [])
 
     def test_matching_header_not_at_the_top(self):
         self.assert_colobot_lint_result_with_project_headers(
-            source_file_lines = [
+            main_file_lines = [
                 '#include "abc.h"',
                 '#include "src.h"',
                 '#include "def.h"',
@@ -480,15 +447,15 @@ class IncludeStyleRuleTest(test_support.TestBase):
                 '#include "def/abc.h"',
                 '#include "def/def.h"',
             ],
-            cpp_file_path = 'src.cpp',
-            project_header_paths = [
+            main_file = 'src.cpp',
+            project_header_files = [
                 'src.h',
                 'abc.h',
                 'def.h',
                 'def/abc.h',
                 'def/def.h'
             ],
-            system_header_paths = [],
+            system_header_files = [],
             expected_errors = [
                 {
                     'msg': "Expected first include directive to be matching header file: 'src.h', not 'abc.h'",
@@ -506,7 +473,7 @@ class IncludeStyleRuleTest(test_support.TestBase):
 
     def test_base_class_header_at_the_top(self):
         self.assert_colobot_lint_result_with_project_headers_and_fake_header_source(
-            source_file_lines = [
+            main_file_lines = [
                 '#include "def/base.h"',
                 '',
                 '#include "abc/abc.h"',
@@ -517,26 +484,22 @@ class IncludeStyleRuleTest(test_support.TestBase):
                 '',
                 'class Derived : public Base {};'
             ],
-            header_file_path = 'def/src.h',
-            fake_header_source_path = 'fake_header_sources/def/src.cpp',
-            project_headers = [
-                { 'path': 'abc/abc.h' },
-                { 'path': 'abc/def.h' },
-                { 'path': 'def/abc.h' },
-                { 'path': 'def/def.h' },
-                {
-                    'path': 'def/base.h',
-                    'source_lines': [
-                        'class Base {};'
-                    ]
-                },
-            ],
-            system_header_paths = [],
+            main_file = 'def/src.h',
+            project_headers = {
+                'abc/abc.h': [],
+                'abc/def.h': [],
+                'def/abc.h': [],
+                'def/def.h': [],
+                'def/base.h': [
+                    'class Base {};'
+                ]
+            },
+            system_header_files = [],
             expected_errors = [])
 
     def test_base_class_header_in_one_block(self):
         self.assert_colobot_lint_result_with_project_headers_and_fake_header_source(
-            source_file_lines = [
+            main_file_lines = [
                 '#include "def/base.h"',
                 '#include "abc/abc.h"',
                 '#include "abc/def.h"',
@@ -546,21 +509,17 @@ class IncludeStyleRuleTest(test_support.TestBase):
                 '',
                 'class Derived : public Base {};'
             ],
-            header_file_path = 'def/src.h',
-            fake_header_source_path = 'fake_header_sources/def/src.cpp',
-            project_headers = [
-                { 'path': 'abc/abc.h' },
-                { 'path': 'abc/def.h' },
-                { 'path': 'def/abc.h' },
-                { 'path': 'def/def.h', },
-                {
-                    'path': 'def/base.h',
-                    'source_lines': [
-                        'class Base {};'
-                    ]
-                },
-            ],
-            system_header_paths = [],
+            main_file = 'def/src.h',
+            project_headers = {
+                'abc/abc.h': [],
+                'abc/def.h': [],
+                'def/abc.h': [],
+                'def/def.h': [],
+                'def/base.h': [
+                    'class Base {};'
+                ]
+            },
+            system_header_files = [],
             expected_errors = [
                 {
                     'id': 'include style',
@@ -572,7 +531,7 @@ class IncludeStyleRuleTest(test_support.TestBase):
 
     def test_base_class_header_and_config_file(self):
         self.assert_colobot_lint_result_with_project_headers_and_fake_header_source(
-            source_file_lines = [
+            main_file_lines = [
                 '#include "def/base.h"',
                 '',
                 '#include "config/config.h"',
@@ -587,22 +546,18 @@ class IncludeStyleRuleTest(test_support.TestBase):
                 '',
                 'class Derived : public Base {};'
             ],
-            header_file_path = 'def/src.h',
-            fake_header_source_path = 'fake_header_sources/def/src.cpp',
-            project_headers = [
-                { 'path': 'config/config.h' },
-                { 'path': 'abc/abc.h' },
-                { 'path': 'abc/def.h' },
-                { 'path': 'def/abc.h' },
-                { 'path': 'def/def.h' },
-                {
-                    'path': 'def/base.h',
-                    'source_lines': [
-                        'class Base {};'
-                    ]
-                },
-            ],
-            system_header_paths = [
+            main_file = 'def/src.h',
+            project_headers = {
+                'config/config.h': [],
+                'abc/abc.h': [],
+                'abc/def.h': [],
+                'def/abc.h': [],
+                'def/def.h': [],
+                'def/base.h': [
+                    'class Base {};'
+                ]
+            },
+            system_header_files = [
                 'system_header.h'
             ],
             expected_errors = [])

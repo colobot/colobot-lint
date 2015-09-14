@@ -1,5 +1,4 @@
 import test_support
-import os
 
 class OutputPrinterTest(test_support.TestBase):
     def test_output_filter(self):

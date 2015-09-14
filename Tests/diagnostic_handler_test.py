@@ -1,5 +1,4 @@
 import test_support
-import os
 
 class DiagnosticHandlerTest(test_support.TestBase):
     def test_compile_warning_in_source_file(self):
@@ -10,7 +9,7 @@ class DiagnosticHandlerTest(test_support.TestBase):
                 '}',
                 ''
             ],
-            additional_compile_flags = '-Wall',
+            additional_compile_flags = ['-Wall'],
             expected_errors = [
                 {
                     'id': 'compile warning',
@@ -29,7 +28,7 @@ class DiagnosticHandlerTest(test_support.TestBase):
                 '}',
                 ''
             ],
-            additional_compile_flags = '-Wall',
+            additional_compile_flags = ['-Wall'],
             expected_errors = [
                 {
                     'id': 'compile error',
@@ -55,41 +54,25 @@ class DiagnosticHandlerTest(test_support.TestBase):
             ])
 
     def test_compile_error_in_fake_header_source(self):
-        with test_support.TempBuildDir() as temp_dir:
-            os.mkdir(temp_dir + '/foo')
-            os.mkdir(temp_dir + '/fake_header_sources')
-            os.mkdir(temp_dir + '/fake_header_sources/foo')
-
-            hpp_file_name = temp_dir + '/foo/bar.h'
-            test_support.write_file_lines(hpp_file_name, [
+        self.assert_colobot_lint_result_with_custom_files(
+            source_files_data = {
+                'foo/bar.h' : [
                     'Bar Foo();',
                     ''
-                ]
-            )
-
-            cpp_file_name = temp_dir + '/fake_header_sources/foo/bar.cpp'
-            test_support.write_file_lines(cpp_file_name, [
+                ],
+                'fake_header_sources/foo/bar.cpp': [
                     '#include "foo/bar.h"'
                 ]
-            )
-
-            test_support.write_compilation_database(
-                build_directory = temp_dir,
-                source_file_names = [cpp_file_name],
-                additional_compile_flags = '-I' + temp_dir)
-
-            xml_output = test_support.run_colobot_lint(build_directory = temp_dir,
-                                                       source_dir = temp_dir,
-                                                       source_paths = [cpp_file_name],
-                                                       rules_selection = [])
-            self.assert_xml_output_match(
-                xml_output = xml_output,
-                expected_errors = [
-                    {
-                        'id': 'header file not self-contained',
-                        'severity': 'error',
-                        'msg': "Including single header file should not result in compile error: unknown type name 'Bar'",
-                        'line': '1'
-                    }
-                ]
-            )
+            },
+            compilation_database_files = ['fake_header_sources/foo/bar.cpp'],
+            target_files = ['fake_header_sources/foo/bar.cpp'],
+            additional_compile_flags = ['-I$TEMP_DIR'],
+            additional_options = ['-project-local-include-path', '$TEMP_DIR'],
+            expected_errors = [
+                {
+                    'id': 'header file not self-contained',
+                    'severity': 'error',
+                    'msg': "Including single header file should not result in compile error: unknown type name 'Bar'",
+                    'line': '1'
+                }
+            ])

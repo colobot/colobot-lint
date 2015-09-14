@@ -11,8 +11,7 @@ class TodoRuleTest(test_support.TestBase):
             source_file_lines = [
                 '// Comment'
             ],
-            expected_errors = []
-        )
+            expected_errors = [])
 
     def test_single_todo_comment(self):
         self.assert_colobot_lint_result(

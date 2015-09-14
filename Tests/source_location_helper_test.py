@@ -1,5 +1,4 @@
 import test_support
-import os
 
 class SourceLocationHelperTest(test_support.TestBase):
     def test_ignore_macro_body_expansion(self):
@@ -29,58 +28,40 @@ class SourceLocationHelperTest(test_support.TestBase):
             rules_selection = ['NakedDeleteRule'])
 
     def test_fake_header_source(self):
-        with test_support.TempBuildDir() as temp_dir:
-            os.mkdir(temp_dir + '/foo')
-            os.mkdir(temp_dir + '/fake_header_sources')
-            os.mkdir(temp_dir + '/fake_header_sources/foo')
-
-            cpp_file_name = temp_dir + '/fake_header_sources/foo/bar.cpp'
-            test_support.write_file_lines(cpp_file_name, [
+        self.assert_colobot_lint_result_with_custom_files(
+            source_files_data = {
+                'fake_header_sources/foo/bar.cpp': [
                     '#include "foo/bar.h"',
                     '#include "foo/baz.h"'
-                ]
-            )
-
-            # report violations in this header
-            hpp_file_name = temp_dir + '/foo/bar.h'
-            test_support.write_file_lines(hpp_file_name, [
+                ],
+                # report violations in this header
+                'foo/bar.h': [
                     'void deleteMe(int* x)',
                     '{',
                     '  delete x;',
                     '}'
-                ]
-            )
-
-            # but not in this one
-            hpp_file_name = temp_dir + '/foo/baz.h'
-            test_support.write_file_lines(hpp_file_name, [
+                ],
+                # but not this one:
+                'foo/baz.h': [
                     'int* createMe()',
                     '{',
                     '  return new int;',
                     '}'
                 ]
-            )
-
-            test_support.write_compilation_database(
-                build_directory = temp_dir,
-                source_file_names = [cpp_file_name],
-                additional_compile_flags = '-I' + temp_dir)
-
-            xml_output = test_support.run_colobot_lint(build_directory = temp_dir,
-                                                       source_dir = temp_dir,
-                                                       source_paths = [cpp_file_name],
-                                                       rules_selection = ['NakedNewRule', 'NakedDeleteRule'])
-            self.assert_xml_output_match(
-                xml_output = xml_output,
-                expected_errors = [
-                    {
-                        'id': 'naked delete',
-                        'severity': 'warning',
-                        'msg': "Naked delete called on type 'int'",
-                        'line': '3'
-                    }
-                ]
-            )
+            },
+            compilation_database_files = ['fake_header_sources/foo/bar.cpp'],
+            target_files = ['fake_header_sources/foo/bar.cpp'],
+            additional_compile_flags = ['-I$TEMP_DIR'],
+            additional_options = ['-project-local-include-path', '$TEMP_DIR'],
+            rules_selection = ['NakedNewRule', 'NakedDeleteRule'],
+            expected_errors = [
+                {
+                    'id': 'naked delete',
+                    'severity': 'warning',
+                    'msg': "Naked delete called on type 'int'",
+                    'line': '3'
+                }
+            ])
 
     def test_exclusion_zone_exclude_one_rule(self):
         self.assert_colobot_lint_result(
