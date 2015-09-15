@@ -39,6 +39,21 @@ class DiagnosticHandlerTest(test_support.TestBase):
                 }
             ])
 
+    def test_fatal_compile_error_in_source_file(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                '#include "nonexistent_include_file.h"',
+                ''
+            ],
+            expected_errors = [
+                {
+                    'id': 'compile error',
+                    'severity': 'error',
+                    'msg': "'nonexistent_include_file.h' file not found",
+                    'line': '1'
+                }
+            ])
+
     def test_compile_error_in_fake_header_source(self):
         with test_support.TempBuildDir() as temp_dir:
             os.mkdir(temp_dir + '/foo')

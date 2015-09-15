@@ -275,10 +275,11 @@ class BlockPlacementRuleTest(test_support.TestBase):
     def test_initializer_list(self):
         self.assert_colobot_lint_result(
             source_file_lines = [
-                '#include <vector>',
+                '#include <initializer_list>',
+                'struct Foo { Foo(std::initializer_list<int>); };',
                 'void foo()',
                 '{',
-                '  std::vector<int> vec{1,2,3,4,5};',
+                '   Foo foo{1,2,3,4,5};',
                 '}'
             ],
             expected_errors = [])

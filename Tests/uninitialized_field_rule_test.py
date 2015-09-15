@@ -84,18 +84,19 @@ class UninitializedFieldRuleTest(test_support.TestBase):
     def test_struct_with_fields_with_default_constructors(self):
         self.assert_colobot_lint_result(
             source_file_lines = [
-                '#include <string>',
-                '#include <complex>',
                 'struct Bar',
                 '{',
                 '   int x;',
                 '   Bar() : x(0) {}',
                 '};',
+                'struct Baz',
+                '{',
+                '   int x = 0;',
+                '};',
                 'struct Foo',
                 '{',
-                '    std::string x;',
-                '    std::complex<double> y;',
-                '    Bar z;',
+                '    Bar x;',
+                '    Baz y;',
                 '};'
             ],
             expected_errors = [])
@@ -103,27 +104,23 @@ class UninitializedFieldRuleTest(test_support.TestBase):
     def test_struct_with_field_without_default_constructor(self):
         self.assert_colobot_lint_result(
             source_file_lines = [
-                '#include <string>',
-                '#include <complex>',
                 'struct Bar',
                 '{',
                 '   int x;',
                 '};',
                 'struct Foo',
                 '{',
-                '    std::string x;',
-                '    std::complex<double> y;',
                 '    Bar z;',
                 '};'
             ],
             expected_errors = [
                 {
                     'msg': "Struct 'Bar' field 'x' remains uninitialized",
-                    'line': '3'
+                    'line': '1' # TODO: fix to be 3
                 },
                 {
                     'msg': "Struct 'Foo' field 'z' remains uninitialized",
-                    'line': '7'
+                    'line': '5' # TODO: fix to be 7
                 }
             ])
 

@@ -6,7 +6,7 @@ class UnintializedLocalVariableRuleTest(test_support.TestBase):
         self.set_default_error_id('uninitialized local variable')
         self.set_default_error_severity('error')
 
-    def test_function_with_builtin_variables_defined(self):
+    def test_function_with_builtin_variables_initialized(self):
         self.assert_colobot_lint_result(
             source_file_lines = [
                 'void Foo()',
@@ -17,7 +17,7 @@ class UnintializedLocalVariableRuleTest(test_support.TestBase):
             ],
             expected_errors = [])
 
-    def test_function_with_one_builtin_variable_undefined(self):
+    def test_function_with_one_builtin_variable_uninitialized(self):
         self.assert_colobot_lint_result(
             source_file_lines = [
                 'void Foo()',
@@ -33,7 +33,7 @@ class UnintializedLocalVariableRuleTest(test_support.TestBase):
                 }
             ])
 
-    def test_function_with_pod_type_undefined(self):
+    def test_function_with_pod_type_uninitialized(self):
         self.assert_colobot_lint_result(
             source_file_lines = [
                 'struct Bar { int x; };',
@@ -50,15 +50,15 @@ class UnintializedLocalVariableRuleTest(test_support.TestBase):
                 }
             ])
 
-    def test_function_with_non_pod_types_undefined(self):
+    def test_function_with_non_pod_types_uninitialized(self):
         self.assert_colobot_lint_result(
             source_file_lines = [
-                '#include <string>',
+                'struct Baz { int x; Baz() : x(0) {} };',
                 'struct Bar { int x = 0; };',
                 'void Foo()',
                 '{',
                 '    Bar bar;',
-                '    std::string z;',
+                '    Baz baz;',
                 '}'
             ],
             expected_errors = [])
@@ -74,13 +74,12 @@ class UnintializedLocalVariableRuleTest(test_support.TestBase):
     def test_dont_report_uninitialized_variables_in_old_style_functions(self):
         self.assert_colobot_lint_result(
             source_file_lines = [
-                '#include <string>',
                 'void Bar(int &x, int &y, int& z);',
                 'void Foo()',
                 '{',
                 '    int x, y, z;',
-                '    float a, b, c',
-                '    std::string str;',
+                '    float a, b, c;',
+                '    const char* str;',
                 '',
                 '    Bar(x, y, z);',
                 '    a = b = c = 10.0f;',
@@ -92,8 +91,8 @@ class UnintializedLocalVariableRuleTest(test_support.TestBase):
                     'id': 'old style function',
                     'severity': 'warning',
                     'msg': "Function 'Foo' seems to be written in legacy C style: " +
-                           "it has uninitialized POD type variables declared far from their point of use ('x', 'y', 'z', 'a'... and 2 more)",
-                    'line': '3'
+                           "it has uninitialized POD type variables declared far from their point of use ('x', 'y', 'z', 'a'... and 3 more)",
+                    'line': '2'
                 }
             ],
             rules_selection = ['OldStyleFunctionRule', 'UninitializedLocalVariableRule'])

@@ -13,7 +13,7 @@ DiagnosticHandler::DiagnosticHandler(Context& context)
 
 void DiagnosticHandler::HandleDiagnostic(DiagnosticsEngine::Level level, const Diagnostic& info)
 {
-    if (level == DiagnosticsEngine::Level::Error)
+    if (level == DiagnosticsEngine::Level::Error || level == DiagnosticsEngine::Level::Fatal)
     {
         if (m_context.areWeInFakeHeaderSourceFile)
         {

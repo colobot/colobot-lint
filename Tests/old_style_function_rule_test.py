@@ -54,13 +54,12 @@ class OldStyleFunctionRuleTest(test_support.TestBase):
     def test_multiple_old_style_declarations(self):
         self.assert_colobot_lint_result(
             source_file_lines = [
-                '#include <string>',
                 'void Bar(int &x, int &y, int& z);',
                 'void Foo()',
                 '{',
                 '    int x, y, z;',
-                '    float a, b, c',
-                '    std::string str;',
+                '    float a, b, c;',
+                '    const char* str;',
                 '',
                 '    Bar(x, y, z);',
                 '    a = b = c = 10.0f;',
@@ -70,8 +69,8 @@ class OldStyleFunctionRuleTest(test_support.TestBase):
             expected_errors = [
                 {
                     'msg': "Function 'Foo' seems to be written in legacy C style: " +
-                            "it has uninitialized POD type variables declared far from their point of use ('x', 'y', 'z', 'a'... and 2 more)",
-                    'line': '3'
+                            "it has uninitialized POD type variables declared far from their point of use ('x', 'y', 'z', 'a'... and 3 more)",
+                    'line': '2'
                 }
             ])
 
@@ -91,13 +90,12 @@ class OldStyleFunctionRuleTest(test_support.TestBase):
     def test_ignore_initialized_declarations(self):
         self.assert_colobot_lint_result(
             source_file_lines = [
-                '#include <string>',
                 'void Bar(int &x, int &y, int& z);',
                 'void Foo()',
                 '{',
                 '    int x = 0, y = 0, z = 0;',
-                '    float a{}, b{}, c{}',
-                '    std::string str;',
+                '    float a{}, b{}, c{};',
+                '    const char* str{};',
                 '',
                 '    Bar(x, y, z);',
                 '    a = b = c = 10.0f;',
@@ -109,24 +107,21 @@ class OldStyleFunctionRuleTest(test_support.TestBase):
     def test_ignore_non_pod_type_declarations(self):
         self.assert_colobot_lint_result(
             source_file_lines = [
-                '#include <string>',
                 'struct Pod { int x; };',
                 'struct NonPod { int x = 0; };',
                 'void Foo()',
                 '{',
                 '    Pod pod;',
                 '    NonPod nonPod;',
-                '    std::string str;',
                 '',
                 '    pod = Pod{10};',
-                '    nonPod = NonPod{20};',
-                '    str = "123";',
+                '    nonPod = NonPod{};',
                 '}'
             ],
             expected_errors = [
                 {
                     'msg': "Function 'Foo' seems to be written in legacy C style: " +
                             "it has uninitialized POD type variables declared far from their point of use ('pod')",
-                    'line': '4'
+                    'line': '3'
                 }
             ])
