@@ -68,7 +68,7 @@ Now you can build everything together:
  $ make
 ```
 
-The binary should be created in `./bin/colobot-lint`. You can install it wherever you like.
+The binary should be created in `./bin/colobot-lint`.
 
 ### Compiling standalone
 
@@ -81,7 +81,18 @@ Try this and keep your fingers crossed:
  $ make
 ```
 
-The binary should be saved in `./colobot-lint`. You can install it wherever you like.
+The binary should be saved in `./colobot-lint`.
+
+### Installing
+
+When you run colobot-lint by executing the compiled binary, you will probably see errors about Clang being unable to find some system header files like `stdarg.h`. This is caused by Clang libraries searching for certain system header files relative to binary file: `../lib/clang/<version>/include/`.
+
+There are two solutions to this problem:
+ * install colobot-lint binary in the same place where you have other clang binaries (usually `/usr/bin`)
+ * create a fake directory structure to force Clang libraries to search the path we want:
+  - `bin/`
+   - `colobot-lint` (colobot-lint binary; it must be a copy of the file, symlink won't work here)
+  - `lib/ -> /usr/lib` (symlink to lib directory expected by Clang libraries; may be other path than `/usr/lib` depending on system)
 
 ## Running
 
