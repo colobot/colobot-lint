@@ -3,8 +3,17 @@ import tempfile
 import shutil
 import sys
 import os
+import errno
 import unittest
 import xml.etree.ElementTree as ET
+
+def mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc:
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else: raise
 
 colobot_lint_exectuable = 'colobot-lint' # default
 if 'COLOBOT_LINT' in os.environ:
@@ -68,7 +77,7 @@ def run_colobot_lint_with_prepared_files(source_files_data,
                                          additional_compile_flags = []):
     with TempBuildDir() as temp_dir:
         for file_subpath in source_files_data.keys():
-            os.makedirs(os.path.join(temp_dir, os.path.dirname(file_subpath)), exist_ok = True)
+            mkdir_p(os.path.join(temp_dir, os.path.dirname(file_subpath)))
             write_file_lines(os.path.join(temp_dir, file_subpath), source_files_data[file_subpath])
 
         processed_target_files = []
