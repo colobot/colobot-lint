@@ -98,7 +98,7 @@ This is enough, you don't need to run `make` itself. Everything that this tool n
 
 Now we can run the tool itself:
 ```
- $ colobot-lint -verbose -p "$PWD/colobot-build" -project-local-include-path "$PWD/colobot/src" -project-local-include-path "$PWD/colobot-build/src" -license-template-file "$PWD/colobot/LICENSE-HEADER.txt" $(find "$PWD/colobot/src" -name '*.cpp') $(find "$PWD/colobot-build/fake_header_sources" '*.cpp')
+ $ colobot-lint -verbose -p "$PWD/colobot-build" -project-local-include-path "$PWD/colobot/src" -project-local-include-path "$PWD/colobot-build/src" -license-template-file "$PWD/colobot/LICENSE-HEADER.txt" $(find "$PWD/colobot/src" -name '*.cpp') $(find "$PWD/colobot-build/fake_header_sources" -name '*.cpp')
 ```
 
 Notes:
