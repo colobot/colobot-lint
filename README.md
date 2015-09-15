@@ -91,7 +91,7 @@ There are two solutions to this problem:
  * install colobot-lint binary in the same place where you have other clang binaries (usually `/usr/bin`)
  * create a fake directory structure to force Clang libraries to search the path we want:
   - `bin/`
-   - `colobot-lint` (colobot-lint binary; it must be a copy of the file, symlink won't work here)
+    - `colobot-lint` (colobot-lint binary; it must be a copy of the file, symlink won't work here)
   - `lib/ -> /usr/lib` (symlink to lib directory expected by Clang libraries; may be other path than `/usr/lib` depending on system)
 
 ## Running
