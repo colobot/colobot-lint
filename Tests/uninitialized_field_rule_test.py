@@ -31,7 +31,7 @@ class UninitializedFieldRuleTest(test_support.TestBase):
             expected_errors = [
                 {
                     'msg': "Struct 'Foo' field 'y' remains uninitialized",
-                    'line': '1'
+                    'line': '4'
                 }
             ])
 
@@ -114,11 +114,11 @@ class UninitializedFieldRuleTest(test_support.TestBase):
             expected_errors = [
                 {
                     'msg': "Struct 'Bar' field 'x' remains uninitialized",
-                    'line': '1' # TODO: fix to be 3
+                    'line': '3'
                 },
                 {
                     'msg': "Struct 'Foo' field 'z' remains uninitialized",
-                    'line': '5' # TODO: fix to be 7
+                    'line': '7'
                 }
             ])
 
@@ -192,7 +192,7 @@ class UninitializedFieldRuleTest(test_support.TestBase):
             ],
             expected_errors = [])
 
-    def test_ignore_anonymous_union_or_struct(self):
+    def test_ignore_anonymous_union_but_not_struct(self):
         self.assert_colobot_lint_result(
             source_file_lines = [
                 'struct Foo',
@@ -211,7 +211,7 @@ class UninitializedFieldRuleTest(test_support.TestBase):
             expected_errors = [
                 {
                     'msg': "Struct '' field 'x' remains uninitialized",
-                    'line': '3'
+                    'line': '5'
                 }
             ])
 
@@ -259,7 +259,7 @@ class UninitializedFieldRuleTest(test_support.TestBase):
             expected_errors = [
                 {
                     'msg': "Class 'NoConstructor' field 'x' remains uninitialized",
-                    'line': '1'
+                    'line': '3'
                 },
                 {
                     'msg': "Class 'ConstructorDefined' field 'x' remains uninitialized in constructor",

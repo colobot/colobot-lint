@@ -43,6 +43,9 @@ private:
     void CheckInitializationsInAssignStatement(const clang::BinaryOperator* assignStatement,
                                                StringRefSet& candidateFieldList);
 
+    clang::SourceLocation GetFieldLocation(const clang::RecordDecl* recordDeclaration,
+                                           clang::StringRef fieldName);
+
 private:
     std::unordered_set<const clang::CXXConstructorDecl*> m_alreadyHandledConstructorDeclarations;
 };

@@ -61,7 +61,7 @@ void UninitializedFieldRule::HandleRecordDeclaration(const RecordDecl* recordDec
                 % which
                 % recordDeclaration->getName().str()
                 % field.str()),
-            location,
+            GetFieldLocation(recordDeclaration, field),
             sourceManager);
     }
 }
@@ -98,7 +98,7 @@ void UninitializedFieldRule::HandleConstructorDeclaration(const CXXConstructorDe
     CheckInitializationsInInitializationList(constructorDeclaration, candidateFieldList);
     CheckInitializationsInConstructorBody(constructorDeclaration, candidateFieldList);
 
-    for (const auto& field : candidateFieldList)
+    for (StringRef field : candidateFieldList)
     {
         std::string which = recordDeclaration->isClass() ? "Class" : "Struct";
 
@@ -137,11 +137,9 @@ UninitializedFieldRule::StringRefSet UninitializedFieldRule::GetCandidateFieldsL
 {
     StringRefSet candidates;
 
-    for (const Decl* decl : recordDeclaration->decls())
+    for (const FieldDecl* fieldDeclaration : recordDeclaration->fields())
     {
-        const FieldDecl* fieldDeclaration = dyn_cast_or_null<const FieldDecl>(decl);
-        if (fieldDeclaration == nullptr ||
-            fieldDeclaration->hasInClassInitializer())
+        if (fieldDeclaration->hasInClassInitializer())
             continue;
 
         QualType type = fieldDeclaration->getType();
@@ -160,9 +158,9 @@ UninitializedFieldRule::StringRefSet UninitializedFieldRule::GetCandidateFieldsL
 void UninitializedFieldRule::CheckInitializationsInInitializationList(const CXXConstructorDecl* constructorDeclaration,
                                                                       UninitializedFieldRule::StringRefSet& candidateFieldList)
 {
-    for (CXXCtorInitializer* init : constructorDeclaration->inits())
+    for (const CXXCtorInitializer* init : constructorDeclaration->inits())
     {
-        FieldDecl* member = init->getMember();
+        const FieldDecl* member = init->getMember();
         if (member != nullptr)
         {
             candidateFieldList.erase(member->getName());
@@ -177,7 +175,7 @@ void UninitializedFieldRule::CheckInitializationsInConstructorBody(const CXXCons
     if (compountStatement == nullptr)
         return;
 
-    for (Stmt* statement : compountStatement->body())
+    for (const Stmt* statement : compountStatement->body())
     {
         const BinaryOperator* binaryOperator = dyn_cast_or_null<const BinaryOperator>(statement);
         if (binaryOperator != nullptr &&
@@ -204,4 +202,14 @@ void UninitializedFieldRule::CheckInitializationsInAssignStatement(const BinaryO
         return;
 
     candidateFieldList.erase(memberDecl->getName());
+}
+
+SourceLocation UninitializedFieldRule::GetFieldLocation(const RecordDecl* recordDeclaration, StringRef fieldName)
+{
+    for (const FieldDecl* fieldDeclaration : recordDeclaration->fields())
+    {
+        if (fieldDeclaration->getName() == fieldName)
+            return fieldDeclaration->getLocation();
+    }
+    return recordDeclaration->getLocation();
 }
