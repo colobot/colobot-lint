@@ -1,7 +1,10 @@
 #include "Handlers/DiagnosticHandler.h"
 
 #include "Common/Context.h"
+#include "Common/FilenameHelper.h"
 #include "Common/OutputPrinter.h"
+
+#include <clang/Basic/SourceManager.h>
 
 #include <boost/format.hpp>
 
@@ -17,32 +20,54 @@ void DiagnosticHandler::HandleDiagnostic(DiagnosticsEngine::Level level, const D
     {
         if (m_context.areWeInFakeHeaderSourceFile)
         {
-            m_context.outputPrinter->PrintRuleViolation(
-                "header file not self-contained",
-                Severity::Error,
-                boost::str(boost::format("Including single header file should not result in compile error: %s")
-                    % GetDiagnosticString(info)),
-                info.getLocation(),
-                info.getSourceManager());
+            ReportDiagnostic("header file not self-contained",
+                             Severity::Error,
+                             "Including single header file should not result in compile error: %s",
+                             info);
         }
         else
         {
-            m_context.outputPrinter->PrintRuleViolation(
-                "compile error",
-                Severity::Error,
-                GetDiagnosticString(info),
-                info.getLocation(),
-                info.getSourceManager());
+            ReportDiagnostic("compile error",
+                             Severity::Error,
+                             "%s",
+                             info);
         }
     }
     else if (level == DiagnosticsEngine::Level::Warning)
     {
+        ReportDiagnostic("compile warning",
+                         Severity::Warning,
+                         "%s",
+                         info);
+    }
+}
+
+void DiagnosticHandler::ReportDiagnostic(const char* ruleName,
+                                         Severity severity,
+                                         const char* descriptionTemplate,
+                                         const Diagnostic& info)
+{
+    std::string diagnosticString = GetDiagnosticString(info);
+
+    SourceManager& sourceManager = info.getSourceManager();
+    SourceLocation location = info.getLocation();
+
+    std::string fileName = GetCleanFilename(location, sourceManager);
+    int lineNumber = sourceManager.getPresumedLineNumber(location);
+
+    std::string uniqueDiagnosticString = boost::str(boost::format("%s:%d: %s")
+        % fileName % lineNumber % diagnosticString);
+
+    if (m_reportedDiagnostics.count(uniqueDiagnosticString) == 0)
+    {
         m_context.outputPrinter->PrintRuleViolation(
-            "compile warning",
-            Severity::Warning,
-            GetDiagnosticString(info),
-            info.getLocation(),
-            info.getSourceManager());
+            ruleName,
+            severity,
+            boost::str(boost::format(descriptionTemplate) % diagnosticString),
+            location,
+            sourceManager);
+
+        m_reportedDiagnostics.insert(uniqueDiagnosticString);
     }
 }
 
