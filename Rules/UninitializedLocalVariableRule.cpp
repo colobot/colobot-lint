@@ -14,7 +14,7 @@ using namespace clang::ast_matchers;
 
 
 UninitializedLocalVariableRule::UninitializedLocalVariableRule(Context& context)
-    : ASTCallbackRule(context)
+    : Rule(context)
 {}
 
 void UninitializedLocalVariableRule::RegisterASTMatcherCallback(MatchFinder& finder)

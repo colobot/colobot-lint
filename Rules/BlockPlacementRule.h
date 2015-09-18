@@ -1,13 +1,13 @@
 #pragma once
 
-#include "Rules/ASTCallbackRule.h"
+#include "Rules/Rule.h"
 
 #include <clang/ASTMatchers/ASTMatchFinder.h>
 #include <clang/AST/RecursiveASTVisitor.h>
 
 #include <unordered_set>
 
-class BlockPlacementRule : public ASTCallbackRule,
+class BlockPlacementRule : public Rule,
                            public clang::ast_matchers::MatchFinder::MatchCallback,
                            public clang::RecursiveASTVisitor<BlockPlacementRule>
 {

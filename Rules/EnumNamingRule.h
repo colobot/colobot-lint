@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Rules/ASTCallbackRule.h"
+#include "Rules/Rule.h"
 
 #include <clang/ASTMatchers/ASTMatchFinder.h>
 
 #include <boost/regex.hpp>
 
-class EnumNamingRule : public ASTCallbackRule,
+class EnumNamingRule : public Rule,
                        public clang::ast_matchers::MatchFinder::MatchCallback
 {
 public:

@@ -59,7 +59,7 @@ AST_MATCHER(CXXMethodDecl, isIteratorAccessMethod)
 } // namespace clang
 
 FunctionNamingRule::FunctionNamingRule(Context& context)
-    : ASTCallbackRule(context),
+    : Rule(context),
       m_functionOrMethodNamePattern(UPPER_CAMEL_CASE_PATTERN)
 {}
 

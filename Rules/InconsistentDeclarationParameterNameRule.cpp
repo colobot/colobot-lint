@@ -14,7 +14,7 @@ using namespace clang::ast_matchers;
 
 
 InconsistentDeclarationParameterNameRule::InconsistentDeclarationParameterNameRule(Context& context)
-    : ASTCallbackRule(context)
+    : Rule(context)
 {}
 
 void InconsistentDeclarationParameterNameRule::RegisterASTMatcherCallback(MatchFinder& finder)

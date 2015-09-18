@@ -51,9 +51,9 @@ void AddRule(Container& rules, Context& context)
     }
 }
 
-std::vector<std::unique_ptr<ASTCallbackRule>> CreateASTRules(Context& context)
+std::vector<std::unique_ptr<Rule>> CreateRules(Context& context)
 {
-    std::vector<std::unique_ptr<ASTCallbackRule>> rules;
+    std::vector<std::unique_ptr<Rule>> rules;
     AddRule<NakedDeleteRule>(rules, context);
     AddRule<NakedNewRule>(rules, context);
     AddRule<TodoRule>(rules, context);
@@ -71,12 +71,6 @@ std::vector<std::unique_ptr<ASTCallbackRule>> CreateASTRules(Context& context)
     AddRule<UnusedForwardDeclarationRule>(rules, context);
     AddRule<PossibleForwardDeclarationRule>(rules, context);
     AddRule<BlockPlacementRule>(rules, context);
-    return rules;
-}
-
-std::vector<std::unique_ptr<DirectASTConsumerRule>> CreateDirectASTConsumerRules(Context& context)
-{
-    std::vector<std::unique_ptr<DirectASTConsumerRule>> rules;
     AddRule<WhitespaceRule>(rules, context);
     AddRule<LicenseInHeaderRule>(rules, context);
     return rules;

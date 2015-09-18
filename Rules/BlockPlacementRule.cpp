@@ -3,6 +3,7 @@
 #include "Common/Context.h"
 #include "Common/OutputPrinter.h"
 #include "Common/SourceLocationHelper.h"
+#include "Common/TranslationUnitMatcher.h"
 
 #include <clang/AST/ASTContext.h>
 #include <clang/ASTMatchers/ASTMatchers.h>
@@ -15,16 +16,8 @@ using namespace clang;
 using namespace clang::ast_matchers;
 using namespace llvm;
 
-namespace clang
-{
-namespace ast_matchers
-{
-const internal::VariadicDynCastAllOfMatcher<Decl, TranslationUnitDecl> translationUnitDecl;
-}
-} // namespace clang
-
 BlockPlacementRule::BlockPlacementRule(Context& context)
-    : ASTCallbackRule(context)
+    : Rule(context)
 {}
 
 void BlockPlacementRule::RegisterASTMatcherCallback(ast_matchers::MatchFinder& finder)

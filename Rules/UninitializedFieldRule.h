@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Rules/ASTCallbackRule.h"
+#include "Rules/Rule.h"
 
 #include "Common/StringRefHash.h"
 
@@ -8,8 +8,8 @@
 
 #include <unordered_set>
 
-class UninitializedFieldRule : public ASTCallbackRule,
-                                public clang::ast_matchers::MatchFinder::MatchCallback
+class UninitializedFieldRule : public Rule,
+                               public clang::ast_matchers::MatchFinder::MatchCallback
 {
 public:
     UninitializedFieldRule(Context& context);

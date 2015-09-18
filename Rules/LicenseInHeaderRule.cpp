@@ -4,25 +4,36 @@
 #include "Common/FilenameHelper.h"
 #include "Common/OutputPrinter.h"
 #include "Common/SourceLocationHelper.h"
+#include "Common/TranslationUnitMatcher.h"
 
 #include <clang/AST/ASTContext.h>
 
 #include <boost/format.hpp>
 
 using namespace clang;
+using namespace clang::ast_matchers;
 using namespace llvm;
 
 LicenseInHeaderRule::LicenseInHeaderRule(Context& context)
-    : DirectASTConsumerRule(context)
+    : Rule(context)
 {
 }
 
-void LicenseInHeaderRule::HandleTranslationUnit(clang::ASTContext& context)
+void LicenseInHeaderRule::RegisterASTMatcherCallback(ast_matchers::MatchFinder& finder)
 {
+    finder.addMatcher(translationUnitDecl().bind("translationUnitDecl"), this);
+}
+
+void LicenseInHeaderRule::run(const ast_matchers::MatchFinder::MatchResult& result)
+{
+    const TranslationUnitDecl* translationUnitDeclaration = result.Nodes.getNodeAs<TranslationUnitDecl>("translationUnitDecl");
+    if (translationUnitDeclaration == nullptr)
+        return;
+
     if (m_context.licenseTemplateLines.empty())
         return;
 
-    SourceManager& sourceManager = context.getSourceManager();
+    SourceManager& sourceManager = *result.SourceManager;
 
     FileID mainFileID = m_context.sourceLocationHelper.GetMainFileID(sourceManager);
 

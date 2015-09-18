@@ -14,7 +14,7 @@ using namespace clang;
 using namespace clang::ast_matchers;
 
 OldStyleNullPointerRule::OldStyleNullPointerRule(Context& context)
-    : ASTCallbackRule(context)
+    : Rule(context)
 {}
 
 void OldStyleNullPointerRule::RegisterASTMatcherCallback(MatchFinder& finder)

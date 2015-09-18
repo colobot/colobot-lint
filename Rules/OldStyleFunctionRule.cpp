@@ -39,7 +39,7 @@ private:
 
 
 OldStyleFunctionRule::OldStyleFunctionRule(Context& context)
-    : ASTCallbackRule(context)
+    : Rule(context)
 {}
 
 void OldStyleFunctionRule::RegisterASTMatcherCallback(MatchFinder& finder)

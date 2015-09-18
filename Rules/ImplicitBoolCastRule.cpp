@@ -14,7 +14,7 @@ using namespace clang;
 using namespace clang::ast_matchers;
 
 ImplicitBoolCastRule::ImplicitBoolCastRule(Context& context)
-    : ASTCallbackRule(context)
+    : Rule(context)
 {}
 
 void ImplicitBoolCastRule::RegisterASTMatcherCallback(MatchFinder& finder)

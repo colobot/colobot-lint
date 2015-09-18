@@ -17,7 +17,7 @@ using namespace clang;
 using namespace clang::ast_matchers;
 
 UnusedForwardDeclarationRule::UnusedForwardDeclarationRule(Context& context)
-    : ASTCallbackRule(context)
+    : Rule(context)
 {}
 
 void UnusedForwardDeclarationRule::RegisterASTMatcherCallback(MatchFinder& finder)

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Rules/ASTCallbackRule.h"
+#include "Rules/Rule.h"
 
 #include <clang/ASTMatchers/ASTMatchFinder.h>
 
@@ -17,7 +17,7 @@ struct IncludeDirective
 using IncludeDirectives = std::vector<IncludeDirective>;
 using IncludeDirectiveIt = IncludeDirectives::const_iterator;
 
-class IncludeStyleRule : public ASTCallbackRule,
+class IncludeStyleRule : public Rule,
                          public clang::ast_matchers::MatchFinder::MatchCallback
 {
 public:

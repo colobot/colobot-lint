@@ -31,7 +31,7 @@ internal::Matcher<QualType> CreateTagTypeMatcher()
 }
 
 PossibleForwardDeclarationRule::PossibleForwardDeclarationRule(Context& context)
-    : ASTCallbackRule(context)
+    : Rule(context)
 {}
 
 void PossibleForwardDeclarationRule::RegisterASTMatcherCallback(MatchFinder& finder)

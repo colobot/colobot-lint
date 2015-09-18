@@ -12,7 +12,7 @@ using namespace clang;
 using namespace clang::ast_matchers;
 
 ClassNamingRule::ClassNamingRule(Context& context)
-    : ASTCallbackRule(context),
+    : Rule(context),
       m_classNamePattern(std::string("C") + UPPER_CAMEL_CASE_PATTERN),
       m_structOrUnionNamePattern(UPPER_CAMEL_CASE_PATTERN)
 {}

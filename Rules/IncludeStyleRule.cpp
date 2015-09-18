@@ -69,7 +69,7 @@ private:
 /////////////////////////
 
 IncludeStyleRule::IncludeStyleRule(Context& context)
-    : ASTCallbackRule(context)
+    : Rule(context)
 {}
 
 void IncludeStyleRule::RegisterPreProcessorCallbacks(CompilerInstance& compiler)

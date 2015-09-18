@@ -14,7 +14,7 @@ using namespace clang;
 using namespace clang::ast_matchers;
 
 NakedDeleteRule::NakedDeleteRule(Context& context)
-    : ASTCallbackRule(context)
+    : Rule(context)
 {}
 
 void NakedDeleteRule::RegisterASTMatcherCallback(MatchFinder& finder)

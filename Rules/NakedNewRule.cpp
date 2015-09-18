@@ -14,7 +14,7 @@ using namespace clang;
 using namespace clang::ast_matchers;
 
 NakedNewRule::NakedNewRule(Context& context)
-    : ASTCallbackRule(context)
+    : Rule(context)
 {}
 
 void NakedNewRule::RegisterASTMatcherCallback(MatchFinder& finder)

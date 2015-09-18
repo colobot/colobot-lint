@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Rules/ASTCallbackRule.h"
+#include "Rules/Rule.h"
 
 #include <clang/ASTMatchers/ASTMatchFinder.h>
 
 #include <unordered_map>
 
-class PossibleForwardDeclarationRule : public ASTCallbackRule,
+class PossibleForwardDeclarationRule : public Rule,
                                        public clang::ast_matchers::MatchFinder::MatchCallback
 {
 public:

@@ -1,13 +1,18 @@
 #pragma once
 
-#include "Rules/DirectASTConsumerRule.h"
+#include "Rules/Rule.h"
 
-class LicenseInHeaderRule : public DirectASTConsumerRule
+#include <clang/ASTMatchers/ASTMatchFinder.h>
+
+class LicenseInHeaderRule : public Rule,
+                            public clang::ast_matchers::MatchFinder::MatchCallback
 {
 public:
     LicenseInHeaderRule(Context& context);
 
-    void HandleTranslationUnit(clang::ASTContext &context) override;
+    void RegisterASTMatcherCallback(clang::ast_matchers::MatchFinder& finder);
+
+    void run(const clang::ast_matchers::MatchFinder::MatchResult& Result) override;
 
     static const char* GetName() { return "LicenseInHeaderRule"; }
 

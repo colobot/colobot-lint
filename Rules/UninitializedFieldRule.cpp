@@ -13,7 +13,7 @@ using namespace clang;
 using namespace clang::ast_matchers;
 
 UninitializedFieldRule::UninitializedFieldRule(Context& context)
-    : ASTCallbackRule(context)
+    : Rule(context)
 {}
 
 void UninitializedFieldRule::RegisterASTMatcherCallback(MatchFinder& finder)

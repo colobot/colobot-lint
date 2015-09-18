@@ -11,7 +11,7 @@ using namespace llvm;
 using namespace clang;
 
 TodoRule::TodoRule(Context& context)
-    : ASTCallbackRule(context),
+    : Rule(context),
       m_todoPattern("(TODO.*?)(\\s*)?(\\*/)?$")
 {}
 

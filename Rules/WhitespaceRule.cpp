@@ -4,19 +4,30 @@
 #include "Common/FilenameHelper.h"
 #include "Common/OutputPrinter.h"
 #include "Common/SourceLocationHelper.h"
+#include "Common/TranslationUnitMatcher.h"
 
 #include <clang/AST/ASTContext.h>
 
 using namespace clang;
+using namespace clang::ast_matchers;
 using namespace llvm;
 
 WhitespaceRule::WhitespaceRule(Context& context)
-    : DirectASTConsumerRule(context)
+    : Rule(context)
 {}
 
-void WhitespaceRule::HandleTranslationUnit(ASTContext& context)
+void WhitespaceRule::RegisterASTMatcherCallback(ast_matchers::MatchFinder& finder)
 {
-    SourceManager& sourceManager = context.getSourceManager();
+    finder.addMatcher(translationUnitDecl().bind("translationUnitDecl"), this);
+}
+
+void WhitespaceRule::run(const ast_matchers::MatchFinder::MatchResult& result)
+{
+    const TranslationUnitDecl* translationUnitDeclaration = result.Nodes.getNodeAs<TranslationUnitDecl>("translationUnitDecl");
+    if (translationUnitDeclaration == nullptr)
+        return;
+
+    SourceManager& sourceManager = *result.SourceManager;
 
     FileID mainFileID = m_context.sourceLocationHelper.GetMainFileID(sourceManager);
 

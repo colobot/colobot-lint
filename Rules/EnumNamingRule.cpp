@@ -11,7 +11,7 @@ using namespace clang;
 using namespace clang::ast_matchers;
 
 EnumNamingRule::EnumNamingRule(Context& context)
-    : ASTCallbackRule(context),
+    : Rule(context),
       m_enumNamePattern(UPPER_CAMEL_CASE_PATTERN),
       m_enumConstantPattern(UPPER_CAMEL_CASE_PATTERN)
 {}

@@ -15,7 +15,7 @@ using namespace clang::ast_matchers;
 
 
 VariableNamingRule::VariableNamingRule(Context& context)
-    : ASTCallbackRule(context),
+    : Rule(context),
       m_localVariableNamePattern(LOWER_CAMEL_CASE_PATTERN),
       m_nonConstGlobalVariableNamePattern(std::string("g_") + LOWER_CAMEL_CASE_PATTERN),
       m_constGlobalVariableNamePattern(ALL_CAPS_UNDERSCORE_PATTERN),
