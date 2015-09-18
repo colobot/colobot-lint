@@ -70,13 +70,13 @@ std::vector<std::unique_ptr<ASTCallbackRule>> CreateASTRules(Context& context)
     AddRule<OldStyleNullPointerRule>(rules, context);
     AddRule<UnusedForwardDeclarationRule>(rules, context);
     AddRule<PossibleForwardDeclarationRule>(rules, context);
+    AddRule<BlockPlacementRule>(rules, context);
     return rules;
 }
 
 std::vector<std::unique_ptr<DirectASTConsumerRule>> CreateDirectASTConsumerRules(Context& context)
 {
     std::vector<std::unique_ptr<DirectASTConsumerRule>> rules;
-    AddRule<BlockPlacementRule>(rules, context);
     AddRule<WhitespaceRule>(rules, context);
     AddRule<LicenseInHeaderRule>(rules, context);
     return rules;

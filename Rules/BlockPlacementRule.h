@@ -1,18 +1,21 @@
 #pragma once
 
-#include "Rules/DirectASTConsumerRule.h"
+#include "Rules/ASTCallbackRule.h"
 
+#include <clang/ASTMatchers/ASTMatchFinder.h>
 #include <clang/AST/RecursiveASTVisitor.h>
 
 #include <unordered_set>
 
-class BlockPlacementRule : public DirectASTConsumerRule,
+class BlockPlacementRule : public ASTCallbackRule,
+                           public clang::ast_matchers::MatchFinder::MatchCallback,
                            public clang::RecursiveASTVisitor<BlockPlacementRule>
 {
 public:
     BlockPlacementRule(Context& context);
 
-    void HandleTranslationUnit(clang::ASTContext &context) override;
+    void RegisterASTMatcherCallback(clang::ast_matchers::MatchFinder& finder) override;
+    void run(const clang::ast_matchers::MatchFinder::MatchResult& result) override;
 
     bool VisitDecl(clang::Decl* declaration);
     bool VisitStmt(clang::Stmt* statement);
@@ -22,8 +25,7 @@ public:
 private:
     bool IsDeclarationOpeningBracePlacedCorrectly(const clang::SourceLocation& locStart,
                                                   const clang::SourceLocation& locEnd);
-    bool IsStatementOpeningBracePlacedCorrectly(const clang::SourceLocation& parentStartLocation,
-                                                const clang::SourceLocation& openingBraceLocation);
+    bool IsStatementOpeningBracePlacedCorrectly(const clang::SourceLocation& openingBraceLocation);
     bool IsClosingBracePlacedCorrectly(const clang::SourceLocation& locStart,
                                        const clang::SourceLocation& locEnd);
 
@@ -35,7 +37,7 @@ private:
 
     void ReportViolation(const clang::SourceLocation& location, ViolationType type);
 
-    clang::ASTContext* m_astContext;
+    clang::ASTContext* m_astContext = nullptr;
     // forbidden lines are where we know we have closing braces
     // of previously visited statements or declarations
     std::unordered_set<int> m_forbiddenLineNumbers;

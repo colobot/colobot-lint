@@ -5,26 +5,44 @@
 #include "Common/SourceLocationHelper.h"
 
 #include <clang/AST/ASTContext.h>
+#include <clang/ASTMatchers/ASTMatchers.h>
 #include <clang/AST/Decl.h>
 #include <clang/AST/Stmt.h>
 
 #include <boost/format.hpp>
 
 using namespace clang;
+using namespace clang::ast_matchers;
+using namespace llvm;
+
+namespace clang
+{
+namespace ast_matchers
+{
+const internal::VariadicDynCastAllOfMatcher<Decl, TranslationUnitDecl> translationUnitDecl;
+}
+} // namespace clang
 
 BlockPlacementRule::BlockPlacementRule(Context& context)
-    : DirectASTConsumerRule(context),
-      m_astContext(nullptr)
+    : ASTCallbackRule(context)
 {}
 
-void BlockPlacementRule::HandleTranslationUnit(ASTContext &context)
+void BlockPlacementRule::RegisterASTMatcherCallback(ast_matchers::MatchFinder& finder)
 {
+    finder.addMatcher(translationUnitDecl().bind("translationUnit"), this);
+}
+
+void BlockPlacementRule::run(const ast_matchers::MatchFinder::MatchResult& result)
+{
+    const TranslationUnitDecl* translationUnitDeclaration = result.Nodes.getNodeAs<TranslationUnitDecl>("translationUnit");
+    if (translationUnitDeclaration == nullptr)
+        return;
+
     m_forbiddenLineNumbers.clear();
     m_reportedLineNumbers.clear();
 
-    TranslationUnitDecl* decl = context.getTranslationUnitDecl();
-    m_astContext = &context;
-    TraverseDecl(decl);
+    m_astContext = result.Context;
+    TraverseDecl(const_cast<TranslationUnitDecl*>(translationUnitDeclaration));
 }
 
 bool BlockPlacementRule::VisitDecl(Decl* declaration)
@@ -93,28 +111,11 @@ bool BlockPlacementRule::VisitStmt(Stmt* statement)
 
     // compound statement is name for a group of brace-enclosed statement(s)
     //  for example: if (x) { foo(); }
-    CompoundStmt* compoundStatement = dyn_cast_or_null<CompoundStmt>(statement);
-    if (compoundStatement == nullptr)
+    const CompoundStmt* compountStatment = dyn_cast_or_null<CompoundStmt>(statement);
+    if (compountStatment == nullptr)
         return true; // recurse further
 
-    SourceLocation openingBraceLocation = compoundStatement->getLBracLoc();
-    SourceLocation parentScopeStartLocation;
-
-    auto parents = m_astContext->getParents(*statement);
-    if (parents.size() > 0)
-    {
-        SourceRange range = parents.front().getSourceRange();
-        if (range.isValid())
-            parentScopeStartLocation = range.getBegin();
-        else
-            parentScopeStartLocation = statement->getLocStart();
-    }
-    else
-    {
-        parentScopeStartLocation = statement->getLocStart();
-    }
-
-    if (! IsStatementOpeningBracePlacedCorrectly(parentScopeStartLocation, openingBraceLocation))
+    if (! IsStatementOpeningBracePlacedCorrectly(compountStatment->getLBracLoc()))
         ReportViolation(statement->getLocStart(), ViolationType::OpeningBrace);
 
     if (! IsClosingBracePlacedCorrectly(statement->getLocStart(), statement->getLocEnd()))
@@ -131,10 +132,6 @@ bool BlockPlacementRule::VisitStmt(Stmt* statement)
 bool BlockPlacementRule::IsDeclarationOpeningBracePlacedCorrectly(const SourceLocation& locStart,
                                                                   const SourceLocation& locEnd)
 {
-    int startOffset = m_astContext->getSourceManager().getFileOffset(locStart);
-    int endOffset = m_astContext->getSourceManager().getFileOffset(locEnd);
-    const char* charData = m_astContext->getSourceManager().getCharacterData(locStart);
-
     /*
      * In declarations, we scan from beginning of declaration until first opening brace
      *  for example: class Foo ... {
@@ -142,9 +139,14 @@ bool BlockPlacementRule::IsDeclarationOpeningBracePlacedCorrectly(const SourceLo
      *             start          end
      */
 
+    int startOffset = m_astContext->getSourceManager().getFileOffset(locStart);
+    int endOffset = m_astContext->getSourceManager().getFileOffset(locEnd);
+    int scanRange = endOffset - startOffset;
+
+    const char* charData = m_astContext->getSourceManager().getCharacterData(locStart);
+
     bool haveNewline = false;
     bool haveNonWhitespaceInLine = false;
-    int scanRange = endOffset - startOffset;
     for (int i = 0; i <= scanRange; ++i)
     {
         char ch = charData[i];
@@ -166,16 +168,11 @@ bool BlockPlacementRule::IsDeclarationOpeningBracePlacedCorrectly(const SourceLo
     return false;
 }
 
-bool BlockPlacementRule::IsStatementOpeningBracePlacedCorrectly(const SourceLocation& parentStartLocation,
-                                                                const SourceLocation& openingBraceLocation)
+bool BlockPlacementRule::IsStatementOpeningBracePlacedCorrectly(const SourceLocation& openingBraceLocation)
 {
-    int startOffset = m_astContext->getSourceManager().getFileOffset(parentStartLocation);
-    int endOffset = m_astContext->getSourceManager().getFileOffset(openingBraceLocation);
-    const char* charData = m_astContext->getSourceManager().getCharacterData(parentStartLocation);
-
     /*
      * In statements, we already know location of opening brace, but we scan backwards to check if there
-     *  isn't something else before, for example:
+     * isn't something else before, for example:
      *  while (true)
      *  {
      *  ^       if (...) { ... }
@@ -183,12 +180,16 @@ bool BlockPlacementRule::IsStatementOpeningBracePlacedCorrectly(const SourceLoca
      * (parent)       opening brace (checked statement)
      */
 
+    int columnNumber = m_astContext->getSourceManager().getPresumedColumnNumber(openingBraceLocation);
+    int scanRange = columnNumber;
+
+    const char* charData = m_astContext->getSourceManager().getCharacterData(openingBraceLocation);
+
     bool haveBrace = false;
     bool haveNonWhitespaceInLine = false;
-    int scanRange = endOffset - startOffset;
-    for (int i = scanRange; i >= 0; --i)
+    for (int i = 0; i <= scanRange; ++i)
     {
-        char ch = charData[i];
+        char ch = charData[-i];
         if (ch == '{')
         {
             haveBrace = true;
@@ -209,10 +210,6 @@ bool BlockPlacementRule::IsStatementOpeningBracePlacedCorrectly(const SourceLoca
 bool BlockPlacementRule::IsClosingBracePlacedCorrectly(const SourceLocation& locStart,
                                                        const SourceLocation& locEnd)
 {
-    int startOffset = m_astContext->getSourceManager().getFileOffset(locStart);
-    int endOffset = m_astContext->getSourceManager().getFileOffset(locEnd);
-    const char* charData = m_astContext->getSourceManager().getCharacterData(locStart);
-
      /*
      * Closing braces are checked like opening braces in statements, by scanning backwards:
      *  class Foo {
@@ -221,9 +218,14 @@ bool BlockPlacementRule::IsClosingBracePlacedCorrectly(const SourceLocation& loc
      *                          end
      */
 
+    int startOffset = m_astContext->getSourceManager().getFileOffset(locStart);
+    int endOffset = m_astContext->getSourceManager().getFileOffset(locEnd);
+    int scanRange = endOffset - startOffset;
+
+    const char* charData = m_astContext->getSourceManager().getCharacterData(locStart);
+
     bool haveBrace = false;
     bool haveNonWhitespaceInLine = false;
-    int scanRange = endOffset - startOffset;
     for (int i = scanRange; i >= 0; --i)
     {
         char ch = charData[i];
