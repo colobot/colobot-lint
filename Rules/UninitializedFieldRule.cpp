@@ -2,6 +2,7 @@
 
 #include "Common/Context.h"
 #include "Common/OutputPrinter.h"
+#include "Common/PodHelper.h"
 #include "Common/SourceLocationHelper.h"
 
 #include <clang/AST/Decl.h>
@@ -144,6 +145,9 @@ UninitializedFieldRule::StringRefSet UninitializedFieldRule::GetCandidateFieldsL
 
         QualType type = fieldDeclaration->getType();
         if (! type.isPODType(*context))
+            continue;
+
+        if (IsRecordTypeWithoutDataMembers(type))
             continue;
 
         if (fieldDeclaration->isAnonymousStructOrUnion())

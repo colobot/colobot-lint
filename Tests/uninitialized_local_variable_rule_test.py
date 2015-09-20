@@ -63,11 +63,25 @@ class UnintializedLocalVariableRuleTest(test_support.TestBase):
             ],
             expected_errors = [])
 
-    def test_skip_function_parameters(self):
+    def test_ignore_function_parameters(self):
         self.assert_colobot_lint_result(
             source_file_lines = [
                 'void Foo(int x, int y, int z);',
                 'void Bar(int x, int y, int z) {}',
+            ],
+            expected_errors = [])
+
+    def test_ignore_pod_types_with_no_data_members(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                'struct PodWithoutData {};',
+                'struct DerivedPodWithoutData : PodWithoutData {};',
+                '',
+                'void Foo()',
+                '{',
+                '    PodWithoutData pod1;',
+                '    DerivedPodWithoutData pod2;',
+                '}'
             ],
             expected_errors = [])
 

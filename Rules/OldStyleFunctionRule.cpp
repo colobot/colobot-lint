@@ -2,9 +2,9 @@
 
 #include "Common/Context.h"
 #include "Common/OutputPrinter.h"
+#include "Common/PodHelper.h"
 #include "Common/SourceLocationHelper.h"
 #include "Common/StringRefHash.h"
-#include "Common/UninitializedPodVariableHelper.h"
 
 #include <clang/AST/RecursiveASTVisitor.h>
 #include <clang/AST/Decl.h>

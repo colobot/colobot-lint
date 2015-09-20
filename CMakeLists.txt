@@ -52,8 +52,8 @@ set(COLOBOT_LINT_SRCS
     ActionFactories.cpp
     Common/FilenameHelper.cpp
     Common/OutputPrinter.cpp
+    Common/PodHelper.cpp
     Common/SourceLocationHelper.cpp
-    Common/UninitializedPodVariableHelper.cpp
     Generators/DependencyGraphGenerator.cpp
     Generators/DeploymentGraphGenerator.cpp
     Generators/GeneratorsFactory.cpp
@@ -65,8 +65,8 @@ set(COLOBOT_LINT_SRCS
     Rules/EnumNamingRule.cpp
     Rules/FunctionNamingRule.cpp
     Rules/ImplicitBoolCastRule.cpp
-    Rules/InconsistentDeclarationParameterNameRule.cpp
     Rules/IncludeStyleRule.cpp
+    Rules/InconsistentDeclarationParameterNameRule.cpp
     Rules/LicenseInHeaderRule.cpp
     Rules/NakedDeleteRule.cpp
     Rules/NakedNewRule.cpp

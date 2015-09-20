@@ -215,6 +215,20 @@ class UninitializedFieldRuleTest(test_support.TestBase):
                 }
             ])
 
+    def test_ignore_pod_types_with_no_data_members(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                'struct PodWithoutData {};',
+                'struct DerivedPodWithoutData : PodWithoutData {};',
+                '',
+                'struct Foo',
+                '{',
+                '    PodWithoutData pod1;',
+                '    DerivedPodWithoutData pod2;',
+                '};'
+            ],
+            expected_errors = [])
+
     def test_ignore_deleted_constructors(self):
         self.assert_colobot_lint_result(
             source_file_lines = [
