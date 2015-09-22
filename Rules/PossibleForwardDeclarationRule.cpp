@@ -36,6 +36,8 @@ PossibleForwardDeclarationRule::PossibleForwardDeclarationRule(Context& context)
 
 void PossibleForwardDeclarationRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
+    finder.addMatcher(recordDecl().bind("recordDecl"), this);
+    finder.addMatcher(declRefExpr().bind("declRefExpr"), this);
     finder.addMatcher(valueDecl(hasType(CreateTagTypeMatcher())).bind("declWithTagType"), this);
     finder.addMatcher(expr(hasType(CreateTagTypeMatcher())).bind("exprWithTagType"), this);
 }
@@ -44,9 +46,29 @@ void PossibleForwardDeclarationRule::run(const MatchFinder::MatchResult& result)
 {
     m_sourceManager = result.SourceManager;
 
+    const DeclRefExpr* declarationReferenceExpression = result.Nodes.getNodeAs<DeclRefExpr>("declRefExpr");
+    if (declarationReferenceExpression != nullptr)
+        return HandleDeclarationReferenceExpression(declarationReferenceExpression);
+
+    const CXXRecordDecl* recordDeclaration = result.Nodes.getNodeAs<CXXRecordDecl>("recordDecl");
+    if (recordDeclaration != nullptr)
+        return HandleRecordDeclaration(recordDeclaration);
+
     const TagDecl* tagDeclaration = result.Nodes.getNodeAs<TagDecl>("tagDecl");
-    if (! IsCandidateForForwardDeclaration(tagDeclaration))
+    if (tagDeclaration == nullptr)
         return;
+
+    if (IsInBlacklistedProjectHeader(tagDeclaration))
+        return; // already blacklisted, so no point of checking further
+
+    if (! IsInDirectlyIncludedProjectHeader(tagDeclaration))
+        return;
+
+    if (! IsForwardDeclarationPossible(tagDeclaration))
+    {
+        BlacklistIncludedProjectHeader(tagDeclaration);
+        return;
+    }
 
     tagDeclaration = tagDeclaration->getCanonicalDecl();
 
@@ -63,12 +85,35 @@ void PossibleForwardDeclarationRule::run(const MatchFinder::MatchResult& result)
         return HandleExpressionWithTagType(tagDeclaration, expressionWithTagType);
 }
 
-bool PossibleForwardDeclarationRule::IsCandidateForForwardDeclaration(const TagDecl* tagDeclaration)
+bool PossibleForwardDeclarationRule::IsInBlacklistedProjectHeader(const Decl* declaration)
 {
-    SourceLocation tagDeclarationLocation = tagDeclaration->getLocation();
+    FileID tagDeclarationFileID = m_sourceManager->getFileID(declaration->getLocation());
+    bool result = m_blacklistedProjectHeaders.count(tagDeclarationFileID) > 0;
+    return result;
+}
+
+void PossibleForwardDeclarationRule::BlacklistIncludedProjectHeader(const Decl* declaration)
+{
+    FileID tagDeclarationFileID = m_sourceManager->getFileID(declaration->getLocation());
+    m_blacklistedProjectHeaders.insert(tagDeclarationFileID);
+}
+bool PossibleForwardDeclarationRule::IsInDirectlyIncludedProjectHeader(const Decl* declaration)
+{
+    SourceLocation tagDeclarationLocation = declaration->getLocation();
     if (! m_context.sourceLocationHelper.IsLocationInProjectSourceFile(tagDeclarationLocation, *m_sourceManager))
         return false;
 
+    FileID tagDeclarationFileID = m_sourceManager->getFileID(declaration->getLocation());
+    SourceLocation tagDeclarationIncludeLocation = m_sourceManager->getIncludeLoc(tagDeclarationFileID);
+    FileID tagDeclarationIncludeFileID = m_sourceManager->getFileID(tagDeclarationIncludeLocation);
+    FileID mainFileID = m_context.sourceLocationHelper.GetMainFileID(*m_sourceManager);
+
+    // we want declaration from directly included project header (no indirect dependencies)
+    return tagDeclarationFileID != mainFileID && tagDeclarationIncludeFileID == mainFileID;
+}
+
+bool PossibleForwardDeclarationRule::IsForwardDeclarationPossible(const TagDecl* tagDeclaration)
+{
     // already forward declared
     if (tagDeclaration->getDefinition() == nullptr)
         return false;
@@ -82,13 +127,52 @@ bool PossibleForwardDeclarationRule::IsCandidateForForwardDeclaration(const TagD
     if (llvm::isa<ClassTemplateSpecializationDecl>(tagDeclaration))
         return false;
 
-    FileID tagDeclarationFileID = m_sourceManager->getFileID(tagDeclaration->getLocation());
-    SourceLocation tagDeclarationIncludeLocation = m_sourceManager->getIncludeLoc(tagDeclarationFileID);
-    FileID tagDeclarationIncludeFileID = m_sourceManager->getFileID(tagDeclarationIncludeLocation);
-    FileID mainFileID = m_context.sourceLocationHelper.GetMainFileID(*m_sourceManager);
+    // other cases seem ok
+    return true;
+}
 
-    // we want declaration from directly included project header (no indirect dependencies)
-    return tagDeclarationFileID != mainFileID && tagDeclarationIncludeFileID == mainFileID;
+void PossibleForwardDeclarationRule::HandleDeclarationReferenceExpression(const clang::DeclRefExpr* declarationReferenceExpression)
+{
+    SourceLocation location = declarationReferenceExpression->getLocation();
+    if (! m_context.sourceLocationHelper.IsLocationOfInterest(GetName(), location, *m_sourceManager))
+        return;
+
+    const Decl* declaration = declarationReferenceExpression->getDecl();
+    if (IsInDirectlyIncludedProjectHeader(declaration))
+    {
+        BlacklistIncludedProjectHeader(declaration);
+    }
+}
+
+void PossibleForwardDeclarationRule::HandleRecordDeclaration(const CXXRecordDecl* recordDeclaration)
+{
+    SourceLocation location = recordDeclaration->getLocation();
+    if (! m_context.sourceLocationHelper.IsLocationOfInterest(GetName(), location, *m_sourceManager))
+        return;
+
+    const CXXRecordDecl* recordDefinition = recordDeclaration->getDefinition();
+    if (recordDefinition == nullptr)
+        return;
+
+    for (const auto& base : recordDefinition->bases())
+    {
+        const RecordType* baseRecordType = base.getType()->getAs<RecordType>();
+        if (baseRecordType == nullptr)
+            continue;
+
+        const RecordDecl* baseDeclaration = baseRecordType->getDecl();
+        if (baseDeclaration == nullptr)
+            continue;
+
+        const RecordDecl* baseDefinition = baseDeclaration->getDefinition();
+        if (baseDefinition == nullptr)
+            continue;
+
+        if (IsInDirectlyIncludedProjectHeader(baseDefinition))
+        {
+            BlacklistIncludedProjectHeader(baseDefinition);
+        }
+    }
 }
 
 void PossibleForwardDeclarationRule::HandleDeclarationWithTagType(const TagDecl* tagDeclaration,
@@ -110,6 +194,7 @@ void PossibleForwardDeclarationRule::HandleDeclarationWithTagType(const TagDecl*
     else
     {
         m_candidateForwardDeclarations.erase(tagDeclaration);
+        BlacklistIncludedProjectHeader(tagDeclaration);
     }
 }
 
@@ -121,6 +206,7 @@ void PossibleForwardDeclarationRule::HandleExpressionWithTagType(const TagDecl* 
         return;
 
     m_candidateForwardDeclarations.erase(tagDeclaration);
+    BlacklistIncludedProjectHeader(tagDeclaration);
 }
 
 void PossibleForwardDeclarationRule::onEndOfTranslationUnit()
@@ -129,7 +215,10 @@ void PossibleForwardDeclarationRule::onEndOfTranslationUnit()
     std::vector<DeclarationInfoPair> forwardDeclarations;
     for (const DeclarationInfoPair& forwardDeclaration : m_candidateForwardDeclarations)
     {
-        forwardDeclarations.push_back(forwardDeclaration);
+        if (! IsInBlacklistedProjectHeader(forwardDeclaration.first))
+        {
+            forwardDeclarations.push_back(forwardDeclaration);
+        }
     }
 
     std::sort(forwardDeclarations.begin(),

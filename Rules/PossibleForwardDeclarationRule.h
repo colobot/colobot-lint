@@ -4,6 +4,7 @@
 
 #include <clang/ASTMatchers/ASTMatchFinder.h>
 
+#include <set>
 #include <unordered_map>
 
 class PossibleForwardDeclarationRule : public Rule,
@@ -21,7 +22,13 @@ public:
     static const char* GetName() { return "PossibleForwardDeclarationRule"; }
 
 private:
-    bool IsCandidateForForwardDeclaration(const clang::TagDecl* tagDeclaration);
+    bool IsInBlacklistedProjectHeader(const clang::Decl* declaration);
+    void BlacklistIncludedProjectHeader(const clang::Decl* declaration);
+    bool IsInDirectlyIncludedProjectHeader(const clang::Decl* declaration);
+    bool IsForwardDeclarationPossible(const clang::TagDecl* tagDeclaration);
+
+    void HandleDeclarationReferenceExpression(const clang::DeclRefExpr* declarationReferenceExpression);
+    void HandleRecordDeclaration(const clang::CXXRecordDecl* recordDeclaration);
     void HandleDeclarationWithTagType(const clang::TagDecl* tagDeclaration,
                                       const clang::Decl* declarationWithTagType,
                                       bool isPointerOrReferenceType);
@@ -31,4 +38,5 @@ private:
 private:
     clang::SourceManager* m_sourceManager;
     std::unordered_map<const clang::TagDecl*, clang::SourceLocation> m_candidateForwardDeclarations;
+    std::set<clang::FileID> m_blacklistedProjectHeaders;
 };

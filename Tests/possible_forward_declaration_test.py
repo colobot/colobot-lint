@@ -91,6 +91,19 @@ class PossibleForwardDeclarationRuleTest(test_support.TestBase):
             ],
             expected_errors = [])
 
+    def test_forward_declaration_impossible_with_type_used_as_field(self):
+        self.assert_result_with_header_files(
+            main_file_lines_without_includes = [
+                'class Bar',
+                '{',
+                '    Foo foo;',
+                '};'
+            ],
+            project_header_lines = [
+                'class Foo {};'
+            ],
+            expected_errors = [])
+
     def test_forward_declaration_impossible_with_template_class(self):
         self.assert_result_with_header_files(
             main_file_lines_without_includes = [
@@ -119,6 +132,17 @@ class PossibleForwardDeclarationRuleTest(test_support.TestBase):
             ],
             project_header_lines = [
                 'enum Foo {};'
+            ],
+            expected_errors = [])
+
+    def test_forward_declaration_impossible_with_typedef(self):
+        self.assert_result_with_header_files(
+            main_file_lines_without_includes = [
+                'void FooFunc(FooConstRefAlias);'
+            ],
+            project_header_lines = [
+                'class Foo {};',
+                'typedef const Foo& FooConstRefAlias;'
             ],
             expected_errors = [])
 
@@ -184,5 +208,54 @@ class PossibleForwardDeclarationRuleTest(test_support.TestBase):
             ],
             indirect_project_header_lines = [
                 'class Foo {};'
+            ],
+            expected_errors = [])
+
+    def test_blacklist_project_header_with_types_which_cannot_be_forward_declared_whole_type(self):
+        self.assert_result_with_header_files(
+            main_file_lines_without_includes = [
+                'void FooFunc(Foo*);',
+                'void BarFunc(Bar);',
+            ],
+            project_header_lines = [
+                'class Foo {};',
+                'class Bar {};'
+            ],
+            expected_errors = [])
+
+    def test_blacklist_project_header_with_types_which_cannot_be_forward_declared_base_class(self):
+        self.assert_result_with_header_files(
+            main_file_lines_without_includes = [
+                'void FooFunc(Foo*);',
+                'class Derived : public Base {};'
+            ],
+            project_header_lines = [
+                'class Foo {};',
+                'class Base {};'
+            ],
+            expected_errors = [])
+
+    def test_blacklist_project_header_with_types_which_cannot_be_forward_declared_typedef(self):
+        self.assert_result_with_header_files(
+            main_file_lines_without_includes = [
+                'void FooFunc(Foo*);',
+                'void BarFunc(BarAlias);',
+            ],
+            project_header_lines = [
+                'class Foo {};',
+                'class Bar {};',
+                'typedef Bar BarAlias;'
+            ],
+            expected_errors = [])
+
+    def test_blacklist_project_header_with_types_which_cannot_be_forward_declared_use_of_const(self):
+        self.assert_result_with_header_files(
+            main_file_lines_without_includes = [
+                'void FooFunc(Foo*);',
+                'const int ANOTHER_GLOBAL = GLOBAL + 1;',
+            ],
+            project_header_lines = [
+                'class Foo {};',
+                'const int GLOBAL = 1;'
             ],
             expected_errors = [])
