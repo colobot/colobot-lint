@@ -74,7 +74,8 @@ class PossibleForwardDeclarationRuleTest(test_support.TestBase):
     def test_forward_declaration_impossible_with_whole_type(self):
         self.assert_result_with_header_files(
             main_file_lines_without_includes = [
-                'void FooFunc(Foo);'
+                'void FooFunc1(const Foo&);',
+                'void FooFunc2(Foo);'
             ],
             project_header_lines = [
                 'class Foo {};'
@@ -84,7 +85,8 @@ class PossibleForwardDeclarationRuleTest(test_support.TestBase):
     def test_forward_declaration_impossible_with_return_type(self):
         self.assert_result_with_header_files(
             main_file_lines_without_includes = [
-                'Foo FooFunc();'
+                'void FooFunc1(const Foo&);',
+                'Foo FooFunc2();'
             ],
             project_header_lines = [
                 'class Foo {};'
@@ -97,7 +99,8 @@ class PossibleForwardDeclarationRuleTest(test_support.TestBase):
                 'class Bar',
                 '{',
                 '    Foo foo;',
-                '};'
+                '};',
+                'void FooFunc(Foo&);'
             ],
             project_header_lines = [
                 'class Foo {};'
@@ -118,7 +121,49 @@ class PossibleForwardDeclarationRuleTest(test_support.TestBase):
         self.assert_result_with_header_files(
             main_file_lines_without_includes = [
                 'template<typename T> class FooClassTemplate { void Foo(T); };',
-                'void FooFunc(FooClassTemplate<Foo>&);'
+                'void FooFunc(FooClassTemplate<Foo>&);',
+                'void FooFunc(Foo&);'
+            ],
+            project_header_lines = [
+                'class Foo {};'
+            ],
+            expected_errors = [])
+
+    def test_forward_declaration_impossible_with_return_template_argument_type(self):
+        self.assert_result_with_header_files(
+            main_file_lines_without_includes = [
+                'template<typename T> class FooClassTemplate { void Foo(T); };',
+                'FooClassTemplate<Foo> FooFunc();',
+                'void FooFunc(Foo&);'
+            ],
+            project_header_lines = [
+                'class Foo {};'
+            ],
+            expected_errors = [])
+
+    def test_forward_declaration_impossible_with_elaborated_template_argument_type(self):
+        self.assert_result_with_header_files(
+            main_file_lines_without_includes = [
+                'namespace NS',
+                '{',
+                '  template<typename T> class FooClassTemplate { void Foo(T); };',
+                '}',
+                'void FooFunc(NS::FooClassTemplate<Foo>&);',
+                'void FooFunc(Foo&);'
+            ],
+            project_header_lines = [
+                'class Foo {};'
+            ],
+            expected_errors = [])
+
+    def test_forward_declaration_impossible_with_array_type(self):
+        self.assert_result_with_header_files(
+            main_file_lines_without_includes = [
+                'class Bar',
+                '{',
+                '   Foo foo[4];',
+                '};',
+                'void FooFunc(Foo&);'
             ],
             project_header_lines = [
                 'class Foo {};'
