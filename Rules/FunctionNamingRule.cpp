@@ -102,10 +102,11 @@ void FunctionNamingRule::HandleDeclaration(const char* type,
     if (! m_context.sourceLocationHelper.IsLocationOfInterest(GetName(), location, sourceManager))
         return;
 
-    std::string fullyQualifiedName = declaration->getQualifiedNameAsString();
-    if (m_reportedFunctionNames.count(fullyQualifiedName) > 0)
+    const FunctionDecl* canonicalDeclaration = declaration->getCanonicalDecl();
+    if (m_visitedDeclarations.count(canonicalDeclaration) > 0)
         return; // already reported
 
+    m_visitedDeclarations.insert(canonicalDeclaration);
 
     auto name = declaration->getName();
     if (! boost::regex_match(name.begin(), name.end(), m_functionOrMethodNamePattern))
@@ -118,7 +119,5 @@ void FunctionNamingRule::HandleDeclaration(const char* type,
                     % name.str()),
                 location,
                 sourceManager);
-
-        m_reportedFunctionNames.insert(fullyQualifiedName);
     }
 }

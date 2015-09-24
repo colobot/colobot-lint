@@ -4,7 +4,7 @@
 
 #include <clang/ASTMatchers/ASTMatchFinder.h>
 
-#include <unordered_set>
+#include <llvm/ADT/DenseSet.h>
 
 class InconsistentDeclarationParameterNameRule : public Rule,
                                                  public clang::ast_matchers::MatchFinder::MatchCallback
@@ -22,5 +22,5 @@ private:
     bool HasInconsitentDeclarationParameters(const clang::FunctionDecl* functionDeclaration);
 
 private:
-    std::unordered_set<std::string> m_reportedFunctions;
+    llvm::DenseSet<const clang::FunctionDecl*> m_visitedDeclarations;
 };

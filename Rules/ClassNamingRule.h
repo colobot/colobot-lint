@@ -4,7 +4,8 @@
 
 #include <clang/ASTMatchers/ASTMatchFinder.h>
 
-#include <unordered_set>
+#include <llvm/ADT/DenseSet.h>
+
 #include <boost/regex.hpp>
 
 class ClassNamingRule : public Rule,
@@ -22,5 +23,5 @@ public:
 private:
     boost::regex m_classNamePattern;
     boost::regex m_structOrUnionNamePattern;
-    std::unordered_set<std::string> m_reportedNames;
+    llvm::DenseSet<const clang::RecordDecl*> m_visitedDeclarations;
 };

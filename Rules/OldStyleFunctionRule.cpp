@@ -9,11 +9,19 @@
 #include <clang/AST/RecursiveASTVisitor.h>
 #include <clang/AST/Decl.h>
 
+#include <llvm/ADT/SmallSet.h>
+#include <llvm/ADT/SmallVector.h>
+
 #include <boost/format.hpp>
 
 using namespace clang;
 using namespace clang::ast_matchers;
 
+namespace
+{
+
+const int MAX_FEW_OLD_STYLE_DECLARATIONS = 4;
+using FirstFewOldStyleDeclarationsContainer = llvm::SmallVector<StringRef, MAX_FEW_OLD_STYLE_DECLARATIONS>;
 
 class OldStyleDeclarationFinder : public RecursiveASTVisitor<OldStyleDeclarationFinder>
 {
@@ -23,17 +31,50 @@ public:
     bool VisitStmt(Stmt* statement);
 
     int GetOldStyleDeclarationsCount() const;
-    const std::vector<StringRef>& GetFirstFewOldStyleDeclarations() const;
+    const FirstFewOldStyleDeclarationsContainer& GetFirstFewOldStyleDeclarations() const;
 
 private:
     bool IsInteresting(const VarDecl* variableDeclaration);
 
 private:
-    std::unordered_set<StringRef> m_oldStyleDeclarations;
-    std::unordered_set<StringRef> m_correctStyleDeclarations;
-    std::vector<StringRef> m_firstFewOldStyleDeclarations;
+    llvm::SmallSet<StringRef, 10> m_oldStyleDeclarations;
+    llvm::SmallSet<StringRef, 10> m_correctStyleDeclarations;
+    FirstFewOldStyleDeclarationsContainer m_firstFewOldStyleDeclarations;
     ASTContext* m_context;
 };
+
+std::string GetShortDeclarationsString(const FirstFewOldStyleDeclarationsContainer& declarations, int totalCount)
+{
+    std::string result;
+    result += "(";
+
+    int count = 0;
+    for (const auto& declaration : declarations)
+    {
+        if (count > 0)
+            result += ", ";
+
+        result += "'";
+        result += declaration.str();
+        result += "'";
+
+        ++count;
+
+        if (count >= 4 && totalCount > count)
+        {
+            result += "... and ";
+            result += std::to_string(totalCount - declarations.size());
+            result += " more";
+            break;
+        }
+    }
+
+    result += ")";
+    return result;
+}
+
+} // anonymous namespace
+
 
 ////////////////////////
 
@@ -81,36 +122,6 @@ void OldStyleFunctionRule::run(const MatchFinder::MatchResult& result)
 
         m_context.reportedOldStyleFunctions.insert(functionDeclaration->getQualifiedNameAsString());
     }
-}
-
-std::string OldStyleFunctionRule::GetShortDeclarationsString(const std::vector<StringRef>& declarations, int totalCount)
-{
-    std::string result;
-    result += "(";
-
-    int count = 0;
-    for (const auto& declaration : declarations)
-    {
-        if (count > 0)
-            result += ", ";
-
-        result += "'";
-        result += declaration.str();
-        result += "'";
-
-        ++count;
-
-        if (count >= 4 && totalCount > count)
-        {
-            result += "... and ";
-            result += std::to_string(totalCount - declarations.size());
-            result += " more";
-            break;
-        }
-    }
-
-    result += ")";
-    return result;
 }
 
 ////////////////////////
@@ -163,7 +174,7 @@ bool OldStyleDeclarationFinder::VisitStmt(Stmt* statement)
     else
     {
         m_oldStyleDeclarations.insert(name);
-        if (m_firstFewOldStyleDeclarations.size() < 4)
+        if (m_firstFewOldStyleDeclarations.size() < MAX_FEW_OLD_STYLE_DECLARATIONS)
             m_firstFewOldStyleDeclarations.push_back(name);
     }
 
@@ -175,7 +186,7 @@ int OldStyleDeclarationFinder::GetOldStyleDeclarationsCount() const
     return m_oldStyleDeclarations.size();
 }
 
-const std::vector<StringRef>& OldStyleDeclarationFinder::GetFirstFewOldStyleDeclarations() const
+const FirstFewOldStyleDeclarationsContainer& OldStyleDeclarationFinder::GetFirstFewOldStyleDeclarations() const
 {
     return m_firstFewOldStyleDeclarations;
 }

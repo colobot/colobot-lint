@@ -4,7 +4,8 @@
 
 #include <clang/ASTMatchers/ASTMatchFinder.h>
 
-#include <unordered_set>
+#include <llvm/ADT/DenseSet.h>
+
 #include <boost/regex.hpp>
 
 class FunctionNamingRule : public Rule,
@@ -26,5 +27,5 @@ private:
 
 private:
     boost::regex m_functionOrMethodNamePattern;
-    std::unordered_set<std::string> m_reportedFunctionNames;
+    llvm::DenseSet<const clang::FunctionDecl*> m_visitedDeclarations;
 };

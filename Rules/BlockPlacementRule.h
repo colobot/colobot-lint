@@ -5,7 +5,7 @@
 #include <clang/ASTMatchers/ASTMatchFinder.h>
 #include <clang/AST/RecursiveASTVisitor.h>
 
-#include <unordered_set>
+#include <llvm/ADT/DenseSet.h>
 
 class BlockPlacementRule : public Rule,
                            public clang::ast_matchers::MatchFinder::MatchCallback,
@@ -40,7 +40,7 @@ private:
     clang::ASTContext* m_astContext = nullptr;
     // forbidden lines are where we know we have closing braces
     // of previously visited statements or declarations
-    std::unordered_set<int> m_forbiddenLineNumbers;
+    llvm::DenseSet<int> m_forbiddenLineNumbers;
     // where problems have already been reported; this is to avoid doubled errors
-    std::unordered_set<int> m_reportedLineNumbers;
+    llvm::DenseSet<int> m_reportedLineNumbers;
 };

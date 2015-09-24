@@ -4,7 +4,6 @@
 #include "Common/OutputPrinter.h"
 #include "Common/SourceLocationHelper.h"
 
-#include <clang/AST/RecursiveASTVisitor.h>
 #include <clang/AST/Decl.h>
 
 #include <boost/format.hpp>
@@ -19,7 +18,7 @@ InconsistentDeclarationParameterNameRule::InconsistentDeclarationParameterNameRu
 
 void InconsistentDeclarationParameterNameRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
-    finder.addMatcher(functionDecl().bind("functionDecl"), this);
+    finder.addMatcher(functionDecl(unless(isImplicit())).bind("functionDecl"), this);
 }
 
 void InconsistentDeclarationParameterNameRule::run(const MatchFinder::MatchResult& result)
@@ -34,12 +33,11 @@ void InconsistentDeclarationParameterNameRule::run(const MatchFinder::MatchResul
     if (! m_context.sourceLocationHelper.IsLocationOfInterest(GetName(), location, sourceManager))
         return;
 
-    if (functionDeclaration->isImplicit())
-        return;
-
-    std::string fullyQualifiedName = functionDeclaration->getQualifiedNameAsString();
-    if (m_reportedFunctions.count(fullyQualifiedName) > 0)
+    const FunctionDecl* canonicalFunctionDeclaration = functionDeclaration->getCanonicalDecl();
+    if (m_visitedDeclarations.count(canonicalFunctionDeclaration) > 0)
         return; // already visited
+
+    m_visitedDeclarations.insert(canonicalFunctionDeclaration);
 
     if (HasInconsitentDeclarationParameters(functionDeclaration))
     {
@@ -47,11 +45,9 @@ void InconsistentDeclarationParameterNameRule::run(const MatchFinder::MatchResul
                 "inconsistent declaration parameter name",
                 Severity::Style,
                 boost::str(boost::format("Function '%s' has other declaration(s) with inconsistently named parameter(s)")
-                    % fullyQualifiedName),
+                    % functionDeclaration->getQualifiedNameAsString()),
                 location,
                 sourceManager);
-
-        m_reportedFunctions.insert(fullyQualifiedName);
     }
 }
 

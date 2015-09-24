@@ -4,8 +4,8 @@
 
 #include <clang/ASTMatchers/ASTMatchFinder.h>
 
-#include <set>
-#include <unordered_map>
+#include <llvm/ADT/DenseMap.h>
+#include <llvm/ADT/DenseSet.h>
 
 class PossibleForwardDeclarationRule : public Rule,
                                        public clang::ast_matchers::MatchFinder::MatchCallback
@@ -37,6 +37,6 @@ private:
 
 private:
     clang::SourceManager* m_sourceManager;
-    std::unordered_map<const clang::TagDecl*, clang::SourceLocation> m_candidateForwardDeclarations;
-    std::set<clang::FileID> m_blacklistedProjectHeaders;
+    llvm::DenseMap<const clang::TagDecl*, clang::SourceLocation> m_candidateForwardDeclarations;
+    llvm::DenseSet<clang::FileID> m_blacklistedProjectHeaders;
 };

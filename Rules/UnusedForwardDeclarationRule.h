@@ -4,8 +4,8 @@
 
 #include <clang/ASTMatchers/ASTMatchFinder.h>
 
-#include <unordered_map>
-#include <unordered_set>
+#include <llvm/ADT/DenseMap.h>
+#include <llvm/ADT/DenseSet.h>
 
 class UnusedForwardDeclarationRule : public Rule,
                                      public clang::ast_matchers::MatchFinder::MatchCallback
@@ -28,6 +28,6 @@ private:
 
 private:
     clang::SourceManager* m_sourceManager = nullptr;
-    std::unordered_set<const clang::TagDecl*> m_definedDeclarations;
-    std::unordered_map<const clang::TagDecl*, int> m_usesOfForwardDeclarations;
+    llvm::DenseSet<const clang::TagDecl*> m_definedDeclarations;
+    llvm::DenseMap<const clang::TagDecl*, int> m_usesOfForwardDeclarations;
 };

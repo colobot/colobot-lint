@@ -4,8 +4,6 @@
 
 #include <clang/ASTMatchers/ASTMatchFinder.h>
 
-#include <unordered_set>
-
 class OldStyleFunctionRule : public Rule,
                              public clang::ast_matchers::MatchFinder::MatchCallback
 {
@@ -17,7 +15,4 @@ public:
     void run(const clang::ast_matchers::MatchFinder::MatchResult& result) override;
 
     static const char* GetName() { return "OldStyleFunctionRule"; }
-
-private:
-    std::string GetShortDeclarationsString(const std::vector<llvm::StringRef>& declarations, int totalCount);
 };
