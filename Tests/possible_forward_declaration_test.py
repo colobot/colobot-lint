@@ -304,3 +304,20 @@ class PossibleForwardDeclarationRuleTest(test_support.TestBase):
                 'const int GLOBAL = 1;'
             ],
             expected_errors = [])
+
+    def test_dont_blacklist_project_header_if_it_defines_not_used_non_forward_declarable_type(self):
+        self.assert_result_with_header_files(
+            main_file_lines_without_includes = [
+                'void FooFunc(Foo*);'
+            ],
+            project_header_lines = [
+                'class Foo {};',
+                'class Bar {};',
+                'typedef Bar BarAlias;'
+            ],
+            expected_errors = [
+                {
+                    'msg': "Class 'Foo' can be forward declared instead of #included",
+                    'line': '3'
+                }
+            ])

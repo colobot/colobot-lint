@@ -183,10 +183,7 @@ void PossibleForwardDeclarationRule::run(const MatchFinder::MatchResult& result)
         return;
 
     if (! IsForwardDeclarationPossible(tagDeclaration))
-    {
-        BlacklistIncludedProjectHeader(tagDeclaration);
         return;
-    }
 
     tagDeclaration = tagDeclaration->getCanonicalDecl();
 
