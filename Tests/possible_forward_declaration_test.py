@@ -305,6 +305,31 @@ class PossibleForwardDeclarationRuleTest(test_support.TestBase):
             ],
             expected_errors = [])
 
+    def test_blacklist_project_header_with_types_which_cannot_be_forward_declared_old_style_enum(self):
+        self.assert_result_with_header_files(
+            main_file_lines_without_includes = [
+                'void FooFunc(Foo*);'
+                'void BarFunc(Bar&);'
+            ],
+            project_header_lines = [
+                'class Foo {};',
+                'enum Bar {};'
+            ],
+            expected_errors = [])
+
+    def test_blacklist_project_header_with_types_which_cannot_be_forward_declared_template_class(self):
+        self.assert_result_with_header_files(
+            main_file_lines_without_includes = [
+                'void FooFunc(Foo*);'
+                'void BarFunc(Bar<int>&);'
+            ],
+            project_header_lines = [
+                'class Foo {};',
+                'template<typename T>',
+                'class Bar {};'
+            ],
+            expected_errors = [])
+
     def test_dont_blacklist_project_header_if_it_defines_not_used_non_forward_declarable_type(self):
         self.assert_result_with_header_files(
             main_file_lines_without_includes = [

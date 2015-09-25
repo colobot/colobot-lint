@@ -25,13 +25,14 @@ private:
     bool IsInBlacklistedProjectHeader(const clang::Decl* declaration);
     void BlacklistIncludedProjectHeader(const clang::Decl* declaration);
     bool IsInDirectlyIncludedProjectHeader(const clang::Decl* declaration);
-    bool IsForwardDeclarationPossible(const clang::TagDecl* tagDeclaration);
 
     void HandleDeclarationReferenceExpression(const clang::DeclRefExpr* declarationReferenceExpression);
     void HandleRecordDeclaration(const clang::CXXRecordDecl* recordDeclaration);
     void HandleDeclarationWithTagType(const clang::TagDecl* tagDeclaration,
                                       const clang::Decl* declarationWithTagType,
-                                      bool isPointerOrReferenceType);
+                                      bool isPointerOrReferenceType,
+                                      bool isTemplateClassType,
+                                      bool isOldStyleEnum);
     void HandleExpressionWithTagType(const clang::TagDecl* tagDeclaration,
                                      const clang::Expr* expressionWithTagType);
 

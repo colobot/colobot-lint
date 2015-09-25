@@ -120,13 +120,29 @@ AST_MATCHER_P(QualType, recursivelyDesugaredTypedefType, internal::Matcher<QualT
     return InnerMatcher.matches(desugaredType, Finder, Builder);
 }
 
+AST_MATCHER(TagDecl, isForwardDeclaration)
+{
+    return Node.getDefinition() == nullptr;
+}
+
+AST_MATCHER(EnumDecl, isScopedUsingClassTag)
+{
+    return Node.isScopedUsingClassTag();
+}
+
 } // namespace ast_matchers
 } // namespace clang
 
 
 internal::Matcher<QualType> CreateActualTagTypeMatcher()
 {
-    return qualType(hasDeclaration(tagDecl(unless(isExpansionInSystemHeader())).bind("tagDecl")));
+    return qualType(hasDeclaration(tagDecl(
+        unless(isExpansionInSystemHeader()),
+        anyOf(classTemplateSpecializationDecl().bind("classTemplate"),
+              enumDecl(unless(isScopedUsingClassTag())).bind("oldStyleEnum"),
+              tagDecl(isForwardDeclaration()).bind("existingForwardDeclaration"),
+              anything()))
+           .bind("tagDecl")));
 }
 
 internal::Matcher<QualType> CreateTemplateTagTypeMatcher()
@@ -182,16 +198,23 @@ void PossibleForwardDeclarationRule::run(const MatchFinder::MatchResult& result)
     if (! IsInDirectlyIncludedProjectHeader(tagDeclaration))
         return;
 
-    if (! IsForwardDeclarationPossible(tagDeclaration))
+    bool isExistingForwardDeclaration = result.Nodes.getNodeAs<Decl>("existingForwardDeclaration") != nullptr;
+    if (isExistingForwardDeclaration)
         return;
 
     tagDeclaration = tagDeclaration->getCanonicalDecl();
 
     bool isPointerOrReferenceType = result.Nodes.getNodeAs<QualType>("ptrOrRefType") != nullptr;
+    bool isTemplateClassType = result.Nodes.getNodeAs<Decl>("classTemplate") != nullptr;
+    bool isOldStyleEnum = result.Nodes.getNodeAs<Decl>("oldStyleEnum") != nullptr;
 
     const Decl* declarationWithTagType = result.Nodes.getNodeAs<Decl>("declWithTagType");
     if (declarationWithTagType != nullptr)
-        return HandleDeclarationWithTagType(tagDeclaration, declarationWithTagType, isPointerOrReferenceType);
+        return HandleDeclarationWithTagType(tagDeclaration,
+                                            declarationWithTagType,
+                                            isPointerOrReferenceType,
+                                            isTemplateClassType,
+                                            isOldStyleEnum);
 
     const Expr* expressionWithTagType = result.Nodes.getNodeAs<Expr>("exprWithTagType");
     if (expressionWithTagType != nullptr)
@@ -223,25 +246,6 @@ bool PossibleForwardDeclarationRule::IsInDirectlyIncludedProjectHeader(const Dec
 
     // we want declaration from directly included project header (no indirect dependencies)
     return tagDeclarationFileID != mainFileID && tagDeclarationIncludeFileID == mainFileID;
-}
-
-bool PossibleForwardDeclarationRule::IsForwardDeclarationPossible(const TagDecl* tagDeclaration)
-{
-    // already forward declared
-    if (tagDeclaration->getDefinition() == nullptr)
-        return false;
-
-    // only enum classes can be forward-declared
-    const EnumDecl* enumDeclaration = llvm::dyn_cast_or_null<EnumDecl>(tagDeclaration);
-    if (enumDeclaration != nullptr && !enumDeclaration->isScopedUsingClassTag())
-        return false;
-
-    // ignore template specializations
-    if (llvm::isa<ClassTemplateSpecializationDecl>(tagDeclaration))
-        return false;
-
-    // other cases seem ok
-    return true;
 }
 
 void PossibleForwardDeclarationRule::HandleDeclarationReferenceExpression(const DeclRefExpr* declarationReferenceExpression)
@@ -291,13 +295,17 @@ void PossibleForwardDeclarationRule::HandleRecordDeclaration(const CXXRecordDecl
 
 void PossibleForwardDeclarationRule::HandleDeclarationWithTagType(const TagDecl* tagDeclaration,
                                                                   const Decl* declarationWithTagType,
-                                                                  bool isPointerOrReferenceType)
+                                                                  bool isPointerOrReferenceType,
+                                                                  bool isTemplateClassType,
+                                                                  bool isOldStyleEnum)
 {
     SourceLocation location = declarationWithTagType->getLocation();
     if (! m_context.sourceLocationHelper.IsLocationOfInterest(GetName(), location, *m_sourceManager))
         return;
 
     if (isPointerOrReferenceType &&
+        !isTemplateClassType &&
+        !isOldStyleEnum &&
         (llvm::isa<ParmVarDecl>(declarationWithTagType) ||
          llvm::isa<FieldDecl>(declarationWithTagType) ||
          llvm::isa<FunctionDecl>(declarationWithTagType)))
