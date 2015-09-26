@@ -16,6 +16,7 @@
 using namespace clang;
 using namespace clang::ast_matchers;
 
+
 UnusedForwardDeclarationRule::UnusedForwardDeclarationRule(Context& context)
     : Rule(context)
 {}
@@ -23,24 +24,30 @@ UnusedForwardDeclarationRule::UnusedForwardDeclarationRule(Context& context)
 void UnusedForwardDeclarationRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
     finder.addMatcher(tagDecl(unless(isImplicit())).bind("tagDecl"), this);
-    finder.addMatcher(tagType(hasDeclaration(tagDecl().bind("tagDecl"))).bind("tagType"), this);
+    finder.addMatcher(typeLoc(loc(tagType(hasDeclaration(tagDecl().bind("tagDecl"))))).bind("tagTypeLoc"), this);
 }
 
 void UnusedForwardDeclarationRule::run(const MatchFinder::MatchResult& result)
 {
+    m_sourceManager = result.SourceManager;
+
     const TagDecl* tagDeclaration = result.Nodes.getNodeAs<TagDecl>("tagDecl");
-    const TagType* tagTypeReference = result.Nodes.getNodeAs<TagType>("tagType");
     if (tagDeclaration == nullptr)
         return;
 
-    m_sourceManager = result.SourceManager;
+    const TypeLoc* tagTypeReference = result.Nodes.getNodeAs<TypeLoc>("tagTypeLoc");
+    if (tagTypeReference != nullptr)
+    {
+        SourceLocation location = tagTypeReference->getLocStart();
+        if (! m_context.sourceLocationHelper.IsLocationOfInterest(GetName(), location, *m_sourceManager))
+            return;
+
+        return HandleTypeReference(tagDeclaration);
+    }
 
     SourceLocation location = tagDeclaration->getLocation();
     if (! m_context.sourceLocationHelper.IsLocationOfInterest(GetName(), location, *m_sourceManager))
         return;
-
-    if (tagTypeReference != nullptr)
-        return HandleTypeReference(tagDeclaration);
 
     else if (tagDeclaration->isThisDeclarationADefinition() ||
              llvm::isa<ClassTemplateSpecializationDecl>(tagDeclaration))
@@ -98,7 +105,7 @@ void UnusedForwardDeclarationRule::HandleTypeReference(const TagDecl* tagDeclara
     {
         m_usesOfForwardDeclarations.erase(canonicalDeclaration);
     }
-    else
+    else if (m_usesOfForwardDeclarations.count(canonicalDeclaration) > 0)
     {
         m_usesOfForwardDeclarations[canonicalDeclaration].useCount++;
     }
@@ -111,9 +118,7 @@ void UnusedForwardDeclarationRule::onEndOfTranslationUnit()
 
     for (const auto& forwardDeclarationUse : m_usesOfForwardDeclarations)
     {
-        int minimumUseCount = llvm::isa<EnumDecl>(forwardDeclarationUse.first) ? 1 : 0;
-
-        if (forwardDeclarationUse.second.useCount == minimumUseCount)
+        if (forwardDeclarationUse.second.useCount == 0)
         {
             unusedDeclarations.push_back(forwardDeclarationUse.second.forwardDeclaration);
         }

@@ -149,6 +149,35 @@ class UnusedForwardDeclarationRuleTest(test_support.TestBase):
             ],
             expected_errors = [])
 
+    def test_class_declared_and_referenced_as_a_pointer(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                'class Foo;',
+                'void FooFunc(Foo*);'
+            ],
+            expected_errors = [])
+
+    def test_class_declared_and_referenced_in_a_template_argument(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                'class Foo;',
+                'template<typename T> class TemplateClass {};',
+                'void FooFunc(TemplateClass<Foo>&);'
+            ],
+            expected_errors = [])
+
+    def test_class_declared_and_referenced_as_a_pointer_field(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                'class Foo;',
+                'struct Bar',
+                '{',
+                '   Foo* foo;',
+                '};'
+            ],
+            expected_errors = [])
+
+
     def test_report_correct_location_with_declaration_in_header(self):
         self.assert_colobot_lint_result_with_custom_files(
             source_files_data = {
