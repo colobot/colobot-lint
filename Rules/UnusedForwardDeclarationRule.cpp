@@ -86,7 +86,8 @@ void UnusedForwardDeclarationRule::HandleForwardDeclaration(const TagDecl* tagDe
         return;
     }
 
-    m_usesOfForwardDeclarations.insert(std::make_pair(canonicalDeclaration, 0));
+    m_usesOfForwardDeclarations.insert(std::make_pair(canonicalDeclaration,
+                                                      ForwardDeclarationUseInfo(tagDeclaration)));
 }
 
 void UnusedForwardDeclarationRule::HandleTypeReference(const TagDecl* tagDeclaration)
@@ -99,7 +100,7 @@ void UnusedForwardDeclarationRule::HandleTypeReference(const TagDecl* tagDeclara
     }
     else
     {
-        m_usesOfForwardDeclarations[canonicalDeclaration]++;
+        m_usesOfForwardDeclarations[canonicalDeclaration].useCount++;
     }
 }
 
@@ -112,9 +113,9 @@ void UnusedForwardDeclarationRule::onEndOfTranslationUnit()
     {
         int minimumUseCount = llvm::isa<EnumDecl>(forwardDeclarationUse.first) ? 1 : 0;
 
-        if (forwardDeclarationUse.second == minimumUseCount)
+        if (forwardDeclarationUse.second.useCount == minimumUseCount)
         {
-            unusedDeclarations.push_back(forwardDeclarationUse.first);
+            unusedDeclarations.push_back(forwardDeclarationUse.second.forwardDeclaration);
         }
     }
     std::sort(unusedDeclarations.begin(),

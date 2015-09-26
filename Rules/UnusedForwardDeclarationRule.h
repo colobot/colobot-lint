@@ -29,5 +29,16 @@ private:
 private:
     clang::SourceManager* m_sourceManager = nullptr;
     llvm::DenseSet<const clang::TagDecl*> m_definedDeclarations;
-    llvm::DenseMap<const clang::TagDecl*, int> m_usesOfForwardDeclarations;
+    struct ForwardDeclarationUseInfo
+    {
+        ForwardDeclarationUseInfo(const clang::TagDecl* forwardDeclaration = nullptr,
+                                  int useCount = 0)
+            : forwardDeclaration(forwardDeclaration),
+              useCount(useCount)
+        {}
+
+        const clang::TagDecl* forwardDeclaration;
+        int useCount;
+    };
+    llvm::DenseMap<const clang::TagDecl*, ForwardDeclarationUseInfo> m_usesOfForwardDeclarations;
 };

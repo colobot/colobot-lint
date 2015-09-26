@@ -148,3 +148,26 @@ class UnusedForwardDeclarationRuleTest(test_support.TestBase):
                 'class Foo { friend class Bar; };'
             ],
             expected_errors = [])
+
+    def test_report_correct_location_with_declaration_in_header(self):
+        self.assert_colobot_lint_result_with_custom_files(
+            source_files_data = {
+                'src.cpp': [
+                    '#include "foo.h"',
+                    '',
+                    'class Foo;'
+                ],
+                'foo.h': [
+                    'class Foo;'
+                ]
+            },
+            compilation_database_files = ['src.cpp'],
+            target_files = ['src.cpp'],
+            additional_compile_flags = ['-I$TEMP_DIR'],
+            additional_options = ['-project-local-include-path', '$TEMP_DIR'],
+            expected_errors = [
+                {
+                    'msg': "Unused forward declaration of class 'Foo'",
+                    'line': '3'
+                }
+            ])
