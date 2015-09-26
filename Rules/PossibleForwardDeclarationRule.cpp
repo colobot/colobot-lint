@@ -58,32 +58,57 @@ QualType RecursivelyDesugarType(const QualType& type)
     return desugaredType;
 }
 
-QualType RecursivelyDesugarPtrOrRefType(const QualType& type)
-{
-    const PointerType* pointerType = type->getAs<PointerType>();
-    if (pointerType != nullptr)
-    {
-        return RecursivelyDesugarType(pointerType->getPointeeType());
-    }
-
-    const ReferenceType* referenceType = type->getAs<ReferenceType>();
-    if (referenceType != nullptr)
-    {
-        return RecursivelyDesugarType(referenceType->getPointeeType());
-    }
-
-    return QualType();
-}
-
 QualType RecursivelyDesugarTypedefType(const QualType& type)
 {
-    const TypedefType* typedefType = type->getAs<TypedefType>();
-    if (typedefType != nullptr)
+    QualType desugaredType = type;
+    bool haveTypedefType = false;
+
+    while (true)
     {
-        return RecursivelyDesugarType(typedefType->desugar());
+        const TypedefType* typedefType = desugaredType->getAs<TypedefType>();
+        if (typedefType != nullptr)
+        {
+            desugaredType = typedefType->desugar();
+            haveTypedefType = true;
+            continue;
+        }
+
+        const ElaboratedType* elaboratedType = desugaredType->getAs<ElaboratedType>();
+        if (elaboratedType != nullptr)
+        {
+            desugaredType = elaboratedType->desugar();
+            continue;
+        }
+
+        if (desugaredType->isArrayType())
+        {
+            desugaredType = desugaredType->getAsArrayTypeUnsafe()->getElementType();
+            continue;
+        }
+
+        const PointerType* pointerType = desugaredType->getAs<PointerType>();
+        if (pointerType != nullptr)
+        {
+            desugaredType = pointerType->getPointeeType();
+            continue;
+        }
+
+        const ReferenceType* referenceType = desugaredType->getAs<ReferenceType>();
+        if (referenceType != nullptr)
+        {
+            desugaredType = referenceType->getPointeeType();
+            continue;
+        }
+
+        break;
     }
 
-    return QualType();
+    if (!haveTypedefType)
+    {
+        return QualType();
+    }
+
+    return desugaredType;
 }
 
 } // anonymous namespace
@@ -102,15 +127,6 @@ AST_MATCHER_P(QualType, recursivelyDesugaredType, internal::Matcher<QualType>, I
     return InnerMatcher.matches(desugaredType, Finder, Builder);
 }
 
-AST_MATCHER_P(QualType, recursivelyDesugaredPtrOrRefType, internal::Matcher<QualType>, InnerMatcher)
-{
-    if (Node.isNull())
-        return false;
-
-    QualType desugaredType = RecursivelyDesugarPtrOrRefType(Node);
-    return InnerMatcher.matches(desugaredType, Finder, Builder);
-}
-
 AST_MATCHER_P(QualType, recursivelyDesugaredTypedefType, internal::Matcher<QualType>, InnerMatcher)
 {
     if (Node.isNull())
@@ -118,6 +134,26 @@ AST_MATCHER_P(QualType, recursivelyDesugaredTypedefType, internal::Matcher<QualT
 
     QualType desugaredType = RecursivelyDesugarTypedefType(Node);
     return InnerMatcher.matches(desugaredType, Finder, Builder);
+}
+
+AST_MATCHER_P(QualType, pointerOrReferenceTypeTo, internal::Matcher<QualType>, InnerMatcher)
+{
+    if (Node.isNull())
+        return false;
+
+    const PointerType* pointerType = Node->getAs<PointerType>();
+    if (pointerType != nullptr)
+    {
+        return InnerMatcher.matches(pointerType->getPointeeType(), Finder, Builder);
+    }
+
+    const ReferenceType* referenceType = Node->getAs<ReferenceType>();
+    if (referenceType != nullptr)
+    {
+        return InnerMatcher.matches(referenceType->getPointeeType(), Finder, Builder);
+    }
+
+    return false;
 }
 
 AST_MATCHER(TagDecl, isForwardDeclaration)
@@ -155,9 +191,10 @@ internal::Matcher<QualType> CreateTemplateTagTypeMatcher()
 
 internal::Matcher<QualType> CreateTagTypeMatcher()
 {
-    return anyOf(qualType(recursivelyDesugaredTypedefType(CreateActualTagTypeMatcher())),
+    return anyOf(qualType(recursivelyDesugaredTypedefType(CreateTemplateTagTypeMatcher())),
+                 qualType(recursivelyDesugaredTypedefType(CreateActualTagTypeMatcher())),
                  qualType(recursivelyDesugaredType(CreateTemplateTagTypeMatcher())),
-                 qualType(recursivelyDesugaredPtrOrRefType(CreateActualTagTypeMatcher())).bind("ptrOrRefType"),
+                 qualType(pointerOrReferenceTypeTo(recursivelyDesugaredType(CreateActualTagTypeMatcher()))).bind("ptrOrRefType"),
                  qualType(recursivelyDesugaredType(CreateActualTagTypeMatcher())));
 }
 

@@ -22,8 +22,8 @@ class PossibleForwardDeclarationRuleTest(test_support.TestBase):
             ] + project_header_lines
 
         main_file_lines_with_includes = [
-                '#include "{0}"'.format(project_header_file),
-                '#include <{0}>'.format(system_header_file)
+                '#include <{0}>'.format(system_header_file),
+                '#include "{0}"'.format(project_header_file)
             ] + main_file_lines_without_includes
 
         source_files_data = {
@@ -290,6 +290,23 @@ class PossibleForwardDeclarationRuleTest(test_support.TestBase):
                 'class Foo {};',
                 'class Bar {};',
                 'typedef Bar BarAlias;'
+            ],
+            expected_errors = [])
+
+    def test_blacklist_project_header_with_types_which_cannot_be_forward_declared_using_template_alias(self):
+        self.assert_result_with_header_files(
+            main_file_lines_without_includes = [
+                'void FooFunc(Foo*);',
+                'void BarFunc(BarAlias&);'
+            ],
+            project_header_lines = [
+                'class Foo {};',
+                'class Bar {};',
+                'using BarAlias = ClassTemplate<Bar>;'
+            ],
+            system_header_lines = [
+                'template<typename T>',
+                'class ClassTemplate {};'
             ],
             expected_errors = [])
 
