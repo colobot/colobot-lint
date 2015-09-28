@@ -58,7 +58,7 @@ class DiagnosticHandlerTest(test_support.TestBase):
         self.assert_colobot_lint_result_with_custom_files(
             source_files_data = {
                 'foo/bar.h' : [
-                    'Bar Foo();',
+                    'Bar Foo() {}',
                     ''
                 ],
                 'fake_header_sources/foo/bar.cpp': [

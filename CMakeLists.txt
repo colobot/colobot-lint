@@ -75,6 +75,7 @@ set(COLOBOT_LINT_SRCS
     Rules/PossibleForwardDeclarationRule.cpp
     Rules/RulesFactory.cpp
     Rules/TodoRule.cpp
+    Rules/UndefinedFunctionRule.cpp
     Rules/UninitializedFieldRule.cpp
     Rules/UninitializedLocalVariableRule.cpp
     Rules/UnusedForwardDeclarationRule.cpp

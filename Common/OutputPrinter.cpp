@@ -30,13 +30,14 @@ public:
                         const std::string& destination,
                         const std::string& options = "") override;
 
+protected:
     void PrintRuleViolationImpl(const std::string& ruleName,
                                 Severity severity,
                                 const std::string& description,
                                 const std::string& fileName,
                                 int lineNumber) override;
 
-    void Save() override;
+    void SaveImpl() override;
 
 private:
     std::ofstream m_outputFileStream;
@@ -53,13 +54,14 @@ public:
                         const std::string& destination,
                         const std::string& options = "") override;
 
+protected:
     void PrintRuleViolationImpl(const std::string& ruleName,
                                 Severity severity,
                                 const std::string& description,
                                 const std::string& fileName,
                                 int lineNumber) override;
 
-    void Save() override;
+    void SaveImpl() override;
 
 private:
     void Init();
@@ -80,13 +82,14 @@ public:
                         const std::string& destination,
                         const std::string& options = "") override;
 
+protected:
     void PrintRuleViolationImpl(const std::string& ruleName,
                                 Severity severity,
                                 const std::string& description,
                                 const std::string& fileName,
                                 int lineNumber) override;
 
-    void Save() override;
+    void SaveImpl() override;
 
 private:
     void Save(std::ostream& ouputStream);
@@ -124,6 +127,27 @@ private:
 } // anonymous namespace
 
 
+struct OutputPrinter::RuleViolationInfo
+{
+    std::string ruleName;
+    Severity severity;
+    std::string description;
+    std::string fileName;
+    int lineNumber;
+
+    RuleViolationInfo(std::string ruleName,
+                      Severity severity,
+                      std::string description,
+                      std::string fileName,
+                      int lineNumber)
+        : ruleName(ruleName),
+          severity(severity),
+          description(description),
+          fileName(fileName),
+          lineNumber(lineNumber)
+    {}
+};
+
 
 OutputPrinter::OutputPrinter(const std::string& outputFileName,
                              std::vector<OutputFilter> outputFilters)
@@ -151,24 +175,38 @@ void OutputPrinter::PrintRuleViolation(const std::string& ruleName,
                                        const std::string& description,
                                        SourceLocation location,
                                        SourceManager& sourceManager,
-                                       int lineOffset)
+                                       int lineOffset,
+                                       bool tentative)
 {
     std::string fileName = GetCleanFilename(location, sourceManager);
     int lineNumber = sourceManager.getPresumedLineNumber(location) + lineOffset;
 
-    PrintRuleViolation(ruleName, severity, description, fileName, lineNumber);
+    PrintRuleViolation(ruleName, severity, description, fileName, lineNumber, tentative);
 }
 
 void OutputPrinter::PrintRuleViolation(const std::string& ruleName,
                                        Severity severity,
                                        const std::string& description,
                                        const std::string& fileName,
-                                       int lineNumber)
+                                       int lineNumber,
+                                       bool tentative)
 {
     if (ShouldPrintLine(fileName, lineNumber))
     {
-        PrintRuleViolationImpl(ruleName, severity, description, fileName, lineNumber);
+        if (tentative)
+        {
+            m_tentativeViolations.emplace_back(ruleName, severity, description, fileName, lineNumber);
+        }
+        else
+        {
+            PrintRuleViolationImpl(ruleName, severity, description, fileName, lineNumber);
+        }
     }
+}
+
+void OutputPrinter::ClearTentativeViolations()
+{
+    m_tentativeViolations.clear();
 }
 
 bool OutputPrinter::ShouldPrintLine(const std::string& fileName, int lineNumber)
@@ -215,6 +253,22 @@ std::string OutputPrinter::GetSeverityString(Severity severity)
     return str;
 }
 
+void OutputPrinter::Save()
+{
+    for (const auto& violationInfo : m_tentativeViolations)
+    {
+        PrintRuleViolation(violationInfo.ruleName,
+                           violationInfo.severity,
+                           violationInfo.description,
+                           violationInfo.fileName,
+                           violationInfo.lineNumber);
+    }
+
+    m_tentativeViolations.clear();
+
+    SaveImpl();
+}
+
 ///////////////////////////
 
 PlainTextOutputPrinter::PlainTextOutputPrinter(const std::string& outputFileName,
@@ -247,7 +301,7 @@ void PlainTextOutputPrinter::PrintGraphEdge(const std::string& source,
     assert(false && "Not implemented");
 }
 
-void PlainTextOutputPrinter::Save()
+void PlainTextOutputPrinter::SaveImpl()
 {
 }
 
@@ -304,7 +358,7 @@ void XmlOutputPrinter::PrintGraphEdge(const std::string& source,
     assert(false && "Not implemented");
 }
 
-void XmlOutputPrinter::Save()
+void XmlOutputPrinter::SaveImpl()
 {
     m_resultsElement->LinkEndChild(m_errorsElement.release());
     m_document.LinkEndChild(m_resultsElement.release());
@@ -342,7 +396,7 @@ void DotGraphOutputPrinter::PrintGraphEdge(const std::string& source,
     m_graphEdges.insert(DotGraphEdge{source, destination, options});
 }
 
-void DotGraphOutputPrinter::Save()
+void DotGraphOutputPrinter::SaveImpl()
 {
     if (m_outputFileName.empty())
     {

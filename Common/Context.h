@@ -1,10 +1,13 @@
 #pragma once
 
 #include "Common/ExclusionZone.h"
+#include "Common/FunctionDefinitionContext.h"
 #include "Common/OutputPrinter.h"
+#include "Common/SourceFileInfo.h"
 
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
 
 class SourceLocationHelper;
@@ -44,6 +47,9 @@ struct Context
     std::unordered_set<ExclusionZone> exclusionZones;
 
     std::unordered_set<std::string> reportedOldStyleFunctions;
+
+    std::unordered_set<std::string> definedFunctions;
+    std::unordered_map<std::string, SourceFileInfo> undefinedFunctions;
 
     SourceLocationHelper& sourceLocationHelper;
 

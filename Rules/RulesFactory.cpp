@@ -16,6 +16,7 @@
 #include "Rules/OldStyleNullPointerRule.h"
 #include "Rules/PossibleForwardDeclarationRule.h"
 #include "Rules/TodoRule.h"
+#include "Rules/UndefinedFunctionRule.h"
 #include "Rules/UninitializedFieldRule.h"
 #include "Rules/UninitializedLocalVariableRule.h"
 #include "Rules/UnusedForwardDeclarationRule.h"
@@ -73,5 +74,6 @@ std::vector<std::unique_ptr<Rule>> CreateRules(Context& context)
     AddRule<BlockPlacementRule>(rules, context);
     AddRule<WhitespaceRule>(rules, context);
     AddRule<LicenseInHeaderRule>(rules, context);
+    AddRule<UndefinedFunctionRule>(rules, context);
     return rules;
 }
