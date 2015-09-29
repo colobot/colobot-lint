@@ -276,3 +276,10 @@ class FunctionNamingRuleTest(test_support.TestBase):
                 'void LaterRRepeatingUpperCaseLetterName();'
             ],
             expected_errors = [])
+
+    def test_ignore_main_function(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                'int main() {}'
+            ],
+            expected_errors = [])

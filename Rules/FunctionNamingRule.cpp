@@ -76,7 +76,8 @@ void FunctionNamingRule::RegisterASTMatcherCallback(MatchFinder& finder)
 
     finder.addMatcher(functionDecl(unless(anyOf(isImplicit(),
                                                 isOverloadedOperator(),
-                                                isMethod())))
+                                                isMethod(),
+                                                hasName("::main"))))
                           .bind("functionDecl"),
                       this);
 }
