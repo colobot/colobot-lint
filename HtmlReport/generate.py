@@ -6,7 +6,7 @@ import cgi
 import xml.etree.ElementTree as ET
 
 def parse_args():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description='Generate colobot-lint HTML report from XML report file')
     parser.add_argument('--xml-report-file', required=True, help='colobot-lint report in XML format')
     parser.add_argument('--output-dir', required=True, help='output directory')
     return parser.parse_args()
