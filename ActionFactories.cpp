@@ -33,6 +33,7 @@ ColobotLintASTFrontendAction::ColobotLintASTFrontendAction(Context& context)
 
 bool ColobotLintASTFrontendAction::BeginSourceFileAction(CompilerInstance& ci, StringRef filename)
 {
+    m_exclusionZoneCommentHandler.AtBeginOfMainFile();
     return m_beginSourceFileHandler.BeginSourceFileAction(ci, filename);
 }
 
@@ -52,7 +53,7 @@ std::unique_ptr<ASTConsumer> ColobotLintASTFrontendAction::CreateASTConsumer(Com
     }
     else
     {
-        compiler.getPreprocessor().addCommentHandler(&m_exclusionZoneCommentHandler);
+        m_exclusionZoneCommentHandler.RegisterPreProcessorCallbacks(compiler);
 
         rules = CreateRules(m_context);
         for (auto& rule : rules)

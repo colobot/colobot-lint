@@ -5,6 +5,8 @@
 #include "Common/SourceLocationHelper.h"
 #include "Common/TextHelper.h"
 
+#include <clang/Frontend/CompilerInstance.h>
+
 #include <iostream>
 
 using namespace llvm;
@@ -36,9 +38,10 @@ ExclusionZoneCommentHandler::ExclusionZoneCommentHandler(Context& context)
       m_excludeZoneStartingLineNumber(0)
 {}
 
-void ExclusionZoneCommentHandler::RegisterPPCallbacks(Preprocessor& pp)
+void ExclusionZoneCommentHandler::RegisterPreProcessorCallbacks(CompilerInstance& compiler)
 {
-    pp.addPPCallbacks(make_unique<ExclusionZonePPCallbacks>(*this));
+    compiler.getPreprocessor().addCommentHandler(this);
+    compiler.getPreprocessor().addPPCallbacks(make_unique<ExclusionZonePPCallbacks>(*this));
 }
 
 bool ExclusionZoneCommentHandler::HandleComment(Preprocessor& pp, SourceRange comment)
@@ -63,6 +66,11 @@ bool ExclusionZoneCommentHandler::HandleComment(Preprocessor& pp, SourceRange co
     }
 
     return false;
+}
+
+void ExclusionZoneCommentHandler::AtBeginOfMainFile()
+{
+    m_context.exclusionZones.clear();
 }
 
 void ExclusionZoneCommentHandler::AtEndOfMainFile()

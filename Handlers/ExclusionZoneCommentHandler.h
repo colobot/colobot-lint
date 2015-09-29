@@ -8,6 +8,11 @@
 
 #include <unordered_set>
 
+namespace clang
+{
+class CompilerInstance;
+} // namespace clang
+
 class Context;
 
 class ExclusionZoneCommentHandler : public clang::CommentHandler
@@ -15,10 +20,11 @@ class ExclusionZoneCommentHandler : public clang::CommentHandler
 public:
     ExclusionZoneCommentHandler(Context& context);
 
-    void RegisterPPCallbacks(clang::Preprocessor& pp);
+    void RegisterPreProcessorCallbacks(clang::CompilerInstance& compiler);
 
     bool HandleComment(clang::Preprocessor& pp, clang::SourceRange comment) override;
 
+    void AtBeginOfMainFile();
     void AtEndOfMainFile();
 
 private:
