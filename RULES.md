@@ -24,6 +24,7 @@ Basic working mechanism of every rule is to match selected AST tree elements and
   - [Old-style function](#old-style-function)
   - [Unused forward declaration](#unused-forward-declaration)
   - [Possible forward declaration](#possible-forward-declaration)
+  - [Undefined function](#undefined-function)
   - [TODO](#todo)
 * [Style rules](#style-rules)
   - [Block placement](#block-placement)
@@ -281,6 +282,38 @@ void FooFunc(Foo); // forward declaration not possbile
 ```
 
 NOTE: this rule intentionally ignores anything that involves templates.
+
+# Undefined function
+
+**Class:** `UndefinedFunctionRule`
+
+**Errors:**
+ - [information] *Function '`name`' declared but never defined*
+
+**Description:**
+
+This rule helps to ensure that all declared functions are defined somewhere in the codebase:
+```cpp
+// foo.h
+
+void Defined();
+void DeclaredButNotDefined(); // warning: function declared but never defined
+
+class Foo
+{
+    void Defined();
+    void DeclaredButNotDefined(); // warning: function declared but never defined
+};
+
+// foo.cpp
+#include "foo.h"
+
+Defined() {}
+
+void Foo::Defined() {}
+```
+
+In order for this rule to work effectively, it must be run on the complete source code of the project, so that all definitions are visible.
 
 ### TODO
 
