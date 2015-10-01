@@ -17,8 +17,32 @@ void SourceLocationHelper::SetContext(Context* context)
     m_context = context;
 }
 
+bool SourceLocationHelper::IsLocationOfInterest(StringRef ruleName,
+                                                SourceLocation location,
+                                                SourceManager& sourceManager)
+{
+    return IsLocationInMainFile(location, sourceManager) and
+           not IsLocationInMacroExpansion(location, sourceManager) and
+           not IsLocationInExclusionZone(ruleName, location, sourceManager);
+}
+
+bool SourceLocationHelper::IsLocationOfInterestAllowingMacros(StringRef ruleName,
+                                                              SourceLocation location,
+                                                              SourceManager& sourceManager)
+{
+    return IsLocationInMainFile(location, sourceManager) and
+           not IsLocationInExclusionZone(ruleName, location, sourceManager);
+}
+
 bool SourceLocationHelper::IsLocationOfInterestIgnoringExclusionZone(SourceLocation location,
                                                                      SourceManager& sourceManager)
+{
+    return IsLocationInMainFile(location, sourceManager) and
+           not IsLocationInMacroExpansion(location, sourceManager);
+}
+
+bool SourceLocationHelper::IsLocationInMainFile(SourceLocation location,
+                                                SourceManager& sourceManager)
 {
     if (m_context->areWeInFakeHeaderSourceFile)
     {
@@ -29,39 +53,32 @@ bool SourceLocationHelper::IsLocationOfInterestIgnoringExclusionZone(SourceLocat
     }
     else
     {
-        if (! sourceManager.isWrittenInMainFile(location))
+        if (! sourceManager.isInMainFile(location))
             return false;
-    }
-
-    // completely ignore macros
-    if (sourceManager.isMacroArgExpansion(location) ||
-        sourceManager.isMacroBodyExpansion(location))
-    {
-        return false;
     }
 
     return true;
 }
 
-bool SourceLocationHelper::IsLocationOfInterest(StringRef ruleName,
-                                                SourceLocation location,
-                                                SourceManager& sourceManager)
+bool SourceLocationHelper::IsLocationInMacroExpansion(SourceLocation location,
+                                                      SourceManager& sourceManager)
 {
-    if (! IsLocationOfInterestIgnoringExclusionZone(location, sourceManager))
+    return sourceManager.isMacroArgExpansion(location) ||
+           sourceManager.isMacroBodyExpansion(location);
+}
+
+bool SourceLocationHelper::IsLocationInExclusionZone(StringRef ruleName,
+                                                     SourceLocation location,
+                                                     SourceManager& sourceManager)
+{
+    if (m_context->exclusionZones.empty())
         return false;
 
-    if (! m_context->exclusionZones.empty())
-    {
-        int lineNumber = sourceManager.getPresumedLineNumber(location);
 
-        if (m_context->exclusionZones.count(ExclusionZone{lineNumber, ruleName}) > 0 ||
-            m_context->exclusionZones.count(ExclusionZone{lineNumber, StringRef("*")}) > 0)
-        {
-            return false;
-        }
-    }
+    int lineNumber = sourceManager.getPresumedLineNumber(location);
 
-    return true;
+    return m_context->exclusionZones.count(ExclusionZone{lineNumber, ruleName}) > 0 ||
+           m_context->exclusionZones.count(ExclusionZone{lineNumber, StringRef("*")}) > 0;
 }
 
 bool SourceLocationHelper::IsLocationInProjectSourceFile(SourceLocation location, SourceManager& sourceManager)

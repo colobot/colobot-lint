@@ -15,4 +15,11 @@ public:
     void run(const clang::ast_matchers::MatchFinder::MatchResult& result) override;
 
     static const char* GetName() { return "OldStyleNullPointerRule"; }
+
+private:
+    void handleZeroLiteralNullExpression(const clang::Expr* zeroLiteralNullExpression,
+                                         clang::SourceManager& sourceManager);
+    void handleGnuNullExpression(const clang::GNUNullExpr* gnuNullExpression,
+                                 const clang::Expr* parentExpression,
+                                 clang::SourceManager& sourceManager);
 };

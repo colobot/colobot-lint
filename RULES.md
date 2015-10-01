@@ -444,8 +444,9 @@ Notes:
 
 **Errors:**
  - [style] *Use of old-style zero integer literal as null pointer*
+ - [style] *Use of NULL macro (GNU __null extension) as null pointer*
 
-This rule finds all occurences of using integer zero literal as null pointer constant.
+This rule finds all occurences of using `NULL` macro (expanded to GNU `__null` extension) and integer zero literal as null pointer constant.
 
 
 ### Include style

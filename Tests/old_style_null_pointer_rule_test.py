@@ -31,5 +31,22 @@ class OldStyleNullPointerRuleTest(test_support.TestBase):
                 {
                     'msg': "Use of old-style zero integer literal as null pointer",
                     'line': '4'
-                },
+                }
+            ])
+
+    def test_use_of_null_macro(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                '#define NULL __null',
+                'int Foo(char* x)',
+                '{',
+                '    if (x == NULL) return 10;',
+                '    return 20;',
+                '}'
+            ],
+            expected_errors = [
+                {
+                    'msg': "Use of NULL macro (GNU __null extension) as null pointer",
+                    'line': '4'
+                }
             ])

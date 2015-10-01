@@ -18,6 +18,10 @@ public:
                               clang::SourceLocation location,
                               clang::SourceManager& sourceManager);
 
+    bool IsLocationOfInterestAllowingMacros(llvm::StringRef ruleName,
+                                            clang::SourceLocation location,
+                                            clang::SourceManager& sourceManager);
+
     bool IsLocationOfInterestIgnoringExclusionZone(clang::SourceLocation location,
                                                    clang::SourceManager& sourceManager);
 
@@ -33,6 +37,14 @@ public:
     std::string CleanRawFilename(llvm::StringRef filename);
 
 private:
+    bool IsLocationInMainFile(clang::SourceLocation location,
+                              clang::SourceManager& sourceManager);
+    bool IsLocationInMacroExpansion(clang::SourceLocation location,
+                                    clang::SourceManager& sourceManager);
+    bool IsLocationInExclusionZone(llvm::StringRef ruleName,
+                                   clang::SourceLocation location,
+                                   clang::SourceManager& sourceManager);
+
     Context* m_context = nullptr;
     llvm::DenseMap<clang::FileID, std::string> m_cleanFilenameCache;
 };
