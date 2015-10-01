@@ -2,8 +2,6 @@
 
 #include "Rules/Rule.h"
 
-#include "Common/StringRefHash.h"
-
 #include <clang/ASTMatchers/ASTMatchFinder.h>
 
 #include <unordered_set>

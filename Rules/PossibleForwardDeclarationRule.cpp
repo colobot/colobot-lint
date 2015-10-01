@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <vector>
 
+using namespace llvm;
 using namespace clang;
 using namespace clang::ast_matchers;
 
@@ -277,9 +278,20 @@ bool PossibleForwardDeclarationRule::IsInDirectlyIncludedProjectHeader(const Dec
         return false;
 
     FileID tagDeclarationFileID = m_sourceManager->getFileID(declaration->getLocation());
+    if (tagDeclarationFileID.isInvalid())
+        return false;
+
     SourceLocation tagDeclarationIncludeLocation = m_sourceManager->getIncludeLoc(tagDeclarationFileID);
+    if (tagDeclarationIncludeLocation.isInvalid())
+        return false;
+
     FileID tagDeclarationIncludeFileID = m_sourceManager->getFileID(tagDeclarationIncludeLocation);
+    if (tagDeclarationIncludeFileID.isInvalid())
+        return false;
+
     FileID mainFileID = m_context.sourceLocationHelper.GetMainFileID(*m_sourceManager);
+    if (mainFileID.isInvalid())
+        return false;
 
     // we want declaration from directly included project header (no indirect dependencies)
     return tagDeclarationFileID != mainFileID && tagDeclarationIncludeFileID == mainFileID;
@@ -343,9 +355,9 @@ void PossibleForwardDeclarationRule::HandleDeclarationWithTagType(const TagDecl*
     if (isPointerOrReferenceType &&
         !isTemplateClassType &&
         !isOldStyleEnum &&
-        (llvm::isa<ParmVarDecl>(declarationWithTagType) ||
-         llvm::isa<FieldDecl>(declarationWithTagType) ||
-         llvm::isa<FunctionDecl>(declarationWithTagType)))
+        (isa<ParmVarDecl>(declarationWithTagType) ||
+         isa<FieldDecl>(declarationWithTagType) ||
+         isa<FunctionDecl>(declarationWithTagType)))
     {
         if (m_candidateForwardDeclarations.count(tagDeclaration) == 0)
         {

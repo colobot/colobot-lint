@@ -4,14 +4,26 @@
 
 #include <clang/ASTMatchers/ASTMatchFinder.h>
 
+#include <llvm/ADT/StringRef.h>
+
 #include <unordered_set>
 
 struct IncludeDirective
 {
-    clang::SourceLocation location = {};
-    std::string includeFileName = {};
-    std::string fullFileName = {};
-    bool isAngled = false;
+    clang::SourceLocation location;
+    std::string includeFileName;
+    std::string fullFileName;
+    bool isAngled;
+
+    IncludeDirective(clang::SourceLocation location,
+                     std::string includeFileName,
+                     std::string fullFileName,
+                     bool isAngled)
+     : location(location),
+       includeFileName(includeFileName),
+       fullFileName(fullFileName),
+       isAngled(isAngled)
+    {}
 };
 
 using IncludeDirectives = std::vector<IncludeDirective>;
@@ -44,8 +56,8 @@ private:
     void CheckNewBlock(IncludeDirectiveIt currentIt, IncludeDirectiveIt endIt, clang::SourceManager& sourceManager);
     void CheckIncludeRangeIsSorted(IncludeDirectiveIt startIt, IncludeDirectiveIt endIt, clang::SourceManager& sourceManager);
 
-    bool IsLocalInclude(const std::string& fileName);
-    std::string GetProjectIncludeSubpath(const std::string& fileName);
+    bool IsLocalInclude(llvm::StringRef fileName);
+    std::string GetProjectIncludeSubpath(llvm::StringRef fileName);
     std::string GetMatchingHeaderFileName(clang::SourceManager& sourceManager);
 
 private:

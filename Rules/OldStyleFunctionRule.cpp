@@ -4,7 +4,6 @@
 #include "Common/OutputPrinter.h"
 #include "Common/PodHelper.h"
 #include "Common/SourceLocationHelper.h"
-#include "Common/StringRefHash.h"
 
 #include <clang/AST/RecursiveASTVisitor.h>
 #include <clang/AST/Decl.h>
@@ -14,6 +13,7 @@
 
 #include <boost/format.hpp>
 
+using namespace llvm;
 using namespace clang;
 using namespace clang::ast_matchers;
 
@@ -21,7 +21,7 @@ namespace
 {
 
 const int MAX_FEW_OLD_STYLE_DECLARATIONS = 4;
-using FirstFewOldStyleDeclarationsContainer = llvm::SmallVector<StringRef, MAX_FEW_OLD_STYLE_DECLARATIONS>;
+using FirstFewOldStyleDeclarationsContainer = SmallVector<StringRef, MAX_FEW_OLD_STYLE_DECLARATIONS>;
 
 class OldStyleDeclarationFinder : public RecursiveASTVisitor<OldStyleDeclarationFinder>
 {
@@ -37,8 +37,8 @@ private:
     bool IsInteresting(const VarDecl* variableDeclaration);
 
 private:
-    llvm::SmallSet<StringRef, 10> m_oldStyleDeclarations;
-    llvm::SmallSet<StringRef, 10> m_correctStyleDeclarations;
+    SmallSet<StringRef, 10> m_oldStyleDeclarations;
+    SmallSet<StringRef, 10> m_correctStyleDeclarations;
     FirstFewOldStyleDeclarationsContainer m_firstFewOldStyleDeclarations;
     ASTContext* m_context;
 };

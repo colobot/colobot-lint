@@ -33,7 +33,7 @@ void EnumNamingRule::run(const MatchFinder::MatchResult& result)
         return HandleEnumConstantDeclaration(enumConstantDeclaration, result.Context);
 }
 
-void EnumNamingRule::HandleEnumDeclaration(const clang::EnumDecl* enumDeclaration, ASTContext* context)
+void EnumNamingRule::HandleEnumDeclaration(const EnumDecl* enumDeclaration, ASTContext* context)
 {
     SourceManager& sourceManager = context->getSourceManager();
 
@@ -75,7 +75,7 @@ void EnumNamingRule::HandleEnumDeclaration(const clang::EnumDecl* enumDeclaratio
     }
 }
 
-void EnumNamingRule::HandleEnumConstantDeclaration(const clang::EnumConstantDecl* enumConstantDeclaration, ASTContext* context)
+void EnumNamingRule::HandleEnumConstantDeclaration(const EnumConstantDecl* enumConstantDeclaration, ASTContext* context)
 {
     SourceManager& sourceManager = context->getSourceManager();
 

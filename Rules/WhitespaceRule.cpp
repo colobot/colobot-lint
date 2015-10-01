@@ -1,7 +1,6 @@
 #include "Rules/WhitespaceRule.h"
 
 #include "Common/Context.h"
-#include "Common/FilenameHelper.h"
 #include "Common/OutputPrinter.h"
 #include "Common/SourceLocationHelper.h"
 #include "Common/TranslationUnitMatcher.h"
@@ -31,7 +30,7 @@ void WhitespaceRule::run(const ast_matchers::MatchFinder::MatchResult& result)
 
     FileID mainFileID = m_context.sourceLocationHelper.GetMainFileID(sourceManager);
 
-    std::string fileName = CleanFilename(StringRef(sourceManager.getFileEntryForID(mainFileID)->getName()));
+    StringRef fileName = m_context.sourceLocationHelper.GetCleanFilename(mainFileID, sourceManager);
 
     MemoryBuffer* buffer = sourceManager.getBuffer(mainFileID);
     const char* bufferChars = buffer->getBufferStart();

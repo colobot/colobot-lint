@@ -1,9 +1,13 @@
 #include "Common/SourceLocationHelper.h"
 
 #include "Common/Context.h"
-#include "Common/FilenameHelper.h"
 
 #include <clang/Basic/SourceManager.h>
+
+#include <llvm/ADT/STLExtras.h>
+#include <llvm/Support/Path.h>
+
+#include <vector>
 
 using namespace llvm;
 using namespace clang;
@@ -18,14 +22,14 @@ bool SourceLocationHelper::IsLocationOfInterestIgnoringExclusionZone(SourceLocat
 {
     if (m_context->areWeInFakeHeaderSourceFile)
     {
-        std::string fileName = GetCleanFilename(location, sourceManager);
+        StringRef fileName = GetCleanFilename(location, sourceManager);
 
-        if (! StringRef(fileName).endswith(m_context->actualHeaderFileSuffix))
+        if (fileName.empty() || ! fileName.endswith(m_context->actualHeaderFileSuffix))
             return false;
     }
     else
     {
-        if (! sourceManager.isInMainFile(location))
+        if (! sourceManager.isWrittenInMainFile(location))
             return false;
     }
 
@@ -62,10 +66,10 @@ bool SourceLocationHelper::IsLocationOfInterest(StringRef ruleName,
 
 bool SourceLocationHelper::IsLocationInProjectSourceFile(SourceLocation location, SourceManager& sourceManager)
 {
-    std::string fileName = GetCleanFilename(location, sourceManager);
+    StringRef fileName = GetCleanFilename(location, sourceManager);
     for (const auto& path : m_context->projectLocalIncludePaths)
     {
-        if (StringRef(fileName).startswith(path))
+        if (fileName.startswith(path))
             return true;
     }
 
@@ -95,4 +99,64 @@ FileID SourceLocationHelper::GetMainFileID(SourceManager& sourceManager)
     }
 
     return mainFileID;
+}
+
+void SourceLocationHelper::ClearFilenameCache()
+{
+    m_cleanFilenameCache.clear();
+}
+
+StringRef SourceLocationHelper::GetCleanFilename(SourceLocation location, SourceManager& sourceManager)
+{
+    return GetCleanFilename(sourceManager.getFileID(location), sourceManager);
+}
+
+StringRef SourceLocationHelper::GetCleanFilename(FileID fileID, SourceManager& sourceManager)
+{
+    if (fileID.isInvalid())
+        return StringRef("");
+
+    auto it = m_cleanFilenameCache.find(fileID);
+    if (it != m_cleanFilenameCache.end())
+        return StringRef(it->second);
+
+    const FileEntry* entry = sourceManager.getFileEntryForID(fileID);
+    if (entry == nullptr)
+        return StringRef("");
+
+    m_cleanFilenameCache[fileID] = CleanRawFilename(entry->getName());
+    it = m_cleanFilenameCache.find(fileID);
+    return StringRef(it->second);
+}
+
+std::string SourceLocationHelper::CleanRawFilename(StringRef filename)
+{
+    std::vector<StringRef> pathComponents;
+
+    for (auto it = sys::path::begin(filename);
+         it != sys::path::end(filename);
+         ++it)
+    {
+        StringRef component = *it;
+        if (component == "." || component == "/")
+        {}
+        else if (component == "..")
+        {
+            if (!pathComponents.empty())
+                pathComponents.pop_back();
+        }
+        else
+        {
+            pathComponents.push_back(component);
+        }
+    }
+
+    std::string cleanFilename;
+    for (const auto& component : pathComponents)
+    {
+        cleanFilename += "/";
+        cleanFilename += component.str();
+    }
+
+    return cleanFilename;
 }

@@ -2,7 +2,7 @@
 
 #include "ColobotLintConfig.h"
 
-#include "Common/FilenameHelper.h"
+#include "Common/SourceLocationHelper.h"
 
 #include <clang/Basic/SourceLocation.h>
 #include <clang/AST/ASTContext.h>
@@ -24,17 +24,18 @@ class PlainTextOutputPrinter : public OutputPrinter
 {
 public:
     PlainTextOutputPrinter(const std::string& outputFileName,
-                           std::vector<OutputFilter> outputFilters);
+                           std::vector<OutputFilter> outputFilters,
+                           SourceLocationHelper& sourceLocationHelper);
 
     void PrintGraphEdge(const std::string& source,
                         const std::string& destination,
                         const std::string& options = "") override;
 
 protected:
-    void PrintRuleViolationImpl(const std::string& ruleName,
+    void PrintRuleViolationImpl(StringRef ruleName,
                                 Severity severity,
                                 const std::string& description,
-                                const std::string& fileName,
+                                StringRef fileName,
                                 int lineNumber) override;
 
     void SaveImpl() override;
@@ -48,17 +49,18 @@ class XmlOutputPrinter : public OutputPrinter
 {
 public:
     XmlOutputPrinter(const std::string& outputFileName,
-                     std::vector<OutputFilter> outputFilters);
+                     std::vector<OutputFilter> outputFilters,
+                     SourceLocationHelper& sourceLocationHelper);
 
     void PrintGraphEdge(const std::string& source,
                         const std::string& destination,
                         const std::string& options = "") override;
 
 protected:
-    void PrintRuleViolationImpl(const std::string& ruleName,
+    void PrintRuleViolationImpl(StringRef ruleName,
                                 Severity severity,
                                 const std::string& description,
-                                const std::string& fileName,
+                                StringRef fileName,
                                 int lineNumber) override;
 
     void SaveImpl() override;
@@ -76,17 +78,18 @@ class DotGraphOutputPrinter : public OutputPrinter
 {
 public:
     DotGraphOutputPrinter(const std::string& outputFileName,
-                          std::vector<OutputFilter> outputFilters);
+                          std::vector<OutputFilter> outputFilters,
+                          SourceLocationHelper& sourceLocationHelper);
 
     void PrintGraphEdge(const std::string& source,
                         const std::string& destination,
                         const std::string& options = "") override;
 
 protected:
-    void PrintRuleViolationImpl(const std::string& ruleName,
+    void PrintRuleViolationImpl(StringRef ruleName,
                                 Severity severity,
                                 const std::string& description,
-                                const std::string& fileName,
+                                StringRef fileName,
                                 int lineNumber) override;
 
     void SaveImpl() override;
@@ -150,9 +153,11 @@ struct OutputPrinter::RuleViolationInfo
 
 
 OutputPrinter::OutputPrinter(const std::string& outputFileName,
-                             std::vector<OutputFilter> outputFilters)
+                             std::vector<OutputFilter> outputFilters,
+                             SourceLocationHelper& sourceLocationHelper)
     : m_outputFileName(outputFileName),
-      m_outputFilters(std::move(outputFilters))
+      m_outputFilters(std::move(outputFilters)),
+      m_sourceLocationHelper(sourceLocationHelper)
 {}
 
 OutputPrinter::~OutputPrinter()
@@ -160,17 +165,18 @@ OutputPrinter::~OutputPrinter()
 
 std::unique_ptr<OutputPrinter> OutputPrinter::Create(OutputFormat format,
                                                      const std::string& outputFileName,
-                                                     std::vector<OutputFilter> outputFilters)
+                                                     std::vector<OutputFilter> outputFilters,
+                                                     SourceLocationHelper& sourceLocationHelper)
 {
     if (format == OutputFormat::PlainTextReport)
-        return make_unique<PlainTextOutputPrinter>(outputFileName, std::move(outputFilters));
+        return make_unique<PlainTextOutputPrinter>(outputFileName, std::move(outputFilters), sourceLocationHelper);
     else if (format == OutputFormat::XmlReport)
-        return make_unique<XmlOutputPrinter>(outputFileName, std::move(outputFilters));
+        return make_unique<XmlOutputPrinter>(outputFileName, std::move(outputFilters), sourceLocationHelper);
 
-    return make_unique<DotGraphOutputPrinter>(outputFileName, std::move(outputFilters));
+    return make_unique<DotGraphOutputPrinter>(outputFileName, std::move(outputFilters), sourceLocationHelper);
 }
 
-void OutputPrinter::PrintRuleViolation(const std::string& ruleName,
+void OutputPrinter::PrintRuleViolation(StringRef ruleName,
                                        Severity severity,
                                        const std::string& description,
                                        SourceLocation location,
@@ -178,16 +184,16 @@ void OutputPrinter::PrintRuleViolation(const std::string& ruleName,
                                        int lineOffset,
                                        bool tentative)
 {
-    std::string fileName = GetCleanFilename(location, sourceManager);
+    StringRef fileName = m_sourceLocationHelper.GetCleanFilename(location, sourceManager);
     int lineNumber = sourceManager.getPresumedLineNumber(location) + lineOffset;
 
     PrintRuleViolation(ruleName, severity, description, fileName, lineNumber, tentative);
 }
 
-void OutputPrinter::PrintRuleViolation(const std::string& ruleName,
+void OutputPrinter::PrintRuleViolation(StringRef ruleName,
                                        Severity severity,
                                        const std::string& description,
-                                       const std::string& fileName,
+                                       StringRef fileName,
                                        int lineNumber,
                                        bool tentative)
 {
@@ -195,7 +201,7 @@ void OutputPrinter::PrintRuleViolation(const std::string& ruleName,
     {
         if (tentative)
         {
-            m_tentativeViolations.emplace_back(ruleName, severity, description, fileName, lineNumber);
+            m_tentativeViolations.emplace_back(ruleName.str(), severity, description, fileName.str(), lineNumber);
         }
         else
         {
@@ -209,14 +215,14 @@ void OutputPrinter::ClearTentativeViolations()
     m_tentativeViolations.clear();
 }
 
-bool OutputPrinter::ShouldPrintLine(const std::string& fileName, int lineNumber)
+bool OutputPrinter::ShouldPrintLine(StringRef fileName, int lineNumber)
 {
     if (m_outputFilters.empty())
         return true;
 
     for (const auto& filter : m_outputFilters)
     {
-        if (StringRef(fileName).endswith(StringRef(filter.fileName)) &&
+        if (fileName.endswith(StringRef(filter.fileName)) &&
             lineNumber >= filter.startLineNumber &&
             lineNumber <= filter.endLineNumber)
         {
@@ -272,8 +278,9 @@ void OutputPrinter::Save()
 ///////////////////////////
 
 PlainTextOutputPrinter::PlainTextOutputPrinter(const std::string& outputFileName,
-                                               std::vector<OutputFilter> outputFilters)
-    : OutputPrinter(outputFileName, std::move(outputFilters)),
+                                               std::vector<OutputFilter> outputFilters,
+                                               SourceLocationHelper& sourceLocationHelper)
+    : OutputPrinter(outputFileName, std::move(outputFilters), sourceLocationHelper),
       m_outputStream(outputFileName.empty() ? std::cout : m_outputFileStream)
 {
     if (!outputFileName.empty())
@@ -282,15 +289,15 @@ PlainTextOutputPrinter::PlainTextOutputPrinter(const std::string& outputFileName
     }
 }
 
-void PlainTextOutputPrinter::PrintRuleViolationImpl(const std::string& ruleName,
+void PlainTextOutputPrinter::PrintRuleViolationImpl(StringRef ruleName,
                                                     Severity severity,
                                                     const std::string& description,
-                                                    const std::string& fileName,
+                                                    StringRef fileName,
                                                     int lineNumber)
 {
     m_outputStream << "[" << GetSeverityString(severity) << "]" << " "
-                   << "[" << ruleName << "]" << " "
-                   << fileName << ":" << lineNumber << " "
+                   << "[" << ruleName.str() << "]" << " "
+                   << fileName.str() << ":" << lineNumber << " "
                    << description << std::endl;
 }
 
@@ -309,8 +316,9 @@ void PlainTextOutputPrinter::SaveImpl()
 ///////////////////////////
 
 XmlOutputPrinter::XmlOutputPrinter(const std::string& outputFileName,
-                                   std::vector<OutputFilter> outputFilters)
-    : OutputPrinter(outputFileName, std::move(outputFilters))
+                                   std::vector<OutputFilter> outputFilters,
+                                   SourceLocationHelper& sourceLocationHelper)
+    : OutputPrinter(outputFileName, std::move(outputFilters), sourceLocationHelper)
 {
     Init();
 }
@@ -330,21 +338,21 @@ void XmlOutputPrinter::Init()
     m_errorsElement = make_unique<TiXmlElement>("errors");
 }
 
-void XmlOutputPrinter::PrintRuleViolationImpl(const std::string& ruleName,
+void XmlOutputPrinter::PrintRuleViolationImpl(StringRef ruleName,
                                               Severity severity,
                                               const std::string& description,
-                                              const std::string& fileName,
+                                              StringRef fileName,
                                               int lineNumber)
 {
     auto errorElement = make_unique<TiXmlElement>("error");
 
-    errorElement->SetAttribute("id", ruleName);
+    errorElement->SetAttribute("id", ruleName.str());
     errorElement->SetAttribute("severity", GetSeverityString(severity));
     errorElement->SetAttribute("msg", description);
     errorElement->SetAttribute("verbose", description);
 
     auto locationElement = make_unique<TiXmlElement>("location");
-    locationElement->SetAttribute("file", fileName);
+    locationElement->SetAttribute("file", fileName.str());
     locationElement->SetAttribute("line", std::to_string(lineNumber));
     errorElement->LinkEndChild(locationElement.release());
 
@@ -376,14 +384,15 @@ void XmlOutputPrinter::SaveImpl()
 ///////////////////////////
 
 DotGraphOutputPrinter::DotGraphOutputPrinter(const std::string& outputFileName,
-                                             std::vector<OutputFilter> outputFilters)
-    : OutputPrinter(outputFileName, std::move(outputFilters))
+                                             std::vector<OutputFilter> outputFilters,
+                                             SourceLocationHelper& sourceLocationHelper)
+    : OutputPrinter(outputFileName, std::move(outputFilters), sourceLocationHelper)
 {}
 
-void DotGraphOutputPrinter::PrintRuleViolationImpl(const std::string& ruleName,
+void DotGraphOutputPrinter::PrintRuleViolationImpl(StringRef ruleName,
                                                    Severity severity,
                                                    const std::string& description,
-                                                   const std::string& fileName,
+                                                   StringRef fileName,
                                                    int lineNumber)
 {
     assert(false && "Not implemented");

@@ -2,6 +2,7 @@
 
 #include "Common/Context.h"
 #include "Common/OutputPrinter.h"
+#include "Common/SourceLocationHelper.h"
 
 #include <llvm/ADT/StringRef.h>
 
@@ -9,12 +10,17 @@
 
 #include <iostream>
 
+using namespace clang;
+using namespace llvm;
+
 BeginSourceFileHandler::BeginSourceFileHandler(Context& context)
     : m_context(context)
 {}
 
-bool BeginSourceFileHandler::BeginSourceFileAction(clang::CompilerInstance&, llvm::StringRef filename)
+bool BeginSourceFileHandler::BeginSourceFileAction(CompilerInstance&, StringRef filename)
 {
+    m_context.sourceLocationHelper.ClearFilenameCache();
+
     auto filenameStr = filename.str();
 
     if (m_context.processedFiles.count(filenameStr) > 0)
@@ -66,12 +72,12 @@ namespace
     const char* const FAKE_HEADER_DIR_PREFIX = "fake_header_sources/";
 } // anonymous namespace
 
-bool BeginSourceFileHandler::IsFakeHeaderSource(llvm::StringRef filename)
+bool BeginSourceFileHandler::IsFakeHeaderSource(StringRef filename)
 {
     return filename.find(FAKE_HEADER_DIR_PREFIX) != filename.npos;
 }
 
-std::string BeginSourceFileHandler::GetActualHeaderFileSuffix(llvm::StringRef filename)
+std::string BeginSourceFileHandler::GetActualHeaderFileSuffix(StringRef filename)
 {
     boost::regex searchPattern(std::string(FAKE_HEADER_DIR_PREFIX) + "(.*?)\\.cpp$");
 

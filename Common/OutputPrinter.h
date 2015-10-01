@@ -12,6 +12,12 @@ class SourceLocation;
 class SourceManager;
 } // namespace clang
 
+namespace llvm
+{
+class StringRef;
+} // namespace clang
+
+class SourceLocationHelper;
 
 enum class OutputFormat
 {
@@ -31,17 +37,19 @@ class OutputPrinter
 {
 protected:
     OutputPrinter(const std::string& outputFileName,
-                  std::vector<OutputFilter> outputFilters);
+                  std::vector<OutputFilter> outputFilters,
+                  SourceLocationHelper& sourceLocationHelper);
 
 public:
     virtual ~OutputPrinter();
 
     static std::unique_ptr<OutputPrinter> Create(OutputFormat format,
                                                  const std::string& outputFileName,
-                                                 std::vector<OutputFilter> outputFilters);
+                                                 std::vector<OutputFilter> outputFilters,
+                                                 SourceLocationHelper& sourceLocationHelper);
 
 
-    void PrintRuleViolation(const std::string& ruleName,
+    void PrintRuleViolation(llvm::StringRef ruleName,
                             Severity severity,
                             const std::string& description,
                             clang::SourceLocation location,
@@ -49,10 +57,10 @@ public:
                             int lineOffset = 0,
                             bool tentative = false);
 
-    void PrintRuleViolation(const std::string& ruleName,
+    void PrintRuleViolation(llvm::StringRef ruleName,
                             Severity severity,
                             const std::string& description,
-                            const std::string& fileName,
+                            llvm::StringRef fileName,
                             int lineNumber,
                             bool tentative = false);
 
@@ -65,13 +73,13 @@ public:
     void Save();
 
 protected:
-    virtual void PrintRuleViolationImpl(const std::string& ruleName,
+    virtual void PrintRuleViolationImpl(llvm::StringRef ruleName,
                                         Severity severity,
                                         const std::string& description,
-                                        const std::string& fileName,
+                                        llvm::StringRef fileName,
                                         int lineNumber) = 0;
     virtual void SaveImpl() = 0;
-    bool ShouldPrintLine(const std::string& fileName, int lineNumber);
+    bool ShouldPrintLine(llvm::StringRef fileName, int lineNumber);
     std::string GetSeverityString(Severity severity);
 
 protected:
@@ -79,4 +87,5 @@ protected:
     const std::vector<OutputFilter> m_outputFilters;
     struct RuleViolationInfo;
     std::vector<RuleViolationInfo> m_tentativeViolations;
+    SourceLocationHelper& m_sourceLocationHelper;
 };

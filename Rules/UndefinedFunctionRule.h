@@ -17,7 +17,4 @@ public:
     void onEndOfTranslationUnit() override;
 
     static const char* GetName() { return "UndefinedFunctionRule"; }
-
-private:
-    clang::SourceManager* m_sourceManager = nullptr;
 };

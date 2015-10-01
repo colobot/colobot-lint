@@ -6,6 +6,7 @@
 #include <clang/AST/ExprCXX.h>
 
 using namespace clang;
+using namespace llvm;
 
 namespace
 {
@@ -50,7 +51,7 @@ bool IsRecordTypeWithoutDataMembers(const QualType& type)
     const auto* checkRecordType = type->getAs<RecordType>();
     return checkRecordType != nullptr &&
             IsRecordWithoutDataMembers(
-                llvm::dyn_cast_or_null<CXXRecordDecl>(checkRecordType->getDecl()));
+                dyn_cast_or_null<CXXRecordDecl>(checkRecordType->getDecl()));
 }
 
 bool IsUninitializedPodVariable(const VarDecl* variableDeclaration, ASTContext* context)

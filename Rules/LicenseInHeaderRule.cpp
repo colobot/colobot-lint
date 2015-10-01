@@ -1,7 +1,6 @@
 #include "Rules/LicenseInHeaderRule.h"
 
 #include "Common/Context.h"
-#include "Common/FilenameHelper.h"
 #include "Common/OutputPrinter.h"
 #include "Common/SourceLocationHelper.h"
 #include "Common/TranslationUnitMatcher.h"
@@ -37,8 +36,6 @@ void LicenseInHeaderRule::run(const ast_matchers::MatchFinder::MatchResult& resu
 
     FileID mainFileID = m_context.sourceLocationHelper.GetMainFileID(sourceManager);
 
-    std::string fileName = CleanFilename(StringRef(sourceManager.getFileEntryForID(mainFileID)->getName()));
-
     MemoryBuffer* buffer = sourceManager.getBuffer(mainFileID);
     const char* bufferChars = buffer->getBufferStart();
     int bufferSize = buffer->getBufferSize();
@@ -55,6 +52,8 @@ void LicenseInHeaderRule::run(const ast_matchers::MatchFinder::MatchResult& resu
         bufferPos += 1; // newline character
         if (line != licenseLine)
         {
+            StringRef fileName = m_context.sourceLocationHelper.GetCleanFilename(mainFileID, sourceManager);
+
             m_context.outputPrinter->PrintRuleViolation(
                 "license header",
                 Severity::Style,

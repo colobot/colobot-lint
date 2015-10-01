@@ -1,7 +1,6 @@
 #include "Rules/IncludeStyleRule.h"
 
 #include "Common/Context.h"
-#include "Common/FilenameHelper.h"
 #include "Common/OutputPrinter.h"
 #include "Common/SourceLocationHelper.h"
 
@@ -36,22 +35,12 @@ public:
                             StringRef /*relativePath*/,
                             const Module* /*imported*/) override
     {
-        if (! m_context.sourceLocationHelper.IsLocationOfInterest(
-            IncludeStyleRule::GetName(), hashLoc, m_sourceManager))
+        if (file != nullptr &&
+            m_context.sourceLocationHelper.IsLocationOfInterest(IncludeStyleRule::GetName(), hashLoc, m_sourceManager))
         {
-            return;
+            std::string fullFileName = m_context.sourceLocationHelper.CleanRawFilename(file->getName());
+            m_includeDirectives.emplace_back(hashLoc, fileName.str(), fullFileName, isAngled);
         }
-
-        if (file == nullptr)
-            return;
-
-        IncludeDirective directive;
-        directive.location = hashLoc;
-        directive.includeFileName = fileName.str();
-        directive.fullFileName = CleanFilename(StringRef(file->getName()));
-        directive.isAngled = isAngled;
-
-        m_includeDirectives.push_back(std::move(directive));
     }
 
     void EndOfMainFile() override
@@ -111,7 +100,7 @@ void IncludeStyleRule::run(const MatchFinder::MatchResult& result)
     const CXXRecordDecl& baseDecl = *typeSourceInfo->getType()->getAsCXXRecordDecl();
     SourceLocation baseLocation = baseDecl.getLocStart();
 
-    auto baseFileName = GetCleanFilename(baseLocation, sourceManager);
+    StringRef baseFileName = m_context.sourceLocationHelper.GetCleanFilename(baseLocation, sourceManager);
     if (! IsLocalInclude(baseFileName))
         return;
 
@@ -396,35 +385,34 @@ void IncludeStyleRule::CheckIncludeRangeIsSorted(IncludeDirectiveIt startIt,
     }
 }
 
-bool IncludeStyleRule::IsLocalInclude(const std::string& fileName)
+bool IncludeStyleRule::IsLocalInclude(StringRef fileName)
 {
     for (const auto& path : m_context.projectLocalIncludePaths)
     {
-        if (StringRef(fileName).startswith(path))
+        if (fileName.startswith(path))
             return true;
     }
 
     return false;
 }
 
-std::string IncludeStyleRule::GetProjectIncludeSubpath(const std::string& fileName)
+std::string IncludeStyleRule::GetProjectIncludeSubpath(StringRef fileName)
 {
     int longestCommonPrefix = 0;
     for (const auto& path : m_context.projectLocalIncludePaths)
     {
-        if (StringRef(fileName).startswith(path))
+        if (fileName.startswith(path))
             longestCommonPrefix = std::max<int>(longestCommonPrefix, path.length());
     }
 
     if (longestCommonPrefix == 0)
         return "";
 
-    StringRef refFileName = StringRef(fileName);
-    refFileName = refFileName.drop_front(longestCommonPrefix);
-    if (refFileName.startswith("/"))
-        refFileName = refFileName.drop_front(1);
+    fileName = fileName.drop_front(longestCommonPrefix);
+    if (fileName.startswith("/"))
+        fileName = fileName.drop_front(1);
 
-    return refFileName.str();
+    return fileName.str();
 }
 
 std::string IncludeStyleRule::GetMatchingHeaderFileName(SourceManager& sourceManager)
@@ -437,9 +425,9 @@ std::string IncludeStyleRule::GetMatchingHeaderFileName(SourceManager& sourceMan
     if (!fileName.endswith(".cpp"))
         return "";
 
-    auto matchingHeaderFileName = fileName.drop_back(3).str() + "h";
-    if (sourceManager.getFileManager().getFile(StringRef(matchingHeaderFileName)) == nullptr)
+    std::string matchingHeaderFileName = fileName.drop_back(3).str() + "h";
+if (sourceManager.getFileManager().getFile(StringRef(matchingHeaderFileName)) == nullptr)
         return "";
 
-    return GetProjectIncludeSubpath(matchingHeaderFileName);
+    return GetProjectIncludeSubpath(StringRef(matchingHeaderFileName));
 }

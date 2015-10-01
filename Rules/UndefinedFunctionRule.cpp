@@ -1,7 +1,6 @@
 #include "Rules/UndefinedFunctionRule.h"
 
 #include "Common/Context.h"
-#include "Common/FilenameHelper.h"
 #include "Common/OutputPrinter.h"
 #include "Common/SourceLocationHelper.h"
 
@@ -35,7 +34,7 @@ UndefinedFunctionRule::UndefinedFunctionRule(Context& context)
     : Rule(context)
 {}
 
-void UndefinedFunctionRule::RegisterASTMatcherCallback(clang::ast_matchers::MatchFinder& finder)
+void UndefinedFunctionRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
     finder.addMatcher(
         functionDecl(unless(anyOf(isImplicit(),
@@ -47,16 +46,16 @@ void UndefinedFunctionRule::RegisterASTMatcherCallback(clang::ast_matchers::Matc
     this);
 }
 
-void UndefinedFunctionRule::run(const clang::ast_matchers::MatchFinder::MatchResult& result)
+void UndefinedFunctionRule::run(const MatchFinder::MatchResult& result)
 {
-    m_sourceManager = result.SourceManager;
+    SourceManager& sourceManager = *result.SourceManager;
 
     const FunctionDecl* functionDeclaration = result.Nodes.getNodeAs<FunctionDecl>("functionDecl");
     if (functionDeclaration == nullptr)
         return;
 
     SourceLocation location = functionDeclaration->getLocation();
-    if (! m_context.sourceLocationHelper.IsLocationOfInterest(GetName(), location, *m_sourceManager))
+    if (! m_context.sourceLocationHelper.IsLocationOfInterest(GetName(), location, sourceManager))
         return;
 
     std::string fullyQualifiedName = functionDeclaration->getQualifiedNameAsString();
@@ -69,9 +68,11 @@ void UndefinedFunctionRule::run(const clang::ast_matchers::MatchFinder::MatchRes
     {
         if (m_context.definedFunctions.count(fullyQualifiedName) == 0)
         {
+            StringRef fileName = m_context.sourceLocationHelper.GetCleanFilename(location, sourceManager);
+
             SourceFileInfo info;
-            info.fileName = GetCleanFilename(location, *m_sourceManager);
-            info.lineNumber = m_sourceManager->getPresumedLineNumber(location);
+            info.fileName = fileName.str();
+            info.lineNumber = sourceManager.getPresumedLineNumber(location);
             m_context.undefinedFunctions.insert(std::make_pair(fullyQualifiedName, info));
         }
     }

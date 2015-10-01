@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <vector>
 
+using namespace llvm;
 using namespace clang;
 using namespace clang::ast_matchers;
 
@@ -50,7 +51,7 @@ void UnusedForwardDeclarationRule::run(const MatchFinder::MatchResult& result)
         return;
 
     else if (tagDeclaration->isThisDeclarationADefinition() ||
-             llvm::isa<ClassTemplateSpecializationDecl>(tagDeclaration))
+             isa<ClassTemplateSpecializationDecl>(tagDeclaration))
         return HandleDefinition(tagDeclaration);
     else
         return HandleForwardDeclaration(tagDeclaration);

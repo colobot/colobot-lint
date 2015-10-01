@@ -1,8 +1,8 @@
 #include "Handlers/DiagnosticHandler.h"
 
 #include "Common/Context.h"
-#include "Common/FilenameHelper.h"
 #include "Common/OutputPrinter.h"
+#include "Common/SourceLocationHelper.h"
 
 #include <clang/Basic/SourceManager.h>
 
@@ -52,11 +52,11 @@ void DiagnosticHandler::ReportDiagnostic(const char* ruleName,
     SourceManager& sourceManager = info.getSourceManager();
     SourceLocation location = info.getLocation();
 
-    std::string fileName = GetCleanFilename(location, sourceManager);
+    StringRef fileName = m_context.sourceLocationHelper.GetCleanFilename(location, sourceManager);
     int lineNumber = sourceManager.getPresumedLineNumber(location);
 
     std::string uniqueDiagnosticString = boost::str(boost::format("%s:%d: %s")
-        % fileName % lineNumber % diagnosticString);
+        % fileName.str() % lineNumber % diagnosticString);
 
     if (m_reportedDiagnostics.count(uniqueDiagnosticString) == 0)
     {
