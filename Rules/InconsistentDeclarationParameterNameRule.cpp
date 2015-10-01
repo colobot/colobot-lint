@@ -18,7 +18,11 @@ InconsistentDeclarationParameterNameRule::InconsistentDeclarationParameterNameRu
 
 void InconsistentDeclarationParameterNameRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
-    finder.addMatcher(functionDecl(unless(isImplicit())).bind("functionDecl"), this);
+    finder.addMatcher(
+        functionDecl(unless(anyOf(isExpansionInSystemHeader(),
+                                  isImplicit())))
+            .bind("functionDecl"),
+        this);
 }
 
 void InconsistentDeclarationParameterNameRule::run(const MatchFinder::MatchResult& result)

@@ -19,7 +19,7 @@ NakedNewRule::NakedNewRule(Context& context)
 
 void NakedNewRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
-    finder.addMatcher(newExpr().bind("new"), this);
+    finder.addMatcher(newExpr(unless(isExpansionInSystemHeader())).bind("new"), this);
 }
 
 void NakedNewRule::run(const MatchFinder::MatchResult& result)

@@ -32,7 +32,12 @@ ClassNamingRule::ClassNamingRule(Context& context)
 
 void ClassNamingRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
-    finder.addMatcher(recordDecl(unless(anyOf(isImplicit(), isLambda()))).bind("recordDecl"), this);
+    finder.addMatcher(
+        recordDecl(unless(anyOf(isExpansionInSystemHeader(),
+                                isImplicit(),
+                                isLambda())))
+            .bind("recordDecl"),
+        this);
 }
 
 void ClassNamingRule::run(const MatchFinder::MatchResult& result)

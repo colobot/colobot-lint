@@ -23,6 +23,7 @@ private:
                                  clang::ASTContext* context);
 
     void HandleConstructorDeclaration(const clang::CXXConstructorDecl* constructorDeclaration,
+                                      const clang::RecordDecl* recordDeclaration,
                                       clang::ASTContext* context);
 
     bool AreThereInterestingConstructorDeclarations(const clang::RecordDecl* recordDeclaration);

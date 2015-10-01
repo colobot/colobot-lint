@@ -37,7 +37,8 @@ UndefinedFunctionRule::UndefinedFunctionRule(Context& context)
 void UndefinedFunctionRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
     finder.addMatcher(
-        functionDecl(unless(anyOf(isImplicit(),
+        functionDecl(unless(anyOf(isExpansionInSystemHeader(),
+                                  isImplicit(),
                                   isDefaulted(),
                                   isDeleted(),
                                   isAnyTemplateKind())),

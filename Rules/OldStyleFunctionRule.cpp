@@ -85,7 +85,11 @@ OldStyleFunctionRule::OldStyleFunctionRule(Context& context)
 
 void OldStyleFunctionRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
-    finder.addMatcher(functionDecl().bind("functionDecl"), this);
+    finder.addMatcher(
+        functionDecl(unless(anyOf(isExpansionInSystemHeader(),
+                                  isImplicit())))
+            .bind("functionDecl"),
+        this);
 }
 
 void OldStyleFunctionRule::run(const MatchFinder::MatchResult& result)

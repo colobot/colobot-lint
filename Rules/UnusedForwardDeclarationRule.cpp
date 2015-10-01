@@ -24,8 +24,18 @@ UnusedForwardDeclarationRule::UnusedForwardDeclarationRule(Context& context)
 
 void UnusedForwardDeclarationRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
-    finder.addMatcher(tagDecl(unless(isImplicit())).bind("tagDecl"), this);
-    finder.addMatcher(typeLoc(loc(tagType(hasDeclaration(tagDecl().bind("tagDecl"))))).bind("tagTypeLoc"), this);
+    finder.addMatcher(
+        tagDecl(unless(anyOf(isExpansionInSystemHeader(),
+                             isImplicit())))
+            .bind("tagDecl"),
+        this);
+
+    finder.addMatcher(
+        typeLoc(unless(isExpansionInSystemHeader()),
+                loc(tagType(hasDeclaration(
+                    tagDecl(unless(isExpansionInSystemHeader())).bind("tagDecl")))))
+            .bind("tagTypeLoc"),
+        this);
 }
 
 void UnusedForwardDeclarationRule::run(const MatchFinder::MatchResult& result)

@@ -19,7 +19,7 @@ ImplicitBoolCastRule::ImplicitBoolCastRule(Context& context)
 
 void ImplicitBoolCastRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
-    finder.addMatcher(implicitCastExpr().bind("implicitCastExpr"), this);
+    finder.addMatcher(implicitCastExpr(unless(isExpansionInSystemHeader())).bind("implicitCastExpr"), this);
 }
 
 void ImplicitBoolCastRule::run(const MatchFinder::MatchResult& result)

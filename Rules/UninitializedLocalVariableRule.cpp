@@ -19,7 +19,13 @@ UninitializedLocalVariableRule::UninitializedLocalVariableRule(Context& context)
 
 void UninitializedLocalVariableRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
-    finder.addMatcher(varDecl().bind("varDecl"), this);
+    finder.addMatcher(
+        varDecl(unless(anyOf(isExpansionInSystemHeader(),
+                             isImplicit())),
+                unless(parmVarDecl()),
+                hasLocalStorage())
+            .bind("varDecl"),
+        this);
 }
 
 void UninitializedLocalVariableRule::run(const MatchFinder::MatchResult& result)
@@ -33,13 +39,6 @@ void UninitializedLocalVariableRule::run(const MatchFinder::MatchResult& result)
     SourceLocation location = variableDeclaration->getLocation();
     if (! m_context.sourceLocationHelper.IsLocationOfInterest(GetName(), location, sourceManager))
         return;
-
-    if (! variableDeclaration->hasLocalStorage() ||   // skip global/static variables
-        ParmVarDecl::classof(variableDeclaration) ||  // ignore function parameters
-        variableDeclaration->isImplicit())            // ignore implicit (compiler-generated) variables
-    {
-        return;
-    }
 
     const DeclContext* declarationContext = variableDeclaration->getDeclContext();
     if (declarationContext->isFunctionOrMethod())

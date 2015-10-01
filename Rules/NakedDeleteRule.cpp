@@ -19,7 +19,7 @@ NakedDeleteRule::NakedDeleteRule(Context& context)
 
 void NakedDeleteRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
-    finder.addMatcher(deleteExpr().bind("delete"), this);
+    finder.addMatcher(deleteExpr(unless(isExpansionInSystemHeader())).bind("delete"), this);
 }
 
 void NakedDeleteRule::run(const MatchFinder::MatchResult& result)

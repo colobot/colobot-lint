@@ -18,8 +18,17 @@ EnumNamingRule::EnumNamingRule(Context& context)
 
 void EnumNamingRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
-    finder.addMatcher(enumDecl().bind("enumDecl"), this);
-    finder.addMatcher(enumConstantDecl().bind("enumConstantDecl"), this);
+    finder.addMatcher(
+        enumDecl(unless(anyOf(isExpansionInSystemHeader(),
+                              isImplicit())))
+            .bind("enumDecl"),
+        this);
+
+    finder.addMatcher(
+        enumConstantDecl(unless(anyOf(isExpansionInSystemHeader(),
+                                      isImplicit())))
+            .bind("enumConstantDecl"),
+        this);
 }
 
 void EnumNamingRule::run(const MatchFinder::MatchResult& result)

@@ -12,6 +12,16 @@
 using namespace clang;
 using namespace clang::ast_matchers;
 
+namespace clang {
+namespace ast_matchers {
+
+AST_MATCHER(NamedDecl, hasEmptyName)
+{
+    return Node.getName().empty();
+}
+
+} // namespace ast_matchers
+} // namespace clang
 
 
 VariableNamingRule::VariableNamingRule(Context& context)
@@ -27,8 +37,19 @@ VariableNamingRule::VariableNamingRule(Context& context)
 
 void VariableNamingRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
-    finder.addMatcher(varDecl().bind("varDecl"), this);
-    finder.addMatcher(fieldDecl().bind("fieldDecl"), this);
+    finder.addMatcher(
+        varDecl(unless(anyOf(isExpansionInSystemHeader(), // ignore system headers
+                             isImplicit(),                // ignore implicit (compiler-generated) variables
+                             hasEmptyName())))            // unnamed function parameters are fine
+            .bind("varDecl"),
+        this);
+
+    finder.addMatcher(
+        fieldDecl(unless(anyOf(isExpansionInSystemHeader(),
+                               isImplicit(),
+                               hasEmptyName())))
+            .bind("fieldDecl"),
+        this);
 }
 
 void VariableNamingRule::run(const MatchFinder::MatchResult& result)
@@ -49,15 +70,7 @@ void VariableNamingRule::HandleVariableDeclaration(const VarDecl* variableDeclar
     if (! m_context.sourceLocationHelper.IsLocationOfInterest(GetName(), location, sourceManager))
         return;
 
-    // Ignore implicit (compiler-generated) variables
-    if (variableDeclaration->isImplicit())
-        return;
-
     auto name = variableDeclaration->getName();
-
-    // Unnamed parameters are fine
-    if (name.empty())
-        return;
 
     // Static class members follow same rules as regular class members
     if (variableDeclaration->isStaticDataMember())

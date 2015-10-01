@@ -4,6 +4,7 @@
 #include "Common/OutputPrinter.h"
 #include "Common/PodHelper.h"
 #include "Common/SourceLocationHelper.h"
+#include "Common/TagTypeNameHelper.h"
 
 #include <clang/AST/Decl.h>
 #include <clang/AST/Stmt.h>
@@ -13,14 +14,40 @@
 using namespace clang;
 using namespace clang::ast_matchers;
 
+namespace clang
+{
+namespace ast_matchers
+{
+
+AST_MATCHER(RecordDecl, isUnion)
+{
+    return Node.isUnion();
+}
+
+} // namespace ast_matchers
+} // namespace clang
+
 UninitializedFieldRule::UninitializedFieldRule(Context& context)
     : Rule(context)
 {}
 
 void UninitializedFieldRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
-    finder.addMatcher(recordDecl().bind("recordDecl"), this);
-    finder.addMatcher(constructorDecl().bind("constructorDecl"), this);
+    finder.addMatcher(
+        recordDecl(unless(anyOf(isExpansionInSystemHeader(),
+                                isImplicit(),
+                                isUnion())))
+            .bind("recordDecl"),
+        this);
+
+    finder.addMatcher(
+        constructorDecl(unless(anyOf(isExpansionInSystemHeader(),
+                                     isImplicit(),
+                                     isDeleted())),
+                        isDefinition(),
+                        hasDeclContext(recordDecl(unless(isUnion())).bind("parentRecordDecl")))
+            .bind("constructorDecl"),
+        this);
 }
 
 void UninitializedFieldRule::run(const MatchFinder::MatchResult& result)
@@ -30,8 +57,9 @@ void UninitializedFieldRule::run(const MatchFinder::MatchResult& result)
         return HandleRecordDeclaration(recordDeclaration, result.Context);
 
     const CXXConstructorDecl* constructorDeclaration = result.Nodes.getNodeAs<CXXConstructorDecl>("constructorDecl");
+    const RecordDecl* parentRecordDeclaration = result.Nodes.getNodeAs<RecordDecl>("parentRecordDecl");
     if (constructorDeclaration != nullptr)
-        return HandleConstructorDeclaration(constructorDeclaration, result.Context);
+        return HandleConstructorDeclaration(constructorDeclaration, parentRecordDeclaration, result.Context);
 }
 
 void UninitializedFieldRule::HandleRecordDeclaration(const RecordDecl* recordDeclaration,
@@ -41,9 +69,6 @@ void UninitializedFieldRule::HandleRecordDeclaration(const RecordDecl* recordDec
 
     SourceLocation location = recordDeclaration->getLocation();
     if (! m_context.sourceLocationHelper.IsLocationOfInterest(GetName(), location, sourceManager))
-        return;
-
-    if (recordDeclaration->isUnion())
         return;
 
     if (AreThereInterestingConstructorDeclarations(recordDeclaration))
@@ -59,7 +84,7 @@ void UninitializedFieldRule::HandleRecordDeclaration(const RecordDecl* recordDec
             "uninitialized field",
             Severity::Error,
             boost::str(boost::format("%s '%s' field '%s' remains uninitialized")
-                % which
+                % GetTagTypeString(recordDeclaration)
                 % recordDeclaration->getName().str()
                 % field.str()),
             GetFieldLocation(recordDeclaration, field),
@@ -68,31 +93,13 @@ void UninitializedFieldRule::HandleRecordDeclaration(const RecordDecl* recordDec
 }
 
 void UninitializedFieldRule::HandleConstructorDeclaration(const CXXConstructorDecl* constructorDeclaration,
+                                                          const RecordDecl* recordDeclaration,
                                                           ASTContext* context)
 {
     SourceManager& sourceManager = context->getSourceManager();
 
     SourceLocation location = constructorDeclaration->getLocation();
     if (! m_context.sourceLocationHelper.IsLocationOfInterest(GetName(), location, sourceManager))
-        return;
-
-    if (constructorDeclaration->isImplicit() ||
-        constructorDeclaration->isDeleted() ||
-        ! constructorDeclaration->isThisDeclarationADefinition())
-    {
-        return;
-    }
-
-    const DeclContext* declContext = constructorDeclaration->getDeclContext();
-    if (declContext == nullptr &&
-        !declContext->isRecord())
-    {
-        return;
-    }
-
-    const RecordDecl* recordDeclaration = static_cast<const RecordDecl*>(declContext);
-
-    if (recordDeclaration->isUnion())
         return;
 
     StringRefSet candidateFieldList = GetCandidateFieldsList(recordDeclaration, context);

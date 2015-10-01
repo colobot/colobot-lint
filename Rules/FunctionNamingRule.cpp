@@ -65,7 +65,8 @@ FunctionNamingRule::FunctionNamingRule(Context& context)
 
 void FunctionNamingRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
-    finder.addMatcher(methodDecl(unless(anyOf(isImplicit(),
+    finder.addMatcher(methodDecl(unless(anyOf(isExpansionInSystemHeader(),
+                                              isImplicit(),
                                               isConstructor(),
                                               isOverloadedOperator(),
                                               hasNonSimpleIdentifierName(),
@@ -74,7 +75,8 @@ void FunctionNamingRule::RegisterASTMatcherCallback(MatchFinder& finder)
                           .bind("methodDecl"),
                       this);
 
-    finder.addMatcher(functionDecl(unless(anyOf(isImplicit(),
+    finder.addMatcher(functionDecl(unless(anyOf(isExpansionInSystemHeader(),
+                                                isImplicit(),
                                                 isOverloadedOperator(),
                                                 isMethod(),
                                                 hasName("::main"))))
