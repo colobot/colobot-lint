@@ -24,7 +24,7 @@ The second method is so far very experimental and probably only works on the onl
 ## Requirements
 
 You obviously need Clang, either its source files (see below), or have it installed normally on your system.
-Please note that the only supported version of Clang is 3.6, and it will probably stay that way to avoid hassle with changing APIs.
+Please note that the only supported versions of Clang are 3.6 and 3.7, and it will probably stay that way to avoid hassle with changing APIs.
 
 The other requirements necessary for compilation are basically same as for Clang (see for example [this](http://llvm.org/docs/GettingStarted.html)).
 However, you will also need:

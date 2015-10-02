@@ -6,6 +6,7 @@ namespace clang
 {
 namespace ast_matchers
 {
-const internal::VariadicDynCastAllOfMatcher<Decl, TranslationUnitDecl> translationUnitDecl;
+// Named with custom- prefix to avoid clash with Clang 3.7
+const internal::VariadicDynCastAllOfMatcher<Decl, TranslationUnitDecl> customTranslationUnitDecl;
 } // namespace ast_matchers
 } // namespace clang

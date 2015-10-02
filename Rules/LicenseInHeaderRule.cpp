@@ -20,7 +20,7 @@ LicenseInHeaderRule::LicenseInHeaderRule(Context& context)
 
 void LicenseInHeaderRule::RegisterASTMatcherCallback(ast_matchers::MatchFinder& finder)
 {
-    finder.addMatcher(translationUnitDecl().bind("translationUnitDecl"), this);
+    finder.addMatcher(customTranslationUnitDecl().bind("translationUnitDecl"), this);
 }
 
 void LicenseInHeaderRule::run(const ast_matchers::MatchFinder::MatchResult& result)

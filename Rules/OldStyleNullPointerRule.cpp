@@ -19,7 +19,8 @@ namespace clang
 namespace ast_matchers
 {
 
-const internal::VariadicDynCastAllOfMatcher<Stmt, GNUNullExpr> gnuNullExpr;
+// Named with custom- prefix to avoid clash with Clang 3.7
+const internal::VariadicDynCastAllOfMatcher<Stmt, GNUNullExpr> customGnuNullExpr;
 
 AST_MATCHER(ImplicitCastExpr, isIntegerLiteralToPointerCast)
 {
@@ -41,7 +42,7 @@ void OldStyleNullPointerRule::RegisterASTMatcherCallback(MatchFinder& finder)
             .bind("zeroLiteralNullExpr"),
         this);
 
-    finder.addMatcher(expr(has(gnuNullExpr().bind("gnuNullExpr"))).bind("parentExpr"), this);
+    finder.addMatcher(expr(has(customGnuNullExpr().bind("gnuNullExpr"))).bind("parentExpr"), this);
 }
 
 void OldStyleNullPointerRule::run(const MatchFinder::MatchResult& result)

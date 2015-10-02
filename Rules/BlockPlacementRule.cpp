@@ -22,7 +22,7 @@ BlockPlacementRule::BlockPlacementRule(Context& context)
 
 void BlockPlacementRule::RegisterASTMatcherCallback(ast_matchers::MatchFinder& finder)
 {
-    finder.addMatcher(translationUnitDecl().bind("translationUnit"), this);
+    finder.addMatcher(customTranslationUnitDecl().bind("translationUnit"), this);
 }
 
 void BlockPlacementRule::run(const ast_matchers::MatchFinder::MatchResult& result)

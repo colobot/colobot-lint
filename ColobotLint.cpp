@@ -9,7 +9,6 @@
 #include "Handlers/DiagnosticHandler.h"
 
 #include <llvm/Support/CommandLine.h>
-#include <llvm/Config/config.h>
 #include <clang/Tooling/CommonOptionsParser.h>
 
 #include <iostream>

@@ -17,7 +17,7 @@ WhitespaceRule::WhitespaceRule(Context& context)
 
 void WhitespaceRule::RegisterASTMatcherCallback(ast_matchers::MatchFinder& finder)
 {
-    finder.addMatcher(translationUnitDecl().bind("translationUnitDecl"), this);
+    finder.addMatcher(customTranslationUnitDecl().bind("translationUnitDecl"), this);
 }
 
 void WhitespaceRule::run(const ast_matchers::MatchFinder::MatchResult& result)
