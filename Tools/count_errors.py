@@ -30,7 +30,7 @@ def main():
             matches_regex(options.rule_filter, error.get('id'))):
             count = count + 1
 
-    sys.stderr.write('{0}\n'.format(count))
+    sys.stdout.write('{0}\n'.format(count))
 
 if __name__ == '__main__':
     main()
