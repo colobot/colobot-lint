@@ -30,7 +30,7 @@ public:
 
     clang::FileID GetMainFileID(clang::SourceManager& sourceManager);
 
-    void ClearFilenameCache();
+    void ClearCachedData();
 
     clang::StringRef GetCleanFilename(clang::SourceLocation location, clang::SourceManager& sourceManager);
     clang::StringRef GetCleanFilename(clang::FileID fileID, clang::SourceManager& sourceManager);
@@ -46,5 +46,6 @@ private:
                                    clang::SourceManager& sourceManager);
 
     Context* m_context = nullptr;
+    clang::FileID m_mainFileID;
     llvm::DenseMap<clang::FileID, std::string> m_cleanFilenameCache;
 };

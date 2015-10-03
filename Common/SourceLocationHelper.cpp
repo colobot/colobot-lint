@@ -95,7 +95,8 @@ bool SourceLocationHelper::IsLocationInProjectSourceFile(SourceLocation location
 
 FileID SourceLocationHelper::GetMainFileID(SourceManager& sourceManager)
 {
-    FileID mainFileID{};
+    if (! m_mainFileID.isInvalid())
+        return m_mainFileID;
 
     if (m_context->areWeInFakeHeaderSourceFile)
     {
@@ -105,21 +106,22 @@ FileID SourceLocationHelper::GetMainFileID(SourceManager& sourceManager)
         {
             if (StringRef(it->first->getName()).endswith(m_context->actualHeaderFileSuffix))
             {
-                mainFileID = sourceManager.translateFile(it->first);
+                m_mainFileID = sourceManager.translateFile(it->first);
                 break;
             }
         }
     }
     else
     {
-        mainFileID = sourceManager.getMainFileID();
+        m_mainFileID = sourceManager.getMainFileID();
     }
 
-    return mainFileID;
+    return m_mainFileID;
 }
 
-void SourceLocationHelper::ClearFilenameCache()
+void SourceLocationHelper::ClearCachedData()
 {
+    m_mainFileID = FileID();
     m_cleanFilenameCache.clear();
 }
 

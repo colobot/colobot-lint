@@ -19,7 +19,7 @@ BeginSourceFileHandler::BeginSourceFileHandler(Context& context)
 
 bool BeginSourceFileHandler::BeginSourceFileAction(CompilerInstance&, StringRef filename)
 {
-    m_context.sourceLocationHelper.ClearFilenameCache();
+    m_context.sourceLocationHelper.ClearCachedData();
 
     auto filenameStr = filename.str();
 
