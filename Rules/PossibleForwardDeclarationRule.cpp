@@ -262,8 +262,7 @@ void PossibleForwardDeclarationRule::run(const MatchFinder::MatchResult& result)
 bool PossibleForwardDeclarationRule::IsInBlacklistedProjectHeader(const Decl* declaration)
 {
     FileID tagDeclarationFileID = m_sourceManager->getFileID(declaration->getLocation());
-    bool result = m_blacklistedProjectHeaders.count(tagDeclarationFileID) > 0;
-    return result;
+    return !tagDeclarationFileID.isInvalid() && m_blacklistedProjectHeaders.count(tagDeclarationFileID) > 0;
 }
 
 void PossibleForwardDeclarationRule::BlacklistIncludedProjectHeader(const Decl* declaration)
