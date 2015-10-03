@@ -17,6 +17,8 @@ public:
     void RegisterASTMatcherCallback(clang::ast_matchers::MatchFinder& finder) override;
     void run(const clang::ast_matchers::MatchFinder::MatchResult& result) override;
 
+    bool TraverseDecl(clang::Decl* declaration);
+
     bool VisitDecl(clang::Decl* declaration);
     bool VisitStmt(clang::Stmt* statement);
 
@@ -38,6 +40,7 @@ private:
     void ReportViolation(const clang::SourceLocation& location, ViolationType type);
 
     clang::ASTContext* m_astContext = nullptr;
+    clang::FileID m_mainFileID;
     // forbidden lines are where we know we have closing braces
     // of previously visited statements or declarations
     llvm::DenseSet<int> m_forbiddenLineNumbers;

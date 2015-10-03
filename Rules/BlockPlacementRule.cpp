@@ -35,7 +35,20 @@ void BlockPlacementRule::run(const ast_matchers::MatchFinder::MatchResult& resul
     m_reportedLineNumbers.clear();
 
     m_astContext = result.Context;
+    m_mainFileID = m_context.sourceLocationHelper.GetMainFileID(m_astContext->getSourceManager());
     TraverseDecl(const_cast<TranslationUnitDecl*>(translationUnitDeclaration));
+}
+
+bool BlockPlacementRule::TraverseDecl(Decl* declaration)
+{
+    if (declaration != nullptr && !isa<TranslationUnitDecl>(declaration))
+    {
+        SourceManager& sourceManager = m_astContext->getSourceManager();
+        if (sourceManager.getFileID(declaration->getLocation()) != m_mainFileID)
+            return true; // there's no point descending into declarations outside main file
+    }
+
+    return RecursiveASTVisitor<BlockPlacementRule>::TraverseDecl(declaration);
 }
 
 bool BlockPlacementRule::VisitDecl(Decl* declaration)
