@@ -20,7 +20,9 @@ public:
 
 private:
     void HandleEnumDeclaration(const clang::EnumDecl* enumDeclaration, clang::ASTContext* context);
-    void HandleEnumConstantDeclaration(const clang::EnumConstantDecl* enumConstantDeclaration, clang::ASTContext* context);
+    void HandleEnumConstantDeclaration(const clang::EnumConstantDecl* enumConstantDeclaration,
+                                       const clang::EnumDecl* enumDeclaration,
+                                       clang::ASTContext* context);
 
 private:
     boost::regex m_enumNamePattern;

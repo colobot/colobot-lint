@@ -10,6 +10,20 @@
 using namespace clang;
 using namespace clang::ast_matchers;
 
+namespace clang
+{
+namespace ast_matchers
+{
+
+AST_MATCHER(EnumDecl, isScopedUsingClassTag)
+{
+    return Node.isScopedUsingClassTag();
+}
+
+} // namespace ast_matchers
+} // namespace clang
+
+
 EnumNamingRule::EnumNamingRule(Context& context)
     : Rule(context),
       m_enumNamePattern(UPPER_CAMEL_CASE_PATTERN),
@@ -27,7 +41,8 @@ void EnumNamingRule::RegisterASTMatcherCallback(MatchFinder& finder)
 
     finder.addMatcher(
         enumConstantDecl(unless(anyOf(isExpansionInSystemHeader(),
-                                      isImplicit())))
+                                      isImplicit())),
+                         hasDeclContext(enumDecl(isScopedUsingClassTag()).bind("enumDecl")))
             .bind("enumConstantDecl"),
         this);
 }
@@ -35,12 +50,12 @@ void EnumNamingRule::RegisterASTMatcherCallback(MatchFinder& finder)
 void EnumNamingRule::run(const MatchFinder::MatchResult& result)
 {
     const EnumDecl* enumDeclaration = result.Nodes.getNodeAs<EnumDecl>("enumDecl");
+    const EnumConstantDecl* enumConstantDeclaration = result.Nodes.getNodeAs<EnumConstantDecl>("enumConstantDecl");
+    if (enumConstantDeclaration != nullptr && enumDeclaration != nullptr)
+        return HandleEnumConstantDeclaration(enumConstantDeclaration, enumDeclaration, result.Context);
+
     if (enumDeclaration != nullptr)
         return HandleEnumDeclaration(enumDeclaration, result.Context);
-
-    const EnumConstantDecl* enumConstantDeclaration = result.Nodes.getNodeAs<EnumConstantDecl>("enumConstantDecl");
-    if (enumConstantDeclaration != nullptr)
-        return HandleEnumConstantDeclaration(enumConstantDeclaration, result.Context);
 }
 
 void EnumNamingRule::HandleEnumDeclaration(const EnumDecl* enumDeclaration, ASTContext* context)
@@ -85,7 +100,9 @@ void EnumNamingRule::HandleEnumDeclaration(const EnumDecl* enumDeclaration, ASTC
     }
 }
 
-void EnumNamingRule::HandleEnumConstantDeclaration(const EnumConstantDecl* enumConstantDeclaration, ASTContext* context)
+void EnumNamingRule::HandleEnumConstantDeclaration(const EnumConstantDecl* enumConstantDeclaration,
+                                                   const EnumDecl* enumDeclaration,
+                                                   ASTContext* context)
 {
     SourceManager& sourceManager = context->getSourceManager();
 
@@ -93,24 +110,15 @@ void EnumNamingRule::HandleEnumConstantDeclaration(const EnumConstantDecl* enumC
     if (! m_context.sourceLocationHelper.IsLocationOfInterest(GetName(), location, sourceManager))
         return;
 
-    const DeclContext* declarationContext = enumConstantDeclaration->getDeclContext();
-    if (declarationContext->getDeclKind() == Decl::Kind::Enum)
+    StringRef name = enumConstantDeclaration->getName();
+    if (! boost::regex_match(name.begin(), name.end(), m_enumConstantPattern))
     {
-        const EnumDecl* enumDeclaration = static_cast<const EnumDecl*>(declarationContext);
-        if (enumDeclaration->isScopedUsingClassTag())
-        {
-            StringRef name = enumConstantDeclaration->getName();
-
-            if (! boost::regex_match(name.begin(), name.end(), m_enumConstantPattern))
-            {
-                m_context.outputPrinter->PrintRuleViolation(
-                    "enum naming",
-                    Severity::Style,
-                    boost::str(boost::format("Enum class constant '%s' should be named in a style like UpperCamelCase")
-                        % name.str()),
-                    location,
-                    sourceManager);
-            }
-        }
+        m_context.outputPrinter->PrintRuleViolation(
+            "enum naming",
+            Severity::Style,
+            boost::str(boost::format("Enum class constant '%s' should be named in a style like UpperCamelCase")
+                % name.str()),
+            location,
+            sourceManager);
     }
 }
