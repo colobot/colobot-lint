@@ -20,7 +20,8 @@ void EnumNamingRule::RegisterASTMatcherCallback(MatchFinder& finder)
 {
     finder.addMatcher(
         enumDecl(unless(anyOf(isExpansionInSystemHeader(),
-                              isImplicit())))
+                              isImplicit())),
+                 isDefinition())
             .bind("enumDecl"),
         this);
 

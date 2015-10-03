@@ -35,7 +35,8 @@ void ClassNamingRule::RegisterASTMatcherCallback(MatchFinder& finder)
     finder.addMatcher(
         recordDecl(unless(anyOf(isExpansionInSystemHeader(),
                                 isImplicit(),
-                                isLambda())))
+                                isLambda())),
+                   isDefinition())
             .bind("recordDecl"),
         this);
 }

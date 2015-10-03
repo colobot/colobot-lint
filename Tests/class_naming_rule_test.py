@@ -113,3 +113,10 @@ class ClassNamingRuleTest(test_support.TestBase):
                 '}'
             ],
             expected_errors = [])
+
+    def test_ignore_forward_declaration(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                'struct ignore_this;'
+            ],
+            expected_errors = [])

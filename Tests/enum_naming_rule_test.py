@@ -120,3 +120,10 @@ class EnumNamingRuleTest(test_support.TestBase):
                     'line': '3'
                 }
             ])
+
+    def test_ignore_forward_declaration(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                'enum class ignore_this : int;'
+            ],
+            expected_errors = [])
