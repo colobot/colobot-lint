@@ -24,7 +24,7 @@ def prepare_dirs(output_dir):
     copy_dir(this_dir, output_dir, 'img')
 
 def write_html(errors, output_file_name):
-    with open(output_file_name, 'w') as output_file:
+    with open(output_file_name, 'w', encoding='utf-8') as output_file:
         def out(text):
             output_file.write(text + '\n')
 
