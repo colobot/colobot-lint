@@ -293,3 +293,16 @@ class BlockPlacementRuleTest(test_support.TestBase):
                 '}'
             ],
             expected_errors = [])
+
+    def test_nested_anonymous_struct(self):
+        self.assert_colobot_lint_result(
+            source_file_lines = [
+                'struct Foo',
+                '{',
+                '  struct',
+                '  {',
+                '    int x;',
+                '  } bar;',
+                '};'
+            ],
+            expected_errors = [])

@@ -88,7 +88,11 @@ bool BlockPlacementRule::VisitDecl(Decl* declaration)
         m_reportedLineNumbers.insert(declarationEndLineNumber); // to avoid double errors
     }
 
-    m_forbiddenLineNumbers.insert(declarationEndLineNumber);
+    const RecordDecl* recordDeclaration = llvm::dyn_cast<const RecordDecl>(declaration);
+    // Exception for anonymous structs & enums
+    if (recordDeclaration != nullptr && recordDeclaration->getName().empty()) {}
+    else
+        m_forbiddenLineNumbers.insert(declarationEndLineNumber);
 
     return true; // recurse further
 }
