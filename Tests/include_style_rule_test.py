@@ -561,3 +561,27 @@ class IncludeStyleRuleTest(test_support.TestBase):
                 'system_header.h'
             ],
             expected_errors = [])
+
+    def test_template_base_class_is_ignored(self):
+        self.assert_colobot_lint_result_with_project_headers_and_fake_header_source(
+             main_file_lines = [
+                 '#include "def/src.h"'
+             ],
+             main_file = 'def/src.cpp',
+             project_headers = {
+                'def/src.h': [
+                    'template<typename T>',
+                    'class Base',
+                    '{',
+                    '   T a;',
+                    '};',
+                    'template<typename T>'
+                    'class Derived : public Base<T>',
+                    '{',
+                    '};',
+                    'Derived<int> d;'
+                ],
+             },
+             system_header_files = [],
+             expected_errors = [])
+

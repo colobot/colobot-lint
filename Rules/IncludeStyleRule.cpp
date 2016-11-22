@@ -97,8 +97,12 @@ void IncludeStyleRule::run(const MatchFinder::MatchResult& result)
     if (typeSourceInfo == nullptr)
         return;
 
-    const CXXRecordDecl& baseDecl = *typeSourceInfo->getType()->getAsCXXRecordDecl();
-    SourceLocation baseLocation = baseDecl.getLocStart();
+    const Type& type = *typeSourceInfo->getType();
+    const CXXRecordDecl* baseDecl = type.getAsCXXRecordDecl();
+    if (baseDecl == nullptr)
+        return;
+
+    SourceLocation baseLocation = baseDecl->getLocStart();
 
     StringRef baseFileName = m_context.sourceLocationHelper.GetCleanFilename(baseLocation, sourceManager);
     if (! IsLocalInclude(baseFileName))
