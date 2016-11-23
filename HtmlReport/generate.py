@@ -116,6 +116,9 @@ def get_project_prefix(errors):
     for error in errors:
         location = error.find('location')
         file_name = location.get('file')
+        if file_name == "":
+            continue
+
         if project_prefix is None:
             project_prefix = file_name
         else:
@@ -124,12 +127,15 @@ def get_project_prefix(errors):
     return project_prefix
 
 def write_tbody_row(error, project_prefix, out):
-    out('<tr>')
-
     location = error.find('location')
-    file_name = os.path.relpath(location.get('file'), start=project_prefix)
-    location_str = file_name + ":" + location.get('line')
+    file_name = location.get('file')
+    if file_name == "":
+        return
 
+    relative_file_name = os.path.relpath(file_name, start=project_prefix)
+    location_str = relative_file_name + ":" + location.get('line')
+
+    out('<tr>')
     out('  <td class="location">%s</td>' % cgi.escape(location_str))
     out('  <td class="category">%s</td>' % cgi.escape(error.get('id')))
     out('  <td class="severity">%s</td>' % cgi.escape(error.get('severity')))
