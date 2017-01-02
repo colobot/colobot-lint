@@ -12,6 +12,10 @@ def parse_args():
     return parser.parse_args()
 
 def matches_regex(pattern, text):
+    # Temporary fix, see issue #14
+    if not text:
+        return False
+
     if pattern.startswith('-'):
         return not re.match(pattern[1:], text)
     else:
